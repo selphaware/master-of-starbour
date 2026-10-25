@@ -1,0 +1,4965 @@
+{
+ "move_persist": {
+  "scenario": {
+   "script": [
+    "move +0 +10",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "teleport": null,
+   "turns": 5,
+   "plan": {
+    "what": "smoke/13 persistent move (move +0 +10 from 12,11)",
+    "ids": "CMD-06, CMD-21, OV-02b, D-98, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       12,
+       15
+      ],
+      "move_remaining": [
+       0,
+       6
+      ],
+      "hazard": null,
+      "note": "move +0 +10: floor(engine 4) = 4 cells per turn, not clipped; persists until it arrives (D-98)"
+     },
+     {
+      "turn": 2,
+      "cell": [
+       12,
+       19
+      ],
+      "move_remaining": [
+       0,
+       2
+      ],
+      "hazard": null,
+      "note": "move +0 +10: floor(engine 4) = 4 cells per turn, not clipped; persists until it arrives (D-98)"
+     },
+     {
+      "turn": 3,
+      "cell": [
+       12,
+       21
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "move +0 +10: floor(engine 4) = 4 cells per turn, not clipped; persists until it arrives (D-98)"
+     },
+     {
+      "turn": 4,
+      "cell": [
+       12,
+       21
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "move +0 +10: floor(engine 4) = 4 cells per turn, not clipped; persists until it arrives (D-98)"
+     },
+     {
+      "turn": 5,
+      "cell": [
+       12,
+       21
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "move +0 +10: floor(engine 4) = 4 cells per turn, not clipped; persists until it arrives (D-98)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 5
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 5,
+   "turns_completed": 5,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": [
+       0,
+       6
+      ]
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "21e1b63d85dbbf7721fb145b197174b29485ca08",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        19
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": [
+       0,
+       2
+      ]
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "b2535d1ce6259ee3d69edb298da53e2c0638f46f",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        21
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "35bd201abd45d20c7d7de618865d0bd3b4933ffe",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 4,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 26,
+      "water": 26,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        21
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "de9b6ef6923824e8908bed830007b5739f524fd0",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 5,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 25,
+      "water": 25,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        21
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "9339926620f662f723010f25c91189f5959bfd23",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "move_stop": {
+  "scenario": {
+   "script": [
+    "move +0 +10",
+    "stop",
+    "",
+    ""
+   ],
+   "teleport": null,
+   "turns": 4,
+   "plan": {
+    "what": "smoke/13 stop (move +0 +10, then stop)",
+    "ids": "CMD-06, CMD-21, OV-02b, D-98, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       12,
+       15
+      ],
+      "move_remaining": [
+       0,
+       6
+      ],
+      "hazard": null
+     },
+     {
+      "turn": 2,
+      "cell": [
+       12,
+       15
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "'stop' at turn 2 cancels the persisting move (CMD-21)"
+     },
+     {
+      "turn": 3,
+      "cell": [
+       12,
+       15
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "'stop' at turn 2 cancels the persisting move (CMD-21)"
+     },
+     {
+      "turn": 4,
+      "cell": [
+       12,
+       15
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "'stop' at turn 2 cancels the persisting move (CMD-21)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 4
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 4,
+   "turns_completed": 4,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": [
+       0,
+       6
+      ]
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "a5ff523709c14f9833b88bff46ed102ea66c90ec",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "829900dbb43bff7bab1f53bbfe06782822a22106",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "e6e9898e6017f5aebe499beb33b96702d0adb231",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 4,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 26,
+      "water": 26,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "724f50f20dba078db9c873330b649bacf435c1d1",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "move_replace": {
+  "scenario": {
+   "script": [
+    "move +0 +10",
+    "move +2 +0",
+    ""
+   ],
+   "teleport": null,
+   "turns": 3,
+   "plan": {
+    "what": "smoke/13 replace (move +0 +10, then move +2 +0)",
+    "ids": "CMD-06, CMD-21, OV-02b, D-98, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       12,
+       15
+      ],
+      "move_remaining": [
+       0,
+       6
+      ],
+      "hazard": null
+     },
+     {
+      "turn": 2,
+      "cell": [
+       14,
+       15
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "a second move (move +2 +0) at turn 2 replaces the persisting one (OV-02b same-kind rule)"
+     },
+     {
+      "turn": 3,
+      "cell": [
+       14,
+       15
+      ],
+      "move_remaining": null,
+      "hazard": null,
+      "note": "a second move (move +2 +0) at turn 2 replaces the persisting one (OV-02b same-kind rule)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 3
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 3,
+   "turns_completed": 3,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": [
+       0,
+       6
+      ]
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "1fb4c3c0b276ae32bfec5a4c5d8b998edb61e549",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        14,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "1af58d5d54bf464e5710cfa62b051d2b8fa2ce05",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        14,
+        15
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "7bc267c5f6785c06cb3728f1d97bb21c3d2666f5",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "star_fatal": {
+  "scenario": {
+   "script": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "teleport": "3 4 7 9 5 5",
+   "turns": 9,
+   "plan": {
+    "what": "smoke/15 star fatal (star at 5,5 in [3, 4]/[7, 9], N = 7)",
+    "ids": "HZ-02, HZ-03, HZ-09, OV-09b, OV-09c, D-100, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 50.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(7 / 1.000) = 7; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 2,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 40.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 5
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(7 / 1.000) = 7; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 3,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 30.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 4
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(7 / 1.000) = 7; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 4,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 20.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 3
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(7 / 1.000) = 7; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 5,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 10.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 2
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(7 / 1.000) = 7; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 6,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 0.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 1
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(7 / 1.000) = 7; shields drain 10 per turn (bucket medium) and floor at 0"
+     }
+    ],
+    "end": {
+     "outcome": "game_over",
+     "turn": 7,
+     "cause": "star",
+     "cell": [
+      5,
+      5
+     ]
+    },
+    "final": {
+     "hazard_deaths_min": 1
+    },
+    "save_present": false
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 9,
+   "turns_completed": 7,
+   "outcome": "game_over",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 50.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "21dab206f58e51015d957e4843fa6ff8bdb4d7c9",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 40.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 5,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "868a2f41ffa8f16467789e2b4dfcdd2a5671b6f0",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 30.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 4,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "274165dd676fa854b4b7ec3d1de6f29d950ec10c",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 4,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 26,
+      "water": 26,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 20.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 3,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "3665231070bf52508f6670c9ffab2ecf45042fdf",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 5,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 25,
+      "water": 25,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 10.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 2,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "03337cb0e93b71a6b8b79c7ac1d009a1f30d07f2",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 6,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 24,
+      "water": 24,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 1,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "e3616f0c4d091904b3896d15c9a556cc78a1c06b",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 7,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 23,
+      "water": 23,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 1,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern destroyed: pulled into the star — game over"
+     ],
+     "snapshot_hash": "a8cb0f76575923d63355b96e03f32518e93ad9b3",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": [
+      {
+       "ship": "s-194",
+       "captain": "c-000",
+       "cause": "star",
+       "cell": [
+        5,
+        5
+       ]
+      }
+     ]
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": 7,
+    "mastery_turn": null,
+    "game_over_cause": "pulled into the star",
+    "hazard_deaths": 1,
+    "warps": 0
+   }
+  },
+  "save_present": false
+ },
+ "star_fatal_scale10": {
+  "scenario": {
+   "script": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "teleport": "3 4 7 9 5 5",
+   "turns": 12,
+   "plan": {
+    "what": "smoke/15 star fatal with pull_turns_scale = 10 (star at 5,5 in [3, 4]/[7, 9], N = 10)",
+    "ids": "HZ-02, HZ-03, HZ-09, OV-09b, OV-09c, D-100, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 50.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 9
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 2,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 40.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 8
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 3,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 30.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 7
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 4,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 20.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 5,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 10.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 5
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 6,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 0.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 4
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 7,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 0.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 3
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 8,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 0.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 2
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     },
+     {
+      "turn": 9,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 0.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 1
+      },
+      "note": "star mass 1.000 → pull 1.000, N = ceil(10 / 1.000) = 10; shields drain 10 per turn (bucket medium) and floor at 0"
+     }
+    ],
+    "end": {
+     "outcome": "game_over",
+     "turn": 10,
+     "cause": "star",
+     "cell": [
+      5,
+      5
+     ]
+    },
+    "final": {
+     "hazard_deaths_min": 1
+    },
+    "save_present": false
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 12,
+   "turns_completed": 10,
+   "outcome": "game_over",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 50.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 9,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "01d8896397047236533b02ab9bfb3a28d8baf328",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 40.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 8,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "88fb327f8217fa71b87c6a39ee186eb3d95b3d27",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 30.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 7,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "dea242e79a6d8303fce884c57bcec6238fdae172",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 4,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 26,
+      "water": 26,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 20.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "3f59338a4853584f948f9d157a5da7ae8008cf44",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 5,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 25,
+      "water": 25,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 10.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 5,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "baf707d0ba5df3e3460eae2048291e2d5639cca5",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 6,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 24,
+      "water": 24,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 4,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "d45585ddee75c04578c19ecf893d673ce15e7739",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 7,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 23,
+      "water": 23,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 3,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "38b515358302e7c052f7d26a483aa8afd54dd180",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 8,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 22,
+      "water": 22,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 2,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "b8d8edb1a4631b0246b94b54b4873ca5954fe5d0",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 9,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 21,
+      "water": 21,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 1,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "e04dffd5bff6349cef69c7eeb1aa9128eca362df",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 10,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 20,
+      "water": 20,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 0.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 1,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern destroyed: pulled into the star — game over"
+     ],
+     "snapshot_hash": "e0ffe34007c57ed40ffce283de6d21c3614a7d16",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": [
+      {
+       "ship": "s-194",
+       "captain": "c-000",
+       "cause": "star",
+       "cell": [
+        5,
+        5
+       ]
+      }
+     ]
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": 10,
+    "mastery_turn": null,
+    "game_over_cause": "pulled into the star",
+    "hazard_deaths": 1,
+    "warps": 0
+   }
+  },
+  "save_present": false
+ },
+ "countdown_reset": {
+  "scenario": {
+   "script": [
+    "",
+    "",
+    "",
+    "move -1 +0",
+    "",
+    "",
+    "move +1 +0",
+    "move -1 +0",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "teleport": "3 4 7 9 5 5",
+   "turns": 14,
+   "plan": {
+    "what": "smoke/16 countdown reset (star at 5,5, exit -1 +0, N = 7)",
+    "ids": "HZ-08, CM-05, HZ-03, D-100, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 50.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6
+      }
+     },
+     {
+      "turn": 2,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 40.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 5
+      }
+     },
+     {
+      "turn": 3,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 30.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 4
+      }
+     },
+     {
+      "turn": 4,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 35.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 5,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 40.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 6,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 45.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 7,
+      "cell": [
+       5,
+       5
+      ],
+      "shield": 35.0,
+      "hazard": {
+       "kind": "star",
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6
+      },
+      "note": "re-entry: the counter must reset on leaving the cell, so turns_left reads N − 1 = 6 again (HZ-08)"
+     },
+     {
+      "turn": 8,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 40.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 9,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 45.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 10,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 50.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 11,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 55.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 12,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 60.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 13,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 60.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     },
+     {
+      "turn": 14,
+      "cell": [
+       4,
+       5
+      ],
+      "shield": 60.0,
+      "hazard": null,
+      "note": "outside any hazard shields recharge 5 per turn at TP-06, capped at shield_max 60 (CM-05)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 14
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 14,
+   "turns_completed": 14,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 50.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "dfe22bf0418861fc4f95629e6210e8f405539994",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 40.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 5,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "10c46533849436701922bfbc7102462852dec1b0",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 30.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 4,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "7dcad213109b0afe1cf3bd54f1dc215964ec097b",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 4,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 26,
+      "water": 26,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 35.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "ddba03333ed2173e62f0a696f85b56914585b8f3",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 5,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 25,
+      "water": 25,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 40.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "b94fbaeab0bd869154754b31cc5cc82f146adf22",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 6,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 24,
+      "water": 24,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 45.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "d7923c7c1185e55f6262769c5e46dec679dc24d9",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 7,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 23,
+      "water": 23,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        5,
+        5
+       ]
+      ],
+      "shield_current": 35.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "distance": 0,
+       "pull": 1.0,
+       "turns_left": 6,
+       "drain": 10
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "9b1dfcb0b81210f18d1e65aacf52792a4168323f",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 8,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 22,
+      "water": 22,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 40.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "027d76d76e63f49783442ef4749227cae5df6570",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 9,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 21,
+      "water": 21,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 45.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "8f7d48e2b473c4b8c7e35f3292a0f25f6f5c0c7b",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 10,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 20,
+      "water": 20,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 50.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "ed34c73295debd258f8a59ab4db303a08f65a785",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 11,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 19,
+      "water": 19,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 55.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "990def359cfc3b6f3f78601deceda781819f295b",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 12,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 18,
+      "water": 18,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "4380fa8b571a2817580f208491589102e2645bce",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 13,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 17,
+      "water": 17,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "b41acfe5366d7a9a35846096bead89042c76e603",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 14,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 16,
+      "water": 16,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "539ba49e500215797cc9b136bfb938fe553ad37c",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "hole_held": {
+  "scenario": {
+   "script": [
+    "move +1 +0",
+    "move +1 +0",
+    "move +1 +0"
+   ],
+   "teleport": "3 4 8 9 8 6",
+   "turns": 3,
+   "plan": {
+    "what": "smoke/17 held by a black hole (distance 2, pull 3.849, N = 2)",
+    "ids": "HZ-04, HZ-06, CFG-16, CFG-17, D-100, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       8,
+       6
+      ],
+      "shield": 60.0,
+      "events_contain": [
+       "held"
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 2,
+       "pull": 3.849001794597505,
+       "turns_left": 1
+      },
+      "note": "move +1 +0 with floor(engine 4 − pull 3.849) = 0 ≤ 0 cells: held (a held ship is an event string containing 'held' (M2 § 1: hazard event 'held by gravity'))"
+     }
+    ],
+    "end": {
+     "outcome": "game_over",
+     "turn": 2,
+     "cause": "black_hole",
+     "cell": [
+      8,
+      6
+     ]
+    },
+    "final": {
+     "hazard_deaths_min": 1
+    },
+    "save_present": false
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 3,
+   "turns_completed": 2,
+   "outcome": "game_over",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        8,
+        6
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 2,
+       "pull": 3.849,
+       "turns_left": 1,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern is held by gravity (pull 3.85 against engine 4)"
+     ],
+     "snapshot_hash": "160c141d8e71bcbc9382148bf474d6e71026c756",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        8,
+        6
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 2,
+       "pull": 3.849,
+       "turns_left": 1,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern destroyed: pulled into the black hole — game over"
+     ],
+     "snapshot_hash": "d7c0bc80d00cea0f976d03f06c6798bf461a78ea",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": [
+      {
+       "ship": "s-194",
+       "captain": "c-000",
+       "cause": "black_hole",
+       "cell": [
+        8,
+        6
+       ]
+      }
+     ]
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": 2,
+    "mastery_turn": null,
+    "game_over_cause": "pulled into the black hole",
+    "hazard_deaths": 1,
+    "warps": 0
+   }
+  },
+  "save_present": false
+ },
+ "hole_escape": {
+  "scenario": {
+   "script": [
+    "move +2 +2",
+    "move +2 +2",
+    "move +3 +3",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "teleport": "3 4 8 9 10 10",
+   "turns": 10,
+   "plan": {
+    "what": "smoke/17 escape from a black hole (from distance 4, 3 moves away)",
+    "ids": "HZ-04, CFG-16, D-100, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       12,
+       12
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 6,
+       "pull": 1.0798984943120777,
+       "turns_left": 6
+      },
+      "note": "after moving away at full engine power the pull at distance 6 is 1.080 → N = 7, counter 1 (D-100: moving outward buys time)"
+     },
+     {
+      "turn": 2,
+      "cell": [
+       14,
+       14
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 8,
+       "pull": 0.7407407407407407,
+       "turns_left": 8
+      },
+      "note": "after moving away at full engine power the pull at distance 8 is 0.741 → N = 10, counter 2 (D-100: moving outward buys time)"
+     },
+     {
+      "turn": 3,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 12
+      },
+      "note": "after moving away at full engine power the pull at distance 11 is 0.481 → N = 15, counter 3 (D-100: moving outward buys time)"
+     },
+     {
+      "turn": 4,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 11
+      },
+      "note": "holding at distance 11: N = 15, counter 4"
+     },
+     {
+      "turn": 5,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 10
+      },
+      "note": "holding at distance 11: N = 15, counter 5"
+     },
+     {
+      "turn": 6,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 9
+      },
+      "note": "holding at distance 11: N = 15, counter 6"
+     },
+     {
+      "turn": 7,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 8
+      },
+      "note": "holding at distance 11: N = 15, counter 7"
+     },
+     {
+      "turn": 8,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 7
+      },
+      "note": "holding at distance 11: N = 15, counter 8"
+     },
+     {
+      "turn": 9,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 6
+      },
+      "note": "holding at distance 11: N = 15, counter 9"
+     },
+     {
+      "turn": 10,
+      "cell": [
+       17,
+       17
+      ],
+      "hazard": {
+       "kind": "black_hole",
+       "distance": 11,
+       "pull": 0.4811252243246881,
+       "turns_left": 5
+      },
+      "note": "holding at distance 11: N = 15, counter 10"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 10
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 10,
+   "turns_completed": 10,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        12,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 6,
+       "pull": 1.0799,
+       "turns_left": 6,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "9bd8d7887ab80acee66d7dd2fbc9565f1800f5e8",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        14,
+        14
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 8,
+       "pull": 0.7407,
+       "turns_left": 8,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "404de5b87637334acc91ab54484b3732cb5a2f2c",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 12,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "ea1bdc0963b57c45840efdf6f0c90d5beee8ee53",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 4,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 26,
+      "water": 26,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 11,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "98424b5672251c0fb1cf5c802017c28962a3685a",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 5,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 25,
+      "water": 25,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 10,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "8218d7807b98c36a60ec3d6ecd27418ee252ad24",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 6,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 24,
+      "water": 24,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 9,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "678868a2a56f11d68cef683e23bac51870e28878",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 7,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 23,
+      "water": 23,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 8,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "c9a7a27f4175d7fd7425ccde551ab51e0d6b1aa8",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 8,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 22,
+      "water": 22,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 7,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "8a63c2153a400dc9418d802ea1d9a1f5749d3ab3",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 9,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 21,
+      "water": 21,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 6,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "428f29ee557dc86177f08e83d134e1271a532dbd",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 10,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 20,
+      "water": 20,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        17,
+        17
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 11,
+       "pull": 0.4811,
+       "turns_left": 5,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "596705a28dfe0c04c3012e65765ddd86b4be8eef",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "neutron": {
+  "scenario": {
+   "script": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "teleport": "3 4 7 10 13 12",
+   "turns": 4,
+   "plan": {
+    "what": "smoke/17 neutron star (distance 1, pull 2.828, N = 3)",
+    "ids": "HZ-06, CFG-17, D-100, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "cell": [
+       13,
+       12
+      ],
+      "shield": 60.0,
+      "hazard": {
+       "kind": "neutron_star",
+       "distance": 1,
+       "pull": 2.82842712474619,
+       "turns_left": 2
+      },
+      "note": "a neutron star pulls but never drains shields (HZ-06)"
+     },
+     {
+      "turn": 2,
+      "cell": [
+       13,
+       12
+      ],
+      "shield": 60.0,
+      "hazard": {
+       "kind": "neutron_star",
+       "distance": 1,
+       "pull": 2.82842712474619,
+       "turns_left": 1
+      },
+      "note": "a neutron star pulls but never drains shields (HZ-06)"
+     }
+    ],
+    "end": {
+     "outcome": "game_over",
+     "turn": 3,
+     "cause": "neutron_star",
+     "cell": [
+      13,
+      12
+     ]
+    },
+    "final": {
+     "hazard_deaths_min": 1
+    },
+    "save_present": false
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 4,
+   "turns_completed": 3,
+   "outcome": "game_over",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        10
+       ],
+       [
+        13,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "neutron_star",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 1,
+       "pull": 2.8284,
+       "turns_left": 2,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "ba29c81eae753ddb4bddcffe53e3f99c80115950",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        10
+       ],
+       [
+        13,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "neutron_star",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 1,
+       "pull": 2.8284,
+       "turns_left": 1,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "5be1f2fa11af72a113ef498f01dba7175d23816b",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 3,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 27,
+      "water": 27,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        10
+       ],
+       [
+        13,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "neutron_star",
+       "cell": [
+        6,
+        6
+       ],
+       "distance": 1,
+       "pull": 2.8284,
+       "turns_left": 1,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern destroyed: pulled into the neutron star — game over"
+     ],
+     "snapshot_hash": "f5e4967e06c4e9838d64873d66afca721eccd4a9",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": [
+      {
+       "ship": "s-194",
+       "captain": "c-000",
+       "cause": "neutron_star",
+       "cell": [
+        13,
+        12
+       ]
+      }
+     ]
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": 3,
+    "mastery_turn": null,
+    "game_over_cause": "pulled into the neutron star",
+    "hazard_deaths": 1,
+    "warps": 0
+   }
+  },
+  "save_present": false
+ },
+ "wormhole": {
+  "scenario": {
+   "script": [
+    ""
+   ],
+   "teleport": "3 4 9 9 8 7",
+   "turns": 1,
+   "plan": {
+    "what": "smoke/18 wormhole crossing (distance 1, N = 1)",
+    "ids": "HZ-05, ST-04, D-102, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "sector": [
+       [
+        3,
+        4
+       ],
+       [
+        10,
+        9
+       ]
+      ],
+      "hazard": "any",
+      "note": "pulled into a wormhole at turn N = 1: the ship emerges alive in the partner's sector [3, 4]/[10, 9] inside the partner's pull range (HZ-05, D-102)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 1
+    },
+    "final": {
+     "warps_min": 0
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 1,
+   "turns_completed": 1,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        10,
+        9
+       ],
+       [
+        8,
+        7
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": {
+       "kind": "black_hole",
+       "cell": [
+        8,
+        8
+       ],
+       "distance": 1,
+       "pull": 7.071,
+       "turns_left": 0,
+       "drain": 0
+      },
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "0505eb49e37ff06ef3ae834c2b82dd6b242b99bd",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "plain_hole": {
+  "scenario": {
+   "script": [
+    "",
+    ""
+   ],
+   "teleport": "3 4 8 9 7 6",
+   "turns": 2,
+   "plan": {
+    "what": "smoke/18 plain black hole (distance 1, N = 1)",
+    "ids": "HZ-04, HZ-05, D-102, C9",
+    "turns": [],
+    "end": {
+     "outcome": "game_over",
+     "turn": 1,
+     "cause": "black_hole",
+     "cell": [
+      7,
+      6
+     ]
+    },
+    "final": {
+     "hazard_deaths_min": 1
+    },
+    "save_present": false
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 2,
+   "turns_completed": 1,
+   "outcome": "game_over",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        7,
+        6
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern destroyed: pulled into the black hole — game over"
+     ],
+     "snapshot_hash": "2a5fe98fc66b7786e21749e590eba234e04872a1",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": [
+      {
+       "ship": "s-194",
+       "captain": "c-000",
+       "cause": "black_hole",
+       "cell": [
+        7,
+        6
+       ]
+      }
+     ]
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": 1,
+    "mastery_turn": null,
+    "game_over_cause": "pulled into the black hole",
+    "hazard_deaths": 1,
+    "warps": 0
+   }
+  },
+  "save_present": false
+ },
+ "warp_arrival": {
+  "scenario": {
+   "script": [
+    "warp 3 4 10 9 3",
+    ""
+   ],
+   "teleport": null,
+   "turns": 2,
+   "plan": {
+    "what": "smoke/19 warp (distance 3) to [3, 4]/[10, 9] at factor 3",
+    "ids": "CMD-07, MV-02, MV-05, D-101, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "sector": [
+       [
+        3,
+        4
+       ],
+       [
+        10,
+        9
+       ]
+      ],
+      "cell_near": {
+       "centre": [
+        11.5,
+        11.5
+       ],
+       "tol": 1.5
+      },
+      "warps": [
+       {
+        "from": [
+         [
+          3,
+          4
+         ],
+         [
+          7,
+          9
+         ]
+        ],
+        "to": [
+         [
+          3,
+          4
+         ],
+         [
+          10,
+          9
+         ]
+        ],
+        "factor": 3.0,
+        "effective": 3.0
+       }
+      ],
+      "note": "warp factor 3 (effective 3); arrival at the free cell nearest the sector centre (MV-05)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 2
+    },
+    "final": {
+     "warps_min": 1
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 2,
+   "turns_completed": 2,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        10,
+        9
+       ],
+       [
+        12,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "f6e450a30a244ad5f738faa812298971fa230db9",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [
+      {
+       "from": [
+        [
+         3,
+         4
+        ],
+        [
+         7,
+         9
+        ]
+       ],
+       "to": [
+        [
+         3,
+         4
+        ],
+        [
+         10,
+         9
+        ]
+       ],
+       "factor": 3.0,
+       "effective": 3.0,
+       "ship": "s-194"
+      }
+     ],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        10,
+        9
+       ],
+       [
+        12,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "9aee29bee903a78c428751acb9b5626b8e2bac30",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 1
+   }
+  },
+  "save_present": null
+ },
+ "warp_far": {
+  "scenario": {
+   "script": [
+    "warp 7 7 15 15 10",
+    ""
+   ],
+   "teleport": null,
+   "turns": 2,
+   "plan": {
+    "what": "smoke/19 warp factor 10 to the farthest sector to [7, 7]/[15, 15] at factor 10",
+    "ids": "CMD-07, MV-02, MV-05, D-101, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "sector": [
+       [
+        7,
+        7
+       ],
+       [
+        15,
+        15
+       ]
+      ],
+      "cell_near": {
+       "centre": [
+        11.5,
+        11.5
+       ],
+       "tol": 1.5
+      },
+      "warps": [
+       {
+        "from": [
+         [
+          3,
+          4
+         ],
+         [
+          7,
+          9
+         ]
+        ],
+        "to": [
+         [
+          7,
+          7
+         ],
+         [
+          15,
+          15
+         ]
+        ],
+        "factor": 10.0,
+        "effective": 10.0
+       }
+      ],
+      "note": "warp factor 10 (effective 10); arrival at the free cell nearest the sector centre (MV-05)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 2
+    },
+    "final": {
+     "warps_min": 1
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 2,
+   "turns_completed": 2,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        7,
+        7
+       ],
+       [
+        15,
+        15
+       ],
+       [
+        12,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "d2348d2e28be050f3ae049991569d706c63f27a6",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [
+      {
+       "from": [
+        [
+         3,
+         4
+        ],
+        [
+         7,
+         9
+        ]
+       ],
+       "to": [
+        [
+         7,
+         7
+        ],
+        [
+         15,
+         15
+        ]
+       ],
+       "factor": 10.0,
+       "effective": 10.0,
+       "ship": "s-194"
+      }
+     ],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        7,
+        7
+       ],
+       [
+        15,
+        15
+       ],
+       [
+        12,
+        12
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "188c66c68afba882441738d5df655203c175f928",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 1
+   }
+  },
+  "save_present": null
+ },
+ "warp_pull_neg": {
+  "scenario": {
+   "script": [
+    "warp 3 4 7 9 3"
+   ],
+   "teleport": "3 4 8 9 8 6",
+   "turns": 1,
+   "plan": {
+    "what": "smoke/19 warp under pull (distance 2, effective -0.85)",
+    "ids": "HZ-10, MV-03, CMD-07, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "sector": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ]
+      ],
+      "no_warps": true,
+      "note": "warp factor 3 from distance 2 of a black hole: effective = 3 − 3.849 = -0.85 ≤ 0 → the warp fails at resolution with a hazard event (a failed warp is an event string containing 'warp' (HZ-10, MV-03: effective factor ≤ 0 → the warp fails with a hazard event))",
+      "events_contain": [
+       "warp"
+      ]
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 1
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 1,
+   "turns_completed": 1,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        8,
+        6
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains",
+      "Lantern: the warp failed — pulled by gravity"
+     ],
+     "snapshot_hash": "f06ebc3b36673034dffe4c4b5eae36343b79622b",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "warp_pull_pos": {
+  "scenario": {
+   "script": [
+    "warp 3 4 7 9 3"
+   ],
+   "teleport": "3 4 8 9 9 6",
+   "turns": 1,
+   "plan": {
+    "what": "smoke/19 warp under pull (distance 3, effective 0.50)",
+    "ids": "HZ-10, MV-03, CMD-07, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "sector": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ]
+      ],
+      "no_warps": true,
+      "note": "warp factor 3 from distance 3 of a black hole: effective = 3 − 2.500 = 0.50 → the destination is beyond reach(effective), the ship must not arrive (HZ-10, MV-03)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 1
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 1,
+   "turns_completed": 1,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        8,
+        9
+       ],
+       [
+        9,
+        6
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "418b9bbe58003fbe3988dcd31e6d6d32ac6185f8",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ }
+}

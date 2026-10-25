@@ -3,16 +3,17 @@
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py .            milestone gate (≤ 3 min)
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py --selftest   stub launcher; opens no window
 
-Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2 against docs/CONTRACTS.md (C1 command
-lines, C3 bus, C5 heartbeats, C6 save).  Windows open and close on the desktop.  Not run
-by the hook.  Any existing saves\\game.json is moved aside first and restored afterwards;
-the gate's own save is deleted.  On any exit every process the gate started is killed.
-Exit 0 pass, 1 fail, 3 HARNESS ERROR.
+Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2 and live/08 per specs/M2.md § 3 against
+docs/CONTRACTS.md (C1 command lines, C3 bus, C5 heartbeats, C6 save, C9 M2 additions).
+Windows open and close on the desktop.  Not run by the hook.  Any existing saves\\game.json
+is moved aside first and restored afterwards; the gate's own save is deleted.  On any exit
+every process the gate started is killed.  Exit 0 pass, 1 fail, 3 HARNESS ERROR.
 """
 from __future__ import annotations
 
 import argparse
 import configparser
+import io
 import json
 import os
 import shutil
@@ -34,6 +35,7 @@ LAUNCH_WAIT_S = 15.0
 HB_WAIT_S = 3.0
 REOPEN_WAIT_S = 5.0
 SHUTDOWN_WAIT_S = 10.0
+LIVE_SEED = 1234
 
 
 def utf8_console() -> None:
@@ -139,6 +141,14 @@ def stop_everything(ctx: Ctx) -> list[str]:
     return killed
 
 
+def kill_role(ctx: Ctx, role: str) -> None:
+    import psutil
+    try:
+        psutil.Process(ctx.pids[role]).kill()
+    except (KeyError, psutil.NoSuchProcess):
+        pass
+
+
 # --------------------------------------------------------------------------- checks
 
 def l01(ctx: Ctx) -> list[str]:
@@ -181,7 +191,7 @@ def l02(ctx: Ctx) -> list[str]:
         ctx.save_backup = ctx.art / "game.json.before-live"
         shutil.move(str(save), str(ctx.save_backup))
         print(f"         moved existing {save} aside to {ctx.save_backup} (restored at the end)")
-    return launch(ctx, [ctx.py, "-m", "starbour", "--seed", "1234"], "first")
+    return launch(ctx, [ctx.py, "-m", "starbour", "--seed", str(LIVE_SEED)], "first")
 
 
 def l03(ctx: Ctx) -> list[str]:
@@ -251,11 +261,7 @@ def l05(ctx: Ctx) -> list[str]:
         raise C.Blocked(ctx.pkg_missing)
     if ctx.launcher is None or ctx.launcher.poll() is not None or "command" not in ctx.pids:
         raise C.Blocked("no running launcher with a command terminal")
-    import psutil
-    try:
-        psutil.Process(ctx.pids["command"]).kill()
-    except psutil.NoSuchProcess:
-        pass
+    kill_role(ctx, "command")
     waited = C.wait_until(lambda: ctx.launcher.poll() is not None and not C.role_processes(ctx.root), SHUTDOWN_WAIT_S, 0.2)
     problems: list[str] = []
     if ctx.launcher.poll() is None:
@@ -278,7 +284,7 @@ def l06(ctx: Ctx) -> list[str]:
     """live/06 — terminating the launcher leaves nothing behind (BUS-06, D-59)."""
     if ctx.pkg_missing:
         raise C.Blocked(ctx.pkg_missing)
-    problems = launch(ctx, [ctx.py, "-m", "starbour", "--seed", "1234"], "second")
+    problems = launch(ctx, [ctx.py, "-m", "starbour", "--seed", str(LIVE_SEED)], "second")
     if problems:
         stop_everything(ctx)
         return problems
@@ -304,7 +310,7 @@ def l07(ctx: Ctx) -> list[str]:
     exe = ctx.root / "dist" / "starbour" / "starbour.exe"
     if not exe.exists():
         return [f"{exe} not found — build it with build.ps1 (BR-14)"]
-    problems = launch(ctx, [str(exe), "--seed", "1234"], "exe")
+    problems = launch(ctx, [str(exe), "--seed", str(LIVE_SEED)], "exe")
     if problems:
         stop_everything(ctx)
         return problems
@@ -320,6 +326,79 @@ def l07(ctx: Ctx) -> list[str]:
     return problems
 
 
+def l08(ctx: Ctx) -> list[str]:
+    """live/08 — (M2) end-to-end game over: launch teleported into a star, N turns → game.over, every
+    window at turn N, save deleted, 'new' → hello at turn 0, closing T1 leaves nothing (OV-09b, MSG-09, OUT-16, C9)."""
+    if ctx.pkg_missing:
+        raise C.Blocked(ctx.pkg_missing)
+    if C.role_processes(ctx.root):
+        stop_everything(ctx)
+    cp = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=None)
+    cp.read(ctx.root / "controls_config.ini", encoding="utf-8")
+    k_g, falloff, scale = cp.getfloat("hazards", "k_g"), cp.getfloat("hazards", "falloff"), cp.getfloat("hazards", "pull_turns_scale")
+    sw, sh = (int(v) for v in cp.get("world", "sector_size").lower().split("x"))
+    # the star cell comes from world_index (C9), never from a literal
+    report, save_dir = ctx.art / f"world_{LIVE_SEED}.json", ctx.art / f"saves_world_{LIVE_SEED}"
+    if save_dir.exists():
+        shutil.rmtree(save_dir, ignore_errors=True)
+    what = f"sim --seed {LIVE_SEED} --turns 1 --ai-player --world-index"
+    res = C.run_cmd([ctx.py, "-m", "starbour", "sim", "--seed", str(LIVE_SEED), "--turns", "1", "--ai-player", "--world-index",
+                     "--report", str(report), "--save-dir", str(save_dir)], ctx.root, 40.0)
+    if res.timed_out or res.returncode != 0:
+        return [f"{what} exited {res.returncode}: {res.tail(8)} — live/08 needs world_index to pick a star cell (C9, D-104)"]
+    doc, err = C.load_json(report)
+    index = doc.get("world_index") if isinstance(doc, dict) else None
+    errs = C.world_index_shape_errors(index)
+    if errs:
+        return [f"{what}: " + "; ".join(errs[:4])]
+    pick = C.pick_star(index, k_g=k_g, falloff=falloff, scale=scale, sector_size=(sw, sh))
+    if pick is None:
+        return [f"world_index for seed {LIVE_SEED} lists no medium-bucket star with a free neighbouring cell among its {len(index.get('stars') or [])} stars (C9)"]
+    star, _ = pick
+    pull = C.pull_at(float(star["mass"]), 0, k_g, falloff)
+    n = C.countdown_turns(pull, scale)
+    cell = C.teleport_arg(star["galaxy"], star["sector"], star["cell"])
+    # a fresh game: the gate's own save from live/05 goes (the user's original is restored at the end)
+    save = ctx.root / "saves" / "game.json"
+    if save.exists():
+        shutil.copy2(save, ctx.art / "game.json.before-live08")
+        save.unlink()
+    problems = launch(ctx, [ctx.py, "-m", "starbour", "--seed", str(LIVE_SEED), "--teleport", cell], "gameover")
+    if problems:
+        problems.append("the launcher must accept --teleport and pass it to the engine role, as it does --seed (C9 C1 additions, D-104)")
+        stop_everything(ctx)
+        return problems
+    obs = C.drive_game_over(ctx.pub_port, ctx.pull_port, turns=n, save_path=save, order_after_over=False, new_game=True, turn_after_new=False,
+                            hello_timeout=15.0, turn_timeout=10.0)
+    problems = C.check_game_over(obs, n, order_after_over=False, new_game=True, turn_after_new=False)
+    if obs.get("game_over") is not None:
+        view_pids = {r: ctx.pids[r] for r in C.VIEW_ROLES if r in ctx.pids}
+        waited = C.wait_until(lambda: not C.check_heartbeats(C.read_heartbeats(ctx.hb_dir), n, pids=view_pids), HB_WAIT_S, 0.1)
+        hb = C.check_heartbeats(C.read_heartbeats(ctx.hb_dir), n, pids=view_pids)
+        if hb:
+            hb[-1] += (f" — waited {waited:.1f} s after game.over at turn {n}; every window redraws turn.resolved {n} with the game-over "
+                       f"banner (OUT-16, BUS-05, C5)")
+        problems += hb
+    kill_role(ctx, "command")
+    waited = C.wait_until(lambda: ctx.launcher.poll() is not None and not C.role_processes(ctx.root), SHUTDOWN_WAIT_S, 0.2)
+    if ctx.launcher.poll() is None:
+        problems.append(f"the launcher is still running {SHUTDOWN_WAIT_S:.0f} s after T1 was killed after game over — closing T1 must end the game (TL, BUS-06)")
+    problems += C.check_all_gone([(pid, role) for pid, role, _ in C.role_processes(ctx.root)],
+                                 f"{SHUTDOWN_WAIT_S:.0f} s after T1 was killed after game over (orphans; BUS-06, D-59)")
+    if problems:
+        killed = stop_everything(ctx)
+        if killed:
+            problems.append("the gate had to kill: " + ", ".join(killed))
+        tail = launcher_log_tail(ctx)
+        if tail.strip():
+            problems.append("launcher log tail:\n" + textwrap.indent(tail, " " * 10))
+    else:
+        print(f"         star at {star['cell']} in {star['galaxy']}/{star['sector']} (mass {float(star['mass']):.3f}, pull {pull:.3f}, N = {n}); "
+              f"game.over after {obs.get('game_over_wait_s')} s; windows at turn {n}; save deleted; new → seed "
+              f"{(obs.get('hello_after_new') or {}).get('seed')} at turn 0; everything gone {waited:.1f} s after killing T1")
+    return problems
+
+
 CHECKS = [
     C.Check("live/01", "ports free before start", "BUS-06", l01),
     C.Check("live/02", "launcher spawns engine + four terminals", "TL, BR-15, C1", l02),
@@ -327,6 +406,7 @@ CHECKS = [
     C.Check("live/04", "closing T2 reopens it, drawn at the current turn", "TL, D-70", l04),
     C.Check("live/05", "closing T1 ends the game: autosave, no orphans", "BUS-06, OV-12", l05),
     C.Check("live/06", "terminating the launcher leaves no children", "BUS-06, D-59", l06),
+    C.Check("live/08", "end-to-end game over: teleport into a star, game.over, save deleted, new", "OV-09b, MSG-09, OUT-16, C9", l08, since="M2"),
     C.Check("live/07", "starbour.exe launches and stays up", "BR-14, BR-15", l07, since="M5"),
 ]
 
@@ -458,6 +538,43 @@ def selftest(root: Path) -> int:
             t(f"bus (no orders): stub engine '{mode}' passes", not problems, problems)
         else:
             t(f"bus (no orders): stub engine '{mode}' fails naming it", any(expect in m for m in problems), problems)
+
+    # ---------------------------------------------------------------- M2: live/08
+    print("-- M2 --")
+    with tempfile.TemporaryDirectory() as td:
+        for mode, expect in (("game_over", None), ("game_over_leaky", ("save", "snapshot.game_over", "C9"))):
+            save = Path(td) / f"{mode}.json"
+            eng = StubEngine(mode, save_path=save, die_at=7)
+            eng.start()
+            eng.ready.wait(5)
+            try:
+                obs = C.drive_game_over(eng.pub_port, eng.pull_port, turns=7, save_path=save, order_after_over=False, new_game=True, turn_after_new=False,
+                                        hello_timeout=10.0, turn_timeout=2.0, reply_timeout=2.0, over_timeout=2.0, file_wait=1.0)
+            finally:
+                eng.stop()
+            problems = C.check_game_over(obs, 7, order_after_over=False, new_game=True, turn_after_new=False)
+            if expect is None:
+                t(f"live/08 driver: stub engine '{mode}' passes (game.over after {obs.get('game_over_wait_s')} s; new → seed {C._get(obs, 'hello_after_new', 'seed')})",
+                  not problems, problems)
+            else:
+                t(f"live/08 driver: stub engine '{mode}' fails naming {expect}", all(any(w in m for m in problems) for w in expect), problems)
+
+    def gate_status(code: str, milestone: str) -> str:
+        chk = next(c for c in CHECKS if c.code == code)
+        canned = C.Check(chk.code, chk.title, chk.ids, lambda ctx: ["canned failure"], since=chk.since, until=chk.until)
+        buf, real = io.StringIO(), sys.stdout
+        sys.stdout = buf
+        try:
+            with tempfile.TemporaryDirectory() as td2:
+                C.run_checks([canned], None, milestone=lambda: milestone, select=None, budget_s=10.0, label="gating", result_path=Path(td2) / "r.json")
+        finally:
+            sys.stdout = real
+        line = next((ln for ln in buf.getvalue().splitlines() if ln.split() and ln.split()[0] in (C.PASS, C.FAIL, C.SKIP, C.BLOCKED) and code in ln), "")
+        return line.split()[0] if line else "?"
+    t("gating: live/08 SKIPs at MILESTONE M1 and runs (here FAILs) at M2", gate_status("live/08", "M1") == C.SKIP and gate_status("live/08", "M2") == C.FAIL,
+      (gate_status("live/08", "M1"), gate_status("live/08", "M2")))
+    t("gating: live/07 still SKIPs until M5", gate_status("live/07", "M2") == C.SKIP and gate_status("live/07", "M5") == C.FAIL)
+    t("teleport_arg formats C9's six integers", C.teleport_arg([3, 4], [7, 9], [5, 5]) == "3 4 7 9 5 5")
 
     bad = [n for ok, n in results if not ok]
     print(f"== live selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")

@@ -1,0 +1,234 @@
+{
+ "scenario": {
+  "script": [
+   "move +1 +0",
+   "move +1 +0",
+   "move +1 +0"
+  ],
+  "teleport": "3 4 8 9 8 6",
+  "turns": 3,
+  "plan": {
+   "what": "smoke/17 held by a black hole (distance 2, pull 3.849, N = 2)",
+   "ids": "HZ-04, HZ-06, CFG-16, CFG-17, D-100, C9",
+   "turns": [
+    {
+     "turn": 1,
+     "cell": [
+      8,
+      6
+     ],
+     "shield": 60.0,
+     "events_contain": [
+      "held"
+     ],
+     "hazard": {
+      "kind": "black_hole",
+      "distance": 2,
+      "pull": 3.849001794597505,
+      "turns_left": 1
+     },
+     "note": "move +1 +0 with floor(engine 4 − pull 3.849) = 0 ≤ 0 cells: held (a held ship is an event string containing 'held' (M2 § 1: hazard event 'held by gravity'))"
+    }
+   ],
+   "end": {
+    "outcome": "game_over",
+    "turn": 2,
+    "cause": "black_hole",
+    "cell": [
+     8,
+     6
+    ]
+   },
+   "final": {
+    "hazard_deaths_min": 1
+   },
+   "save_present": false
+  }
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 3,
+  "turns_completed": 3,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 192
+    },
+    "ai_ships_moved": 185,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       9,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 1,
+      "drain": 0
+     },
+     "move_remaining": null
+    },
+    "captains": 193,
+    "events": [
+     "Orders: 1 from you, 192 from AI captains"
+    ],
+    "snapshot_hash": "160c141d8e71bcbc9382148bf474d6e71026c756",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 192
+    },
+    "ai_ships_moved": 185,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       10,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 1,
+      "drain": 0
+     },
+     "move_remaining": null
+    },
+    "captains": 193,
+    "events": [
+     "Orders: 1 from you, 192 from AI captains",
+     "Lantern destroyed: pulled into the black hole — game over"
+    ],
+    "snapshot_hash": "d7c0bc80d00cea0f976d03f06c6798bf461a78ea",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 192
+    },
+    "ai_ships_moved": 185,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       11,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 1,
+      "drain": 0
+     },
+     "move_remaining": null
+    },
+    "captains": 193,
+    "events": [
+     "Orders: 1 from you, 192 from AI captains",
+     "Lantern destroyed: pulled into the black hole — game over"
+    ],
+    "snapshot_hash": "d7c0bc80d00cea0f976d03f06c6798bf461a78ea",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": []
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0
+  }
+ },
+ "save_present": true
+}

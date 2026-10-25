@@ -1,0 +1,113 @@
+{
+ "scenario": {
+  "script": [
+   ""
+  ],
+  "teleport": "3 4 9 9 8 7",
+  "turns": 1,
+  "plan": {
+   "what": "smoke/18 wormhole crossing (distance 1, N = 1)",
+   "ids": "HZ-05, ST-04, D-102, C9",
+   "turns": [
+    {
+     "turn": 1,
+     "sector": [
+      [
+       3,
+       4
+      ],
+      [
+       10,
+       9
+      ]
+     ],
+     "hazard": "any",
+     "note": "pulled into a wormhole at turn N = 1: the ship emerges alive in the partner's sector [3, 4]/[10, 9] inside the partner's pull range (HZ-05, D-102)"
+    }
+   ],
+   "end": {
+    "outcome": "running",
+    "turns": 1
+   },
+   "final": {
+    "warps_min": 0
+   }
+  }
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 1,
+  "turns_completed": 1,
+  "outcome": "game_over",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 192
+    },
+    "ai_ships_moved": 185,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       9,
+       9
+      ],
+      [
+       8,
+       7
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null
+    },
+    "captains": 193,
+    "events": [
+     "Orders: 1 from you, 192 from AI captains"
+    ],
+    "snapshot_hash": "0505eb49e37ff06ef3ae834c2b82dd6b242b99bd",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [
+     {
+      "ship": "s-194",
+      "captain": "c-000",
+      "cause": "black_hole",
+      "cell": [
+       8,
+       7
+      ]
+     }
+    ]
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": 1,
+   "mastery_turn": null,
+   "game_over_cause": "pulled into the black hole",
+   "hazard_deaths": 1,
+   "warps": 0
+  }
+ },
+ "save_present": null
+}

@@ -1,0 +1,89 @@
+{
+ "cases": [
+  {
+   "label": "beyond reach",
+   "command": "warp",
+   "args": [
+    "3",
+    "4",
+    "11",
+    "9",
+    "3"
+   ],
+   "expect": "rejected",
+   "reach": 3.0681361418795716,
+   "why": "distance 4 exceeds reach 3.07 for factor 3 (CMD-07, MV-02)"
+  },
+  {
+   "label": "factor above warpcore_power",
+   "command": "warp",
+   "args": [
+    "3",
+    "4",
+    "10",
+    "9",
+    "4"
+   ],
+   "expect": "rejected",
+   "reason_all": [
+    "warp[ _]?core[ _]?power"
+   ],
+   "why": "factor 4 > warpcore_power 3 (CMD-07)"
+  },
+  {
+   "label": "Void destination",
+   "command": "warp",
+   "args": [
+    "3",
+    "4",
+    "5",
+    "9",
+    "3"
+   ],
+   "expect": "rejected",
+   "why": "Void (M2 § 1)"
+  },
+  {
+   "label": "outside the universe",
+   "command": "warp",
+   "args": [
+    "8",
+    "8",
+    "0",
+    "0",
+    "3"
+   ],
+   "expect": "rejected",
+   "why": "outside (M2 § 5)"
+  }
+ ],
+ "obs": {
+  "hello": {
+   "turn_no": 0,
+   "seed": 1234
+  },
+  "notes": [],
+  "replies": [
+   {
+    "label": "beyond reach",
+    "topic": "order.rejected",
+    "reason": "destination 4 sectors away is beyond the reach 3.07 for factor 3 (CMD-07)"
+   },
+   {
+    "label": "factor above warpcore_power",
+    "topic": "order.rejected",
+    "reason": "factor 4 exceeds warpcore_power 3 (CMD-07)"
+   },
+   {
+    "label": "Void destination",
+    "topic": "order.rejected",
+    "reason": "destination 3,4/5,9 is Void (CMD-07)"
+   },
+   {
+    "label": "outside the universe",
+    "topic": "order.rejected",
+    "reason": "galaxy 8,8 is outside the universe (CMD-07)"
+   }
+  ]
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "hello": {
+  "turn_no": 0
+ },
+ "seed": 1234,
+ "ship_id": "s-194",
+ "resolved": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+ ],
+ "last_snapshot_game_over": false,
+ "game_over": {
+  "turn_no": 7,
+  "cause": "pulled into the star at 5,5 in sector 3,4/7,9",
+  "summary": {
+   "turns": 7,
+   "sectors_visited": 1,
+   "mutinies": 0,
+   "fear": 10,
+   "respect": 10,
+   "gold": 5,
+   "silver": 50
+  }
+ },
+ "game_over_wait_s": 0.01,
+ "save_present_after_over": true,
+ "after_over_reply": {
+  "topic": "order.accepted",
+  "reason": ""
+ },
+ "hello_after_over": null,
+ "new_reply": {
+  "topic": "order.accepted",
+  "reason": ""
+ },
+ "hello_after_new": {
+  "turn_no": 0,
+  "seed": 1235,
+  "game_over": false
+ },
+ "resolved_after_new": 1,
+ "save_present_after_new_turn": true,
+ "notes": []
+}

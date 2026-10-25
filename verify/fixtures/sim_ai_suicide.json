@@ -1,0 +1,1006 @@
+{
+ "index": {
+  "player_start": [
+   [
+    3,
+    4
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    12,
+    11
+   ]
+  ],
+  "stars": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     9
+    ],
+    "cell": [
+     5,
+     5
+    ],
+    "bucket": "medium",
+    "mass": 1.0,
+    "colour": "yellow"
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     10
+    ],
+    "cell": [
+     20,
+     3
+    ],
+    "bucket": "medium",
+    "mass": 0.83,
+    "colour": "orange"
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     8,
+     10
+    ],
+    "cell": [
+     2,
+     21
+    ],
+    "bucket": "high",
+    "mass": 20.1,
+    "colour": "blue-white"
+   }
+  ],
+  "black_holes": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     8,
+     9
+    ],
+    "cell": [
+     6,
+     6
+    ],
+    "wormhole_to": null
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     9,
+     9
+    ],
+    "cell": [
+     7,
+     7
+    ],
+    "wormhole_to": {
+     "galaxy": [
+      3,
+      4
+     ],
+     "sector": [
+      10,
+      9
+     ],
+     "cell": [
+      8,
+      8
+     ]
+    }
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     10,
+     9
+    ],
+    "cell": [
+     8,
+     8
+    ],
+    "wormhole_to": {
+     "galaxy": [
+      3,
+      4
+     ],
+     "sector": [
+      9,
+      9
+     ],
+     "cell": [
+      7,
+      7
+     ]
+    }
+   }
+  ],
+  "neutron_stars": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     10
+    ],
+    "cell": [
+     12,
+     12
+    ]
+   }
+  ],
+  "planets": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     9
+    ],
+    "cell": [
+     6,
+     5
+    ],
+    "name": "Oreth"
+   }
+  ]
+ },
+ "snapshots": [
+  {
+   "turn_no": 0,
+   "seed": 1234,
+   "version": "0.1.0",
+   "sizes": {
+    "universe": [
+     8,
+     8
+    ],
+    "galaxy": [
+     16,
+     16
+    ],
+    "sector": [
+     24,
+     24
+    ]
+   },
+   "player_id": "c-000",
+   "captains": {
+    "c-000": {
+     "name": "Harrow Vey",
+     "is_player": true,
+     "gold": 5,
+     "silver": 50,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-194"
+     ],
+     "active_ship": "s-194",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-001": {
+     "name": "Ilse Marrow",
+     "is_player": false,
+     "gold": 3,
+     "silver": 20,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-001"
+     ],
+     "active_ship": "s-001",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-002": {
+     "name": "Tam Wyre",
+     "is_player": false,
+     "gold": 3,
+     "silver": 20,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-002"
+     ],
+     "active_ship": "s-002",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    }
+   },
+   "ships": {
+    "s-194": {
+     "name": "Lantern",
+     "class": "kestrel",
+     "captain": "c-000",
+     "torpedoes": 6,
+     "phasers": 3.0,
+     "shield_max": 60.0,
+     "shield_current": 60.0,
+     "engine": 4.0,
+     "warp": 3.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "orders_queued": 0,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    },
+    "s-001": {
+     "name": "Grey Heron",
+     "class": "corsair",
+     "captain": "c-001",
+     "torpedoes": 12,
+     "phasers": 5.0,
+     "shield_max": 80.0,
+     "shield_current": 80.0,
+     "engine": 6.0,
+     "warp": 5.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       9,
+       6
+      ]
+     ],
+     "orders_queued": 1,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    },
+    "s-002": {
+     "name": "Low Tide",
+     "class": "corsair",
+     "captain": "c-002",
+     "torpedoes": 12,
+     "phasers": 5.0,
+     "shield_max": 80.0,
+     "shield_current": 80.0,
+     "engine": 6.0,
+     "warp": 5.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       2,
+       2
+      ]
+     ],
+     "orders_queued": 0,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    }
+   },
+   "universe": {
+    "galaxies": [
+     [
+      3,
+      4
+     ]
+    ]
+   },
+   "galaxies": {
+    "3,4": {
+     "sectors": [
+      [
+       7,
+       9
+      ]
+     ],
+     "visited": [
+      [
+       7,
+       9
+      ]
+     ],
+     "hazards": []
+    }
+   },
+   "sectors": {
+    "3,4/7,9": {
+     "terrain": [
+      {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "colour": "yellow",
+       "bucket": "medium"
+      },
+      {
+       "kind": "planet",
+       "cell": [
+        6,
+        5
+       ],
+       "name": "Oreth"
+      }
+     ],
+     "items": [
+      {
+       "id": "i-017",
+       "cell": [
+        9,
+        2
+       ],
+       "rarity": "normal",
+       "revealed": false
+      }
+     ]
+    }
+   },
+   "fog_of_war": true,
+   "view": {
+    "level": "follow"
+   },
+   "game_over": false
+  },
+  {
+   "turn_no": 1,
+   "seed": 1234,
+   "version": "0.1.0",
+   "sizes": {
+    "universe": [
+     8,
+     8
+    ],
+    "galaxy": [
+     16,
+     16
+    ],
+    "sector": [
+     24,
+     24
+    ]
+   },
+   "player_id": "c-000",
+   "captains": {
+    "c-000": {
+     "name": "Harrow Vey",
+     "is_player": true,
+     "gold": 5,
+     "silver": 50,
+     "fear": 10,
+     "respect": 10,
+     "food": 29,
+     "water": 29,
+     "ships": [
+      "s-194"
+     ],
+     "active_ship": "s-194",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-001": {
+     "name": "Ilse Marrow",
+     "is_player": false,
+     "gold": 3,
+     "silver": 20,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-001"
+     ],
+     "active_ship": "s-001",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-002": {
+     "name": "Tam Wyre",
+     "is_player": false,
+     "gold": 3,
+     "silver": 20,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-002"
+     ],
+     "active_ship": "s-002",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-003": {
+     "name": "Ren Astley",
+     "is_player": false,
+     "gold": 0,
+     "silver": 0,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [],
+     "active_ship": null,
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    }
+   },
+   "ships": {
+    "s-194": {
+     "name": "Lantern",
+     "class": "kestrel",
+     "captain": "c-000",
+     "torpedoes": 6,
+     "phasers": 3.0,
+     "shield_max": 60.0,
+     "shield_current": 60.0,
+     "engine": 4.0,
+     "warp": 3.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "orders_queued": 0,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    },
+    "s-001": {
+     "name": "Grey Heron",
+     "class": "corsair",
+     "captain": "c-001",
+     "torpedoes": 12,
+     "phasers": 5.0,
+     "shield_max": 80.0,
+     "shield_current": 80.0,
+     "engine": 6.0,
+     "warp": 5.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       8,
+       6
+      ]
+     ],
+     "orders_queued": 1,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    },
+    "s-002": {
+     "name": "Low Tide",
+     "class": "corsair",
+     "captain": "c-002",
+     "torpedoes": 12,
+     "phasers": 5.0,
+     "shield_max": 80.0,
+     "shield_current": 80.0,
+     "engine": 6.0,
+     "warp": 5.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       5,
+       5
+      ]
+     ],
+     "orders_queued": 0,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    }
+   },
+   "universe": {
+    "galaxies": [
+     [
+      3,
+      4
+     ]
+    ]
+   },
+   "galaxies": {
+    "3,4": {
+     "sectors": [
+      [
+       7,
+       9
+      ]
+     ],
+     "visited": [
+      [
+       7,
+       9
+      ]
+     ],
+     "hazards": []
+    }
+   },
+   "sectors": {
+    "3,4/7,9": {
+     "terrain": [
+      {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "colour": "yellow",
+       "bucket": "medium"
+      },
+      {
+       "kind": "planet",
+       "cell": [
+        6,
+        5
+       ],
+       "name": "Oreth"
+      }
+     ],
+     "items": [
+      {
+       "id": "i-017",
+       "cell": [
+        9,
+        2
+       ],
+       "rarity": "normal",
+       "revealed": false
+      }
+     ]
+    }
+   },
+   "fog_of_war": true,
+   "view": {
+    "level": "follow"
+   },
+   "game_over": false
+  },
+  {
+   "turn_no": 2,
+   "seed": 1234,
+   "version": "0.1.0",
+   "sizes": {
+    "universe": [
+     8,
+     8
+    ],
+    "galaxy": [
+     16,
+     16
+    ],
+    "sector": [
+     24,
+     24
+    ]
+   },
+   "player_id": "c-000",
+   "captains": {
+    "c-000": {
+     "name": "Harrow Vey",
+     "is_player": true,
+     "gold": 5,
+     "silver": 50,
+     "fear": 10,
+     "respect": 10,
+     "food": 28,
+     "water": 28,
+     "ships": [
+      "s-194"
+     ],
+     "active_ship": "s-194",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-001": {
+     "name": "Ilse Marrow",
+     "is_player": false,
+     "gold": 3,
+     "silver": 20,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-001"
+     ],
+     "active_ship": "s-001",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-002": {
+     "name": "Tam Wyre",
+     "is_player": false,
+     "gold": 3,
+     "silver": 20,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [
+      "s-002"
+     ],
+     "active_ship": "s-002",
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    },
+    "c-003": {
+     "name": "Ren Astley",
+     "is_player": false,
+     "gold": 0,
+     "silver": 0,
+     "fear": 10,
+     "respect": 10,
+     "food": 30,
+     "water": 30,
+     "ships": [],
+     "active_ship": null,
+     "items": [],
+     "is_master": false,
+     "mutiny_countdown": null
+    }
+   },
+   "ships": {
+    "s-194": {
+     "name": "Lantern",
+     "class": "kestrel",
+     "captain": "c-000",
+     "torpedoes": 6,
+     "phasers": 3.0,
+     "shield_max": 60.0,
+     "shield_current": 60.0,
+     "engine": 4.0,
+     "warp": 3.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "orders_queued": 0,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    },
+    "s-001": {
+     "name": "Grey Heron",
+     "class": "corsair",
+     "captain": "c-001",
+     "torpedoes": 12,
+     "phasers": 5.0,
+     "shield_max": 80.0,
+     "shield_current": 80.0,
+     "engine": 6.0,
+     "warp": 5.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       7,
+       6
+      ]
+     ],
+     "orders_queued": 1,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    },
+    "s-002": {
+     "name": "Low Tide",
+     "class": "corsair",
+     "captain": "c-002",
+     "torpedoes": 12,
+     "phasers": 5.0,
+     "shield_max": 80.0,
+     "shield_current": 80.0,
+     "engine": 6.0,
+     "warp": 5.0,
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       5,
+       5
+      ]
+     ],
+     "orders_queued": 0,
+     "move_remaining": null,
+     "hazard": null,
+     "orders": []
+    }
+   },
+   "universe": {
+    "galaxies": [
+     [
+      3,
+      4
+     ]
+    ]
+   },
+   "galaxies": {
+    "3,4": {
+     "sectors": [
+      [
+       7,
+       9
+      ]
+     ],
+     "visited": [
+      [
+       7,
+       9
+      ]
+     ],
+     "hazards": []
+    }
+   },
+   "sectors": {
+    "3,4/7,9": {
+     "terrain": [
+      {
+       "kind": "star",
+       "cell": [
+        5,
+        5
+       ],
+       "colour": "yellow",
+       "bucket": "medium"
+      },
+      {
+       "kind": "planet",
+       "cell": [
+        6,
+        5
+       ],
+       "name": "Oreth"
+      }
+     ],
+     "items": [
+      {
+       "id": "i-017",
+       "cell": [
+        9,
+        2
+       ],
+       "rarity": "normal",
+       "revealed": false
+      }
+     ]
+    }
+   },
+   "fog_of_war": true,
+   "view": {
+    "level": "follow"
+   },
+   "game_over": false
+  }
+ ],
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 2,
+  "turns_completed": 2,
+  "outcome": "running",
+  "elapsed_s": 0.5,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 0,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null
+    },
+    "captains": 3,
+    "events": [
+     "AI moved"
+    ],
+    "snapshot_hash": "27e65f7e5ac160812b2bc8e00d48827e192457f4",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 5.0,
+    "warps": [],
+    "destroyed": [
+     {
+      "ship": "s-002",
+      "captain": "c-002",
+      "cause": "star",
+      "cell": [
+       5,
+       5
+      ]
+     }
+    ]
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 0,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null
+    },
+    "captains": 3,
+    "events": [
+     "AI moved"
+    ],
+    "snapshot_hash": "468f7429aac516946782f5cfe61276af10b12f7d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 5.0,
+    "warps": [],
+    "destroyed": []
+   }
+  ],
+  "final": {
+   "captains": 3,
+   "ships": 3,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 1,
+   "warps": 0
+  }
+ }
+}

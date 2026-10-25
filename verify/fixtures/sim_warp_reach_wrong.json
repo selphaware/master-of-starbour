@@ -1,0 +1,271 @@
+{
+ "arrival": {
+  "scenario": {
+   "script": [
+    "warp 3 4 10 9 3",
+    ""
+   ],
+   "teleport": null,
+   "turns": 2,
+   "plan": {
+    "what": "smoke/19 warp (distance 3) to [3, 4]/[10, 9] at factor 3",
+    "ids": "CMD-07, MV-02, MV-05, D-101, C9",
+    "turns": [
+     {
+      "turn": 1,
+      "sector": [
+       [
+        3,
+        4
+       ],
+       [
+        10,
+        9
+       ]
+      ],
+      "cell_near": {
+       "centre": [
+        11.5,
+        11.5
+       ],
+       "tol": 1.5
+      },
+      "warps": [
+       {
+        "from": [
+         [
+          3,
+          4
+         ],
+         [
+          7,
+          9
+         ]
+        ],
+        "to": [
+         [
+          3,
+          4
+         ],
+         [
+          10,
+          9
+         ]
+        ],
+        "factor": 3.0,
+        "effective": 3.0
+       }
+      ],
+      "note": "warp factor 3 (effective 3); arrival at the free cell nearest the sector centre (MV-05)"
+     }
+    ],
+    "end": {
+     "outcome": "running",
+     "turns": 2
+    },
+    "final": {
+     "warps_min": 1
+    }
+   }
+  },
+  "report": {
+   "schema": 1,
+   "seed": 1234,
+   "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+   "turns_requested": 2,
+   "turns_completed": 2,
+   "outcome": "running",
+   "elapsed_s": 1.0,
+   "per_turn": [
+    {
+     "turn_no": 1,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 29,
+      "water": 29,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        11
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "f6e450a30a244ad5f738faa812298971fa230db9",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    },
+    {
+     "turn_no": 2,
+     "orders_executed": {
+      "player": 1,
+      "ai": 192
+     },
+     "ai_ships_moved": 185,
+     "player": {
+      "food": 28,
+      "water": 28,
+      "fear": 10,
+      "respect": 10,
+      "gold": 5,
+      "silver": 50,
+      "ship_class": "kestrel",
+      "position": [
+       [
+        3,
+        4
+       ],
+       [
+        7,
+        9
+       ],
+       [
+        12,
+        11
+       ]
+      ],
+      "shield_current": 60.0,
+      "shield_max": 60.0,
+      "hazard": null,
+      "move_remaining": null
+     },
+     "captains": 193,
+     "events": [
+      "Orders: 1 from you, 192 from AI captains"
+     ],
+     "snapshot_hash": "9aee29bee903a78c428751acb9b5626b8e2bac30",
+     "snapshot_bytes": 180000,
+     "resolve_ms": 6.0,
+     "warps": [],
+     "destroyed": []
+    }
+   ],
+   "final": {
+    "captains": 193,
+    "ships": 193,
+    "mutinies": [],
+    "game_over_turn": null,
+    "mastery_turn": null,
+    "game_over_cause": null,
+    "hazard_deaths": 0,
+    "warps": 0
+   }
+  },
+  "save_present": null
+ },
+ "bus": {
+  "cases": [
+   {
+    "label": "beyond reach",
+    "command": "warp",
+    "args": [
+     "3",
+     "4",
+     "11",
+     "9",
+     "3"
+    ],
+    "expect": "rejected",
+    "reach": 3.0681361418795716,
+    "why": "distance 4 exceeds reach 3.07 for factor 3 (CMD-07, MV-02)"
+   },
+   {
+    "label": "factor above warpcore_power",
+    "command": "warp",
+    "args": [
+     "3",
+     "4",
+     "10",
+     "9",
+     "4"
+    ],
+    "expect": "rejected",
+    "reason_all": [
+     "warp[ _]?core[ _]?power"
+    ],
+    "why": "factor 4 > warpcore_power 3 (CMD-07)"
+   },
+   {
+    "label": "Void destination",
+    "command": "warp",
+    "args": [
+     "3",
+     "4",
+     "5",
+     "9",
+     "3"
+    ],
+    "expect": "rejected",
+    "why": "Void (M2 § 1)"
+   },
+   {
+    "label": "outside the universe",
+    "command": "warp",
+    "args": [
+     "8",
+     "8",
+     "0",
+     "0",
+     "3"
+    ],
+    "expect": "rejected",
+    "why": "outside (M2 § 5)"
+   }
+  ],
+  "obs": {
+   "hello": {
+    "turn_no": 0,
+    "seed": 1234
+   },
+   "notes": [],
+   "replies": [
+    {
+     "label": "beyond reach",
+     "topic": "order.rejected",
+     "reason": "destination 4 sectors away is beyond the reach 4.00 for factor 3 (CMD-07)"
+    },
+    {
+     "label": "factor above warpcore_power",
+     "topic": "order.rejected",
+     "reason": "factor 4 exceeds warpcore_power 3 (CMD-07)"
+    },
+    {
+     "label": "Void destination",
+     "topic": "order.rejected",
+     "reason": "destination 3,4/5,9 is Void (CMD-07)"
+    },
+    {
+     "label": "outside the universe",
+     "topic": "order.rejected",
+     "reason": "galaxy 8,8 is outside the universe (CMD-07)"
+    }
+   ]
+  }
+ }
+}
