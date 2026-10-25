@@ -43,6 +43,7 @@ class Listener(threading.Thread):
         self.snapshot: dict | None = None
         self.turn_no = 0
         self.first_hello = threading.Event()
+        self.updated = threading.Event()     # set whenever a fresh snapshot arrives (hello or resolved)
         self.resolved = threading.Event()
         self.reply = threading.Event()
         self.last_reply: tuple[str, dict] | None = None
@@ -69,6 +70,7 @@ class Listener(threading.Thread):
                     self.snapshot = snap
                     self.turn_no = int(payload.get("turn_no", snap.get("turn_no", 0)))
                 self.first_hello.set()
+                self.updated.set()
             if topic == M.TURN_RESOLVED:
                 self.last_events = list(payload.get("events") or [])
                 self.resolved.set()
@@ -122,12 +124,16 @@ class CommandTerminal:
     def send_order(self, command: str, args: list[str]) -> tuple[str, dict] | None:
         snap, turn_no = self.listener.current()
         self.listener.reply.clear()
+        self.listener.updated.clear()
         self.listener.last_reply = None
         self.push.send(M.ORDER_SUBMITTED, M.OrderSubmitted(command, list(args), self.active_ship_id(), turn_no, "command").to_dict())
         if not self.listener.reply.wait(REPLY_TIMEOUT_S):
             self.console.print("  no reply from the engine within 5 s - is it running? (logs/engine.log)", style=P.STYLES["command_error"])
             return None
-        return self.listener.last_reply
+        reply = self.listener.last_reply
+        if reply and reply[0] == M.ORDER_ACCEPTED and command in ("new", "ship", "scan"):
+            self.listener.updated.wait(REPLY_TIMEOUT_S)   # D-91: the engine sends a fresh hello after an immediate state change
+        return reply
 
     def show_reply(self, reply: tuple[str, dict] | None, order_text: str) -> None:
         if reply is None:
