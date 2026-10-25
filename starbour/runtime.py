@@ -93,19 +93,37 @@ def heartbeat_dir() -> Path | None:
     return Path(raw) if raw else None
 
 
+HEARTBEAT_RETRIES = 8
+HEARTBEAT_RETRY_S = 0.01
+
+
 def write_heartbeat(role: str, turn_no: int, render_ms: float) -> None:
-    """C5 / D-66: <MOS_HEARTBEAT_DIR>/<role>.json after every redraw; a no-op in normal play."""
+    """C5 / D-66: <MOS_HEARTBEAT_DIR>/<role>.json after every redraw; a no-op in normal play.
+
+    Windows refuses ``os.replace`` while another process has the target open for reading
+    (WinError 5) - exactly what the live gate does every 100 ms - so the replace is retried
+    briefly and, as a last resort, the document is written in place: a reader that catches
+    a partial file simply polls again.
+    """
     hb = heartbeat_dir()
     if hb is None:
         return
+    log = logging.getLogger("starbour.heartbeat")
     try:
         hb.mkdir(parents=True, exist_ok=True)
-        doc = {"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": round(render_ms, 1)}
-        tmp = hb / f"{role}.json.tmp"
-        tmp.write_text(json.dumps(doc), encoding="utf-8")
-        os.replace(tmp, hb / f"{role}.json")
+        text = json.dumps({"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": round(render_ms, 1)})
+        tmp, final = hb / f"{role}.json.tmp", hb / f"{role}.json"
+        tmp.write_text(text, encoding="utf-8")
+        for attempt in range(HEARTBEAT_RETRIES):
+            try:
+                os.replace(tmp, final)
+                return
+            except PermissionError:
+                time.sleep(HEARTBEAT_RETRY_S)
+        final.write_text(text, encoding="utf-8")
+        log.info("heartbeat written in place after %d blocked replaces", HEARTBEAT_RETRIES)
     except OSError as e:
-        logging.getLogger("starbour.heartbeat").warning("heartbeat not written: %s", e)
+        log.warning("heartbeat not written: %s", e)
 
 
 def headless() -> bool:
