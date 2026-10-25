@@ -192,3 +192,19 @@ now part of the contract; the M1 builder follows them (full text in `docs/DECISI
 - **D-83** `state.hello` every 2 s for the whole game (C3 above already says so).
 - **D-84** the gates pass explicit free ports with `--pub-port N --pull-port N`; `0 = random` is not relied on.
 - **D-85** the live gate moves `saves\game.json` aside and restores it; it starts the launcher with `--seed 1234`.
+
+## C9 — M2 additions (movement physics, hazards, game over)
+
+Added for `specs/M2.md`; C1–C8 are unchanged. Every field below is additive.
+
+**C1 additions.** The engine role and `sim` both accept `--teleport "gx gy sx sy cx cy"` (D-104, debug: places the player's active ship there before turn 1; the target must be a sector cell; a terrain cell is allowed — that is the point). `sim` also accepts `--player-script PATH` (one order per line, one line per turn, blank line = no order; the script replaces `--ai-player` for the player) and `--world-index` (adds `world_index` to the report).
+
+**C2 report additions** (per turn): `player.shield_current`, `player.shield_max`, `player.hazard` = `null` or `{"kind": "star|black_hole|neutron_star|wormhole", "cell": [cx, cy], "distance": 0, "pull": 1.0, "turns_left": 6, "drain": 10}`, `player.move_remaining` = `null` or `[dx, dy]` (the persisting move), `warps` = list of `{"ship": "s-001", "from": [[gx,gy],[sx,sy]], "to": [[gx,gy],[sx,sy]], "factor": 3.0, "effective": 2.5}`, `destroyed` = list of `{"ship": "s-017", "captain": "c-004", "cause": "star|black_hole|neutron_star", "cell": [cx, cy]}`. `final` additions: `game_over_turn`, `game_over_cause` (string or null), `hazard_deaths` (count, all captains), `warps` (count). `outcome` becomes `game_over` the turn the player's active ship is destroyed and the sim stops there (D-106). With `--world-index`: `world_index` = `{"player_start": [[gx,gy],[sx,sy],[cx,cy]], "stars": [{"galaxy": [gx,gy], "sector": [sx,sy], "cell": [cx,cy], "bucket": "medium", "mass": 1.0, "colour": "yellow"}, …], "black_holes": [{"galaxy":…, "sector":…, "cell":…, "wormhole_to": null or {"galaxy":…, "sector":…, "cell":…}}], "neutron_stars": [...], "planets": [...]}` — at most 200 entries per list, nearest to the player's start first.
+
+**C3 additions.** `turn.resolved.events[]` gain `"type"` values `hazard` (OUT-03), `destroyed` (OUT-11 / OUT-16), `warp` (OUT-02) and `stopped` (CMD-21). `game.over` (MSG-09) payload: `{"turn_no": 57, "cause": "pulled into the black hole at 5,5 in sector 3,4/7,9", "summary": {"turns": 57, "sectors_visited": 4, "mutinies": 1, "fear": 10, "respect": 13, "gold": 5, "silver": 50}}`; after it the engine answers every order except `new` and `quit` with `order.rejected` (`"reason": "game over — type new to start again (CMD-19)"`), publishes `state.hello` with `game_over: true` in the snapshot, and on `new` publishes a fresh `state.hello` at turn 0 with the new seed.
+
+**Snapshot additions.** `ships[*]` gain `shield_current` (already present), `move_remaining`, `hazard` (as in C2) and `orders` (the queued orders as `[{"command": "move", "args": ["+0", "+6"]}]`, PNL-07); the snapshot gains `game_over: false|true`.
+
+**C4 additions.** T2's sector render tints every cell inside a hazard's pull range and prints `turns_left` next to the player's ship glyph (GRD-03); T4 renders PNL-06 (pull, turns_left, drain) whenever `player.hazard` is not null, PNL-07 (the active ship's `orders` with a persisting move shown as `move +0 +6 (4 cells/turn)`), and a GAME OVER banner when `game_over` is true; T3 renders OUT-03 and OUT-16.
+
+**C5–C7** unchanged.

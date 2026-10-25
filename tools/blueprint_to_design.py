@@ -239,6 +239,28 @@ def build_config_manifest(wb) -> str:
     return json.dumps({"source": WORKBOOK.name, "keys": keys}, indent=2, ensure_ascii=False) + "\n"
 
 
+HYPERLINK_RE = re.compile(r'^=HYPERLINK\("[^"]*",\s*"([^"]*)"\)$')
+
+
+def fill_uncached_formulas(wb_values, wb_formulas) -> int:
+    """openpyxl drops Excel's cached results when it saves a workbook; a data_only load then
+    returns None for every formula cell. Render HYPERLINK labels directly and mark the rest
+    '(recalc)' so nothing vanishes silently. Returns the number of cells marked."""
+    missing = 0
+    for ws_v in wb_values.worksheets:
+        ws_f = wb_formulas[ws_v.title]
+        for row in ws_f.iter_rows():
+            for cf in row:
+                if isinstance(cf.value, str) and cf.value.startswith("=") and ws_v[cf.coordinate].value is None:
+                    m = HYPERLINK_RE.match(cf.value)
+                    if m:
+                        ws_v[cf.coordinate].value = m.group(1)
+                    else:
+                        ws_v[cf.coordinate].value = "(recalc)"
+                        missing += 1
+    return missing
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="verify generated files are current; write nothing")
@@ -247,6 +269,10 @@ def main() -> int:
         print(f"HARNESS ERROR: workbook not found at {WORKBOOK}")
         return 3
     wb = openpyxl.load_workbook(WORKBOOK, data_only=True)
+    missing = fill_uncached_formulas(wb, openpyxl.load_workbook(WORKBOOK, data_only=False))
+    if missing:
+        print(f"WARNING: {missing} formula cells have no cached value (the workbook was last saved by a tool, "
+              "not Excel). They render as '(recalc)'. Open the workbook in Excel, save it, and run this script again.")
     existing_decisions = DECISIONS_MD.read_text(encoding="utf-8") if DECISIONS_MD.exists() else None
     outputs = {
         DESIGN_MD: build_design(wb),
