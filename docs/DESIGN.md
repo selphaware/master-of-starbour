@@ -59,27 +59,27 @@ Live counts from each tab's Status column. Proposed = Claude's proposal awaiting
 
 | Tab | Group | What it holds | Agreed | Proposed | Draft | Needs detail | Not started | Rows | % Agreed | Open · no Q |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 5 T3 Output | Terminals | Message types, log behaviour | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 5b T4 Status | Terminals | Permanent status panels | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 9 Ships | Entities | Ship attributes, movement, warp curve, classes | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 11 Items & Planets | Entities | Items, element catalogue, planets | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 13 Combat | Rules | Combat model recommendation, outcomes, loot | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 15 Config Keys | Config | Config keys for controls_config.ini | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 16 Open Questions | Questions | Open design questions, answers, resolution | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | — |
-| 17 Decisions | Decisions | Decision log | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | — |
-| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | 16 | 4 | 4 | 0 | 0 | 24 | 0.6667 | 0 |
+| 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | 12 | 10 | 0 | 0 | 0 | 22 | 0.5455 | 0 |
+| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | 15 | 8 | 6 | 0 | 0 | 29 | 0.5172 | 0 |
+| 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | 4 | 21 | 0 | 0 | 0 | 25 | 0.16 | 0 |
+| 5 T3 Output | Terminals | Message types, log behaviour | 5 | 5 | 12 | 0 | 0 | 22 | 0.2273 | 0 |
+| 5b T4 Status | Terminals | Permanent status panels | 2 | 5 | 0 | 0 | 0 | 7 | 0.2857 | 0 |
+| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | 6 | 6 | 0 | 0 | 0 | 12 | 0.5 | 0 |
+| 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | 5 | 7 | 0 | 0 | 0 | 12 | 0.4167 | 0 |
+| 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | 5 | 5 | 0 | 0 | 0 | 10 | 0.5 | 0 |
+| 9 Ships | Entities | Ship attributes, movement, warp curve, classes | 7 | 11 | 0 | 1 | 0 | 19 | 0.3684 | 1 |
+| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | 13 | 10 | 0 | 0 | 0 | 23 | 0.5652 | 0 |
+| 11 Items & Planets | Entities | Items, element catalogue, planets | 14 | 21 | 0 | 0 | 0 | 35 | 0.4 | 0 |
+| 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | 17 | 3 | 0 | 0 | 0 | 20 | 0.85 | 0 |
+| 13 Combat | Rules | Combat model recommendation, outcomes, loot | 6 | 11 | 0 | 0 | 0 | 17 | 0.3529 | 0 |
+| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | 8 | 14 | 0 | 0 | 0 | 22 | 0.3636 | 0 |
+| 15 Config Keys | Config | Config keys for controls_config.ini | 17 | 43 | 0 | 0 | 0 | 60 | 0.2833 | 0 |
+| 16 Open Questions | Questions | Open design questions, answers, resolution | 37 | 0 | 0 | 0 | 0 | 37 | 1 | — |
+| 17 Decisions | Decisions | Decision log | 55 | 0 | 0 | 0 | 0 | 55 | 1 | — |
+| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | 17 | 7 | 0 | 0 | 9 | 33 | 0.5152 | 8 |
 | Source v1 | Source | Original blueprint, verbatim, plus chat addendum | — | — | — | — | — | — | — | — |
-| Total |  |  | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| Total |  |  | 261 | 191 | 22 | 1 | 9 | 484 | 0.5393 | 9 |
 
 ### Legend
 
@@ -465,10 +465,10 @@ Inputs are placeholders; tune in playtest.
 - **10000** — blue-white
 - **30000** — blue
 - **Example star** — radius · base_energy · volume · energy · bucket · temperature K · colour
-- **dying star** — 0.3 · 2 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **Sun-like** — 1 · 5 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **giant** — 3 · 8 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **your own** — 1.5 · 6 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **dying star** — 0.3 · 2 · 0.1131 · 0.2262 · low · 1862 · red
+- **Sun-like** — 1 · 5 · 4.189 · 20.94 · medium · 5776 · yellow
+- **giant** — 3 · 8 · 113.1 · 904.8 · high · 1.481e+04 · blue-white
+- **your own** — 1.5 · 6 · 14.14 · 84.82 · medium · 8194 · white
 
 ---
 
@@ -504,20 +504,20 @@ All inputs are placeholders — the 7-turn Sun-like star is only the blueprint's
 - **sun_mass** — 1 · a Sun-like star's mass
 - **pull_turns_scale** — 7 · [hazards] pull_turns_scale
 - **distance** — black hole pull · min engine to move · turns to pulled in · neutron pull · min engine to move · turns to pulled in
-- **0** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **1** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **2** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **3** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **4** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **5** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **6** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **7** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **8** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **9** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **10** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **11** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **12** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **Sun-like star, same cell:** — (recalc) · (recalc) · ← pull, turns until pulled in (should read 7 with the defaults)
+- **0** — 20 · impossible · 1 · 8 · 8.1 · 1
+- **1** — 7.071 · 7.1 · 1 · 2.828 · 2.9 · 3
+- **2** — 3.849 · 3.9 · 2 · 1.54 · 1.6 · 5
+- **3** — 2.5 · 2.6 · 3 · 1 · 1.1 · 7
+- **4** — 1.789 · 1.8 · 4 · 0.7155 · 0.8 · 10
+- **5** — 1.361 · 1.4 · 6 · 0.5443 · 0.6 · 13
+- **6** — 1.08 · 1.1 · 7 · 0.432 · 0.5 · 17
+- **7** — 0.8839 · 0.9 · 8 · 0.3536 · 0.4 · 20
+- **8** — 0.7407 · 0.8 · 10 · 0.2963 · 0.4 · 24
+- **9** — 0.6325 · 0.7 · 12 · 0.253 · 0.3 · 28
+- **10** — 0.5482 · 0.6 · 13 · 0.2193 · 0.3 · 32
+- **11** — 0.4811 · 0.5 · 15 · 0.1925 · 0.3 · 37
+- **12** — 0.4267 · 0.5 · 17 · 0.1707 · 0.2 · 42
+- **Sun-like star, same cell:** — 1 · 7 · ← pull, turns until pulled in (should read 7 with the defaults)
 
 ---
 
@@ -560,19 +560,19 @@ B and p are placeholders; tune in playtest.
 - **B** — 16 · [movement] warp_curve_base
 - **p** — 4 · [movement] warp_curve_exponent
 - **warp factor** — reach (sectors) · note
-- **1** — (recalc)
-- **2** — (recalc)
-- **3** — (recalc)
-- **4** — (recalc)
-- **5** — (recalc)
-- **6** — (recalc)
-- **7** — (recalc)
-- **8** — (recalc)
-- **9** — (recalc)
-- **9.5** — (recalc)
-- **9.9** — (recalc)
-- **10** — (recalc) · universe diameter ≈ 181 sectors at 8 × 16
-- **10** — (recalc)
+- **1** — 1
+- **2** — 2.009
+- **3** — 3.068
+- **4** — 4.294
+- **5** — 5.946
+- **6** — 8.594
+- **7** — 13.62
+- **8** — 24.91
+- **9** — 55.5
+- **9.5** — 90.88
+- **9.9** — 142
+- **10** — 160 · universe diameter ≈ 181 sectors at 8 × 16
+- **10** — anywhere
 
 ### Ship classes
 
