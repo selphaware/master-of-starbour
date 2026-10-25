@@ -97,3 +97,30 @@ def test_scan_reveals_items_in_the_cell(small_state: GameState, small_cfg: GameC
     res = O.apply_immediate(small_state, parse("scan", ship.id), small_cfg)
     assert isinstance(res, O.Accepted) and "iridium" in res.text and res.events
     assert all(i.revealed for i in sector.items if i.cell == ship.cell)
+
+
+def test_warp_validation_and_queue(small_state: GameState, small_cfg: GameConfig) -> None:
+    """CMD-07: a reachable sector queues; a second warp replaces the first (OV-02b); factor defaults to the core."""
+    sid = small_state.player.active_ship
+    ship = small_state.ships[sid]
+    here = (ship.galaxy, ship.sector)
+    dests = [k for k in sorted(small_state.world.sectors) if k[0] == here[0] and k != here]
+    (gx, gy), (sx, sy) = dests[0]
+    res = O.submit(small_state, parse(f"warp {gx} {gy} {sx} {sy}", sid), small_cfg)
+    assert isinstance(res, O.Accepted) and res.queue_position == 1 and "warp queued" in res.text
+    if len(dests) > 1:
+        (gx2, gy2), (sx2, sy2) = dests[1]
+        res2 = O.submit(small_state, parse(f"warp {gx2} {gy2} {sx2} {sy2} 2", sid), small_cfg)
+        assert isinstance(res2, O.Accepted) and res2.queued == 1 and "OV-02b" in res2.text
+    O.submit(small_state, parse("move 1 0", sid), small_cfg)
+    assert O.pending_count(small_state, sid) == 2, "a move and a warp are different kinds"
+
+
+def test_stop_immediate(small_state: GameState, small_cfg: GameConfig) -> None:
+    sid = small_state.player.active_ship
+    nothing = O.apply_immediate(small_state, parse("stop", sid), small_cfg)
+    assert isinstance(nothing, O.Accepted) and "nothing to stop" in nothing.text and "CMD-21" in nothing.text
+    O.submit(small_state, parse("move 1 0", sid), small_cfg)
+    res = O.apply_immediate(small_state, parse("all stop", sid), small_cfg)
+    assert isinstance(res, O.Accepted) and "cancelled" in res.text and O.pending_count(small_state, sid) == 0
+    assert res.events and res.events[0]["type"] == "stopped"

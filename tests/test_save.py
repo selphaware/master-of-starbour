@@ -56,6 +56,19 @@ def test_queued_orders_survive_the_round_trip(small_state: GameState, small_cfg:
     assert O.pending_count(back, sid) == 1 and back.snapshot() == snap
 
 
+def test_persisting_move_and_hazard_counter_survive_the_round_trip(small_state: GameState, small_cfg: GameConfig) -> None:
+    """D-98 / C6: a persisting move (and the HZ-08 counter fields) come back exactly."""
+    from starbour.commands.parse import Order, QUEUED
+    sid = small_state.player.active_ship
+    small_state.queues[sid] = [Order("move", ("+0", "+6"), sid, QUEUED, persisting=True)]
+    ship = small_state.ships[sid]
+    ship.hazard_turns, ship.hazard_key = 2, "0,0/1,1:star:3,3"
+    snap = small_state.snapshot()
+    assert snap["ships"][sid]["move_remaining"] == [0, 6] and snap["ships"][sid]["orders"][0]["persisting"] is True
+    back = from_snapshot(snap, small_cfg)
+    assert back.move_remaining(sid) == [0, 6] and back.ships[sid].hazard_turns == 2 and back.snapshot() == snap
+
+
 def test_atomic_write_keeps_the_previous_save(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A failure before os.replace leaves the old file intact and no partial file at the final path."""
     path = tmp_path / "game.json"

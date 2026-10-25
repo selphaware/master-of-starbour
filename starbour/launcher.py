@@ -48,8 +48,11 @@ def interpreter() -> tuple[list[str], dict[str, str]]:
 
 
 def role_command(role: str, cfg: GameConfig, pub_port: int, pull_port: int, log_level: str,
-                 seed: int | None = None, new_game: bool = False, save_dir: Path | None = None) -> list[str]:
-    """C1: ``python -m starbour --role <r>`` in dev, ``starbour.exe --role <r>`` when frozen (BR-15)."""
+                 seed: int | None = None, new_game: bool = False, save_dir: Path | None = None,
+                 teleport: str | None = None) -> list[str]:
+    """C1: ``python -m starbour --role <r>`` in dev, ``starbour.exe --role <r>`` when frozen (BR-15).
+
+    ``--seed``, ``--new``, ``--save-dir`` and the debug ``--teleport`` (C9, D-104, D-110) go to the engine only."""
     cmd = list(interpreter()[0])
     cmd += ["--role", role, "--config", str(cfg.path), "--pub-port", str(pub_port), "--pull-port", str(pull_port),
             "--log-level", log_level]
@@ -60,18 +63,21 @@ def role_command(role: str, cfg: GameConfig, pub_port: int, pull_port: int, log_
             cmd += ["--new"]
         if save_dir is not None:
             cmd += ["--save-dir", str(save_dir)]
+        if teleport is not None:
+            cmd += ["--teleport", teleport]
     return cmd
 
 
 class Launcher:
     def __init__(self, cfg: GameConfig, *, pub_port: int, pull_port: int, log_level: str = "INFO", seed: int | None = None,
-                 new_game: bool = False, save_dir: Path | None = None) -> None:
+                 new_game: bool = False, save_dir: Path | None = None, teleport: str | None = None) -> None:
         self.cfg = cfg
         self.pub_port, self.pull_port = pub_port, pull_port
         self.log_level = log_level
         self.seed = seed
         self.new_game = new_game
         self.save_dir = save_dir
+        self.teleport = teleport
         self.children: dict[str, subprocess.Popen] = {}
         self.respawns: dict[str, list[float]] = {r: [] for r in ROLES}
         self.headless = runtime.headless()
@@ -105,7 +111,8 @@ class Launcher:
 
     # ---- spawning
     def spawn(self, role: str) -> subprocess.Popen:
-        cmd = role_command(role, self.cfg, self.pub_port, self.pull_port, self.log_level, self.seed, self.new_game, self.save_dir)
+        cmd = role_command(role, self.cfg, self.pub_port, self.pull_port, self.log_level, self.seed, self.new_game, self.save_dir,
+                           self.teleport)
         if role == "engine" or self.headless:
             flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
             out = open(self.logs / f"{role}.stderr.log", "a", encoding="utf-8")
@@ -238,7 +245,7 @@ class Launcher:
 
 
 def main(cfg: GameConfig, *, pub_port: int, pull_port: int, log_level: str, seed: int | None, new_game: bool = False,
-         save_dir: Path | None = None) -> int:
-    """``python -m starbour`` with no role (C1)."""
+         save_dir: Path | None = None, teleport: str | None = None) -> int:
+    """``python -m starbour`` with no role (C1); ``--teleport`` is forwarded to the engine (C9)."""
     return Launcher(cfg, pub_port=pub_port, pull_port=pull_port, log_level=log_level, seed=seed, new_game=new_game,
-                    save_dir=save_dir).run()
+                    save_dir=save_dir, teleport=teleport).run()

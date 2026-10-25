@@ -31,7 +31,7 @@ def test_turn_no_increments_and_phases_named(small_state: GameState, small_cfg: 
     assert phases == sorted(phases), "events arrive in TP order (OB-04)"
     for code in ("TP-01", "TP-02", "TP-03", "TP-04", "TP-05", "TP-06", "TP-07", "TP-08"):
         assert code in phases, f"{code} must appear, even as 'skipped' (never silently absent)"
-    assert any("skipped (M2)" in t for t in texts(events, "TP-03"))
+    assert any(t.startswith("Hazards:") for t in texts(events, "TP-03")), "TP-03 resolves hazards from M2"
     assert any("skipped (M3)" in t for t in texts(events, "TP-04"))
     state, _ = run_turns(state, small_cfg, 2)
     assert state.turn_no == 3
@@ -44,8 +44,8 @@ def test_movement_helpers() -> None:
     assert step_towards((4, 4), (0, 0), 10) == (0, 0)
 
 
-def test_player_move_is_clipped_to_engine(small_state: GameState, small_cfg: GameConfig) -> None:
-    """MV-01 / D-73: a far target moves floor(engine) cells along the Chebyshev path and stops."""
+def test_player_move_persists_beyond_engine_reach(small_state: GameState, small_cfg: GameConfig) -> None:
+    """MV-01 / D-98: a far target moves floor(engine) cells along the Chebyshev path and the order persists."""
     ship = small_state.active_ship()
     ship.position = (ship.galaxy, ship.sector, (0, 0))
     w, h = small_cfg.sector_size
@@ -53,8 +53,10 @@ def test_player_move_is_clipped_to_engine(small_state: GameState, small_cfg: Gam
     state, events = run_turns(small_state, small_cfg, 1)
     cells = int(ship.engine)
     assert state.ships[ship.id].cell == (cells, cells)
-    assert any("short of" in t for t in texts(events, "TP-02"))
+    assert any("continues" in t for t in texts(events, "TP-02"))
     assert state.last_stats["orders_executed"]["player"] == 1
+    assert state.move_remaining(ship.id) == [w - 1 - cells, h - 1 - cells]
+    assert O.pending(state, ship.id)[0].persisting
 
 
 def test_relative_move(small_state: GameState, small_cfg: GameConfig) -> None:
@@ -135,8 +137,11 @@ def test_mutiny_with_a_fleet_moves_to_the_nearest_ship(small_state: GameState, s
     T = small_cfg.food_start + small_cfg.mutiny_turns_at_zero
     cap = small_state.player
     active = small_state.ships[cap.active_ship]
-    far_cell = ((active.cell[0] + 6) % small_cfg.sector_size[0], active.cell[1])
-    near_cell = ((active.cell[0] + 1) % small_cfg.sector_size[0], active.cell[1])
+    # free cells only: from M2 a ship parked on a star is destroyed by it (HZ-02), and the start sector has no hole (SP-05)
+    from starbour.world.grid import chebyshev
+    free = [c for c in small_state.sector_of(active).grid.free_cells() if c != active.cell]
+    near_cell = min(free, key=lambda c: (chebyshev(c, active.cell), c))
+    far_cell = max(free, key=lambda c: (chebyshev(c, active.cell), c))
     far = Ship.of_class(small_state.new_ship_id(), "Far Gannet", small_cfg.ships["corsair"], cap.id, (active.galaxy, active.sector, far_cell))
     near = Ship.of_class(small_state.new_ship_id(), "Near Plover", small_cfg.ships["corsair"], cap.id, (active.galaxy, active.sector, near_cell))
     small_state.ships[far.id] = far

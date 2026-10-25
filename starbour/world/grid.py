@@ -102,3 +102,22 @@ class GeneralGrid(Generic[T]):
 def chebyshev(a: Coord, b: Coord) -> int:
     """Chebyshev (king's-move) distance between two cells - MV-01, CM-02."""
     return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+
+
+def nearest_free_cell(grid: GeneralGrid, around: tuple[float, float]) -> Coord | None:
+    """The Void cell nearest ``around`` - MV-05 (sector centre), D-102 (wormhole exit).
+
+    Nearest by Chebyshev distance, then Manhattan, then x, then y, so the choice is
+    deterministic for a fractional centre such as (11.5, 11.5) (D-67).  ``around`` may
+    itself be an occupied cell (a wormhole).  None when the grid is full.
+    """
+    ax, ay = float(around[0]), float(around[1])
+    best: tuple[tuple[float, float, int, int], Coord] | None = None
+    for y in range(grid.height):
+        for x in range(grid.width):
+            if (x, y) in grid:
+                continue
+            key = (max(abs(x - ax), abs(y - ay)), abs(x - ax) + abs(y - ay), x, y)
+            if best is None or key < best[0]:
+                best = (key, (x, y))
+    return best[1] if best else None

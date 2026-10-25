@@ -151,3 +151,102 @@ def test_render_modules_are_pure() -> None:
     for mod in (render_grid, render_output, render_status, render_command):
         src = inspect.getsource(mod)
         assert "import zmq" not in src and "import time" not in src and "input(" not in src
+
+
+# --------------------------------------------------------------------------- M2: hazard overlay, PNL-06, PNL-07, banners (GRD-03, OUT-03, OUT-16)
+
+def styled(renderable, width: int = 120) -> str:
+    con = Console(file=io.StringIO(), width=width, record=True, force_terminal=True, color_system="truecolor", legacy_windows=False, highlight=False)
+    con.print(renderable)
+    return con.export_text(styles=True)
+
+
+def hazard_variants(snap: dict) -> dict:
+    """A hole in the sector with player.hazard set; the same sector without; a star under the ship; game over."""
+    base = copy.deepcopy(snap)
+    cap = base["captains"][base["player_id"]]
+    sid = cap["active_ship"]
+    ship = base["ships"][sid]
+    (gx, gy), (sx, sy), _ = ship["position"]
+    ship["position"] = [[gx, gy], [sx, sy], [6, 5]]
+    ship["hazard"] = None
+    ship["move_remaining"] = None
+    ship["orders"] = []
+    base["game_over"] = False
+    key = f"{gx},{gy}/{sx},{sy}"
+    sector = base.setdefault("sectors", {}).setdefault(key, {"terrain": [], "items": []})
+    sector["terrain"] = [t for t in sector.get("terrain") or [] if t.get("kind") not in ("black_hole", "neutron_star", "wormhole")
+                         and list(t.get("cell") or []) not in ([6, 5], [1, 1])]
+    for other in base["ships"].values():
+        if other is not ship and list(other.get("position", [[], [], []])[2]) in ([6, 5], [1, 1]):
+            other["position"][2] = [7, 6]
+    hole = copy.deepcopy(base)
+    hole["sectors"][key]["terrain"].append({"kind": "black_hole", "cell": [1, 1], "mass": 20})
+    hole["ships"][sid]["hazard"] = {"kind": "black_hole", "cell": [1, 1], "distance": 5, "pull": 1.361, "turns_left": 4, "drain": 0}
+    star = copy.deepcopy(base)
+    star["sectors"][key]["terrain"].append({"kind": "star", "cell": [6, 5], "colour": "yellow", "bucket": "medium", "mass": 1.0})
+    star["ships"][sid]["hazard"] = {"kind": "star", "cell": [6, 5], "distance": 0, "pull": 1.0, "turns_left": 4, "drain": 10}
+    star["ships"][sid]["shield_current"] = 30.0
+    over = copy.deepcopy(star)
+    over["game_over"] = True
+    over["game_over_turn"] = over["turn_no"]
+    orders = copy.deepcopy(base)
+    orders["ships"][sid]["move_remaining"] = [0, 6]
+    orders["ships"][sid]["orders"] = [{"command": "move", "args": ["+0", "+6"], "persisting": True}, {"command": "warp", "args": ["1", "1", "2", "2", "3"]}]
+    orders["ships"][sid]["orders_queued"] = 2
+    return {"without": base, "hole": hole, "star": star, "over": over, "orders": orders, "sid": sid}
+
+
+def test_grid_hazard_overlay_and_countdown(snap: dict, gcfg: GameConfig) -> None:
+    """GRD-03: cells in pull range are tinted; turns_left sits beside the ship glyph; no label without a hazard."""
+    v = hazard_variants(snap)
+    glyph = P.glyphs(gcfg)["ship_active"]
+    with_, without = plain(render_grid.render(v["hole"], None, gcfg, 120)), plain(render_grid.render(v["without"], None, gcfg, 120))
+    rows_w, rows_wo = with_.splitlines(), without.splitlines()
+    ship_row = next(i for i, ln in enumerate(rows_w) if ln.startswith(" 5 ") and glyph in ln)
+    col = rows_w[ship_row].index(glyph)
+    assert rows_w[ship_row][col + 1] == "4", "the countdown follows the glyph (GRD-03)"
+    assert rows_wo[ship_row][col + 1] == " "
+    assert "4 turn(s) until pulled in" in with_ and "pull 1.36" in with_
+    sw, swo = styled(render_grid.render(v["hole"], None, gcfg, 120)).splitlines(), styled(render_grid.render(v["without"], None, gcfg, 120)).splitlines()
+    identical_text_rows = [i for i in range(min(len(rows_w), len(rows_wo))) if rows_w[i] == rows_wo[i] and rows_w[i][:3].strip().isdigit()]
+    assert identical_text_rows and any(sw[i] != swo[i] for i in identical_text_rows), "a tinted row has the same text but other styles"
+    star_t = plain(render_grid.render(v["star"], None, gcfg, 120))
+    assert "shields drain 10 per turn" in star_t
+    assert "GAME OVER" in plain(render_grid.render(v["over"], None, gcfg, 120)) and "GAME OVER" not in with_
+
+
+def test_status_hazard_orders_and_banner(snap: dict, gcfg: GameConfig) -> None:
+    """PNL-06 shows pull, countdown and drain only when relevant; PNL-07 lists orders; OUT-16 banner on game over."""
+    v = hazard_variants(snap)
+    star_t, wo_t, over_t = (plain(render_status.render(v[k], None, gcfg, 120)) for k in ("star", "without", "over"))
+    assert "Hazard" in star_t and "Hazard" not in wo_t
+    new_lines = "\n".join(ln for ln in star_t.splitlines() if ln not in set(wo_t.splitlines()))
+    assert "Pull" in new_lines and " 1 " in new_lines + " " and "4 turn(s) until pulled in" in new_lines and "10 per turn" in new_lines
+    assert "GAME OVER" in over_t and "GAME OVER" not in wo_t and "GAME OVER" not in star_t
+    orders_t = plain(render_status.render(v["orders"], None, gcfg, 120))
+    i_move, i_warp = orders_t.find("move +0 +6"), orders_t.find("warp 1 1 2 2 3")
+    assert 0 <= i_move < i_warp, "PNL-07 lists the queued orders in order"
+    step = int(v["orders"]["ships"][v["sid"]]["engine"])
+    assert f"{step} cells/turn" in orders_t and "persisting" in orders_t and "Orders (2)" in orders_t
+    assert "no orders queued" in wo_t
+
+
+def test_output_game_over_block(snap: dict, gcfg: GameConfig) -> None:
+    """OUT-16: a turn whose snapshot says game_over ends with the block; game_over_lines renders the MSG-09 payload."""
+    v = hazard_variants(snap)
+    ev = {"phase": "TP-03", "type": "destroyed", "severity": "alert", "text": "Lantern destroyed: pulled into the black hole at 1,1 - game over", "ids": ["OUT-16"]}
+    text = plain(render_output.render({"turn_no": 9, "snapshot": v["over"], "events": [ev]}, None, gcfg, 120))
+    assert "black hole" in text and "GAME OVER" in text and "'new'" in text
+    plain_turn = plain(render_output.render({"turn_no": 9, "snapshot": v["without"], "events": [ev]}, None, gcfg, 120))
+    assert "GAME OVER" not in plain_turn
+    block = "\n".join(plain(t) for t in render_output.game_over_lines({"turn_no": 57, "cause": "pulled into the star at 5,5", "summary": {"turns": 57, "fear": 10}}))
+    assert "57" in block and "pulled into the star" in block and "fear 10" in block
+
+
+def test_command_shields_lines(snap: dict, gcfg: GameConfig) -> None:
+    """CMD-09: shields current / max from the snapshot, with the drain when in a star's cell."""
+    v = hazard_variants(snap)
+    text = plain(render_command.shields_lines(v["star"])[0])
+    assert "shields 30 / " in text and "draining 10 per turn" in text
+    assert "shields" in plain(render_command.shields_lines(v["without"])[0])

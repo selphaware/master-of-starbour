@@ -1,9 +1,14 @@
-"""The engine process loop - T0, BUS-01...07, MSG-01...09, D-57, D-70, D-83.
+"""The engine process loop - T0, BUS-01...07, MSG-01...09, D-57, D-70, D-83, D-104, D-105.
 
 Binds PUB and PULL, polls PULL, applies orders, resolves a turn on ``turn.end`` and
 publishes ``turn.resolved`` with the full snapshot, autosaves, publishes ``state.hello``
 every 2 s, and exits 0 on ``system.shutdown``.  The same class runs the headless sim:
 with ``bus=False`` nothing is bound and ``resolve_and_publish`` only resolves and records.
+
+Game over (OV-09b, OV-09c, CMD-19, C9): the turn the player's active ship is destroyed the
+save is deleted *before* ``game.over`` is published; afterwards every order except ``new``
+and ``quit`` is rejected and ``turn.end`` resolves nothing.  The in-process sim stops there
+(D-106); the bus engine stays up until ``new`` or a shutdown (D-107).
 """
 from __future__ import annotations
 
@@ -22,6 +27,7 @@ from starbour.engine import orders as O
 from starbour.engine import save as S
 from starbour.engine.phases import resolve_turn
 from starbour.engine.state import GameState, canonical_json, hash_snapshot, new_game
+from starbour.entities.ship import Position
 from starbour.world.generate import game_rng
 
 log = logging.getLogger("starbour.engine")
@@ -30,6 +36,8 @@ POLL_MS = 100
 DRAIN_S = 0.3          # let the last publish leave the socket before closing (slow-joiner trap, inverse)
 WARMUP_S = 10.0        # D-91: for the first seconds hello goes out every WARMUP_INTERVAL_S so windows draw at once
 WARMUP_INTERVAL_S = 0.5
+GAME_OVER_REASON = "game over - type new to start again (CMD-19)"
+T1_ONLY = ("help", "status", "fleet", "shields", "end", "quit")   # answered by T1 from its snapshot (D-92)
 
 
 def pick_seed(cfg: GameConfig, requested: int | None) -> int:
@@ -41,12 +49,25 @@ def pick_seed(cfg: GameConfig, requested: int | None) -> int:
     return random.SystemRandom().randrange(1, 2**31 - 1)
 
 
+def parse_teleport(text: str) -> Position:
+    """C9 / D-104: ``--teleport "gx gy sx sy cx cy"`` -> ((gx, gy), (sx, sy), (cx, cy))."""
+    parts = text.replace(",", " ").split()
+    if len(parts) != 6:
+        raise ValueError(f'--teleport needs six integers "gx gy sx sy cx cy", got {text!r} (C9, D-104)')
+    try:
+        g = [int(p) for p in parts]
+    except ValueError:
+        raise ValueError(f'--teleport needs six integers "gx gy sx sy cx cy", got {text!r} (C9, D-104)') from None
+    return (g[0], g[1]), (g[2], g[3]), (g[4], g[5])
+
+
 class Engine:
     """One game, one engine (BUS-04)."""
 
     def __init__(self, cfg: GameConfig, *, seed: int | None = None, save_path: Path | None = None, pub_port: int = 0,
                  pull_port: int = 0, bus: bool = True, ai_player: bool = False, max_turns: int | None = None,
-                 recorder: Any = None, resume: bool = True, launcher_pid: int | None = None) -> None:
+                 recorder: Any = None, resume: bool = True, launcher_pid: int | None = None,
+                 teleport: Position | None = None) -> None:
         self.cfg = cfg
         self.save_path = Path(save_path) if save_path else None
         self.want_pub, self.want_pull = pub_port, pull_port
@@ -75,6 +96,8 @@ class Engine:
                 self._new_game(pick_seed(cfg, seed))
         else:
             self._new_game(pick_seed(cfg, seed))
+        if teleport is not None:
+            self.apply_teleport(teleport)
 
     # ------------------------------------------------------------------ lifecycle
     def _new_game(self, seed: int) -> None:
@@ -84,6 +107,15 @@ class Engine:
         self._hello_bytes = None
         log.info("new game: seed %d, %d captains, %d sectors, generated in %.2f s", seed, len(self.state.captains),
                  len(self.state.world.sectors), time.perf_counter() - t0)
+
+    def apply_teleport(self, position: Position) -> None:
+        """D-104 / D-110 debug affordance: the active ship is placed before turn 1; ignored on a resumed game."""
+        if self.state.turn_no != 0:
+            log.warning("--teleport ignored: the game resumed at turn %d (D-104 places the ship before turn 1)", self.state.turn_no)
+            return
+        ship = self.state.teleport(position)
+        self._hello_bytes = None
+        log.warning("DEBUG teleport (D-104): %s placed at galaxy %s sector %s cell %s", ship.name, ship.galaxy, ship.sector, ship.cell)
 
     def start(self) -> None:
         """Bind the sockets (bus mode), save the opening state, say hello."""
@@ -133,16 +165,28 @@ class Engine:
         self._publish(M.EVENT_LOG, M.EventLog(self.state.turn_no, type_, severity, text).to_dict())
 
     def autosave(self, snapshot: dict | None = None) -> None:
+        """OV-12 autosave; after game over the save stays deleted (OV-09c) whatever asks for one."""
         if self.save_path is None:
+            return
+        if self.state.game_over:
+            S.delete(self.save_path)
             return
         try:
             S.save(self.state, self.rng, self.save_path, snapshot)
         except OSError as e:
             log.error("autosave failed: %s", e)
 
+    def game_over_payload(self) -> dict:
+        """MSG-09 / C9: {turn_no, cause, summary}."""
+        over = self.state.last_stats.get("game_over") or {}
+        cap = self.state.player
+        summary = {"turns": self.state.turn_no, "sectors_visited": self.state.sectors_visited(), "mutinies": self.state.player_mutinies,
+                   "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver}
+        return M.GameEnd(self.state.turn_no, str(over.get("cause") or "ship destroyed"), summary).to_dict()
+
     # ------------------------------------------------------------------ the turn
     def resolve_and_publish(self) -> dict:
-        """TP-01...08: resolve, publish turn.resolved (MSG-03), autosave (OV-12), record (C2)."""
+        """TP-01...08: resolve, publish turn.resolved (MSG-03), autosave (OV-12) or game.over (MSG-09), record (C2)."""
         t0 = time.perf_counter()
         self.state, events = resolve_turn(self.state, self.cfg, self.rng, ai_player=self.ai_player)
         snapshot = self.state.snapshot()
@@ -153,8 +197,19 @@ class Engine:
         if snap_bytes == 0:
             snap_bytes = len(canonical_json(snapshot))
         self.state_changed()
-        self.autosave(snapshot)
-        self.event_log("system", "muted", f"autosaved turn {self.state.turn_no}")
+        ended = self.state.game_over_turn == self.state.turn_no
+        if ended:
+            # OV-09c / M2 section 5: drop the save before announcing, so a crash cannot leave a resurrectable game
+            if self.save_path is not None:
+                S.delete(self.save_path)
+            over = self.game_over_payload()
+            self._publish(M.GAME_OVER, over)
+            self.event_log("game", "alert", f"GAME OVER at turn {self.state.turn_no}: {over['cause']}. Type 'new' to start again (CMD-19, OUT-16)")
+            log.info("game over at turn %d: %s", self.state.turn_no, over["cause"])
+            self.publish_hello()
+        else:
+            self.autosave(snapshot)
+            self.event_log("system", "muted", f"autosaved turn {self.state.turn_no}")
         self.turns_done += 1
         stats = dict(self.state.last_stats)
         stats.update({"snapshot_hash": snap_hash, "snapshot_bytes": snap_bytes, "resolve_ms": resolve_ms})
@@ -162,8 +217,9 @@ class Engine:
                  stats.get("orders_executed"), snap_bytes)
         if self.recorder is not None:
             self.recorder.record_turn(self.state, events, stats)
-        if self.state.game_over_turn is not None or self.state.mastery_turn is not None:
-            self.request_stop(0)
+        if self.state.game_over or self.state.mastery_turn is not None:
+            if not self.bus:
+                self.request_stop(0)      # D-106: the in-process sim stops the turn the game ends
         elif self.max_turns is not None and self.turns_done >= self.max_turns:
             self.request_stop(0)
         return stats
@@ -172,6 +228,11 @@ class Engine:
     def handle(self, topic: str, payload: dict) -> None:
         if topic == M.TURN_END:
             te = M.TurnEnd.from_dict(payload)
+            if self.state.game_over:
+                log.info("turn.end ignored after game over (CMD-19)")
+                self.event_log("game", "alert", GAME_OVER_REASON)
+                self.publish_hello()
+                return
             if te.turn_no != self.state.turn_no:
                 log.warning("turn.end carries turn_no %d, engine is at %d - resolving anyway", te.turn_no, self.state.turn_no)
             self.resolve_and_publish()
@@ -192,6 +253,17 @@ class Engine:
         else:
             log.debug("ignoring topic %s", topic)
 
+    def apply_order(self, order: Order) -> O.Accepted | O.Rejected:
+        """Route a parsed order: immediate ones are applied at once (D-92), queued ones validated and queued."""
+        if self.state.game_over and order.command not in ("new", "quit"):
+            return O.Rejected(order, GAME_OVER_REASON)
+        spec = lookup(order.command)
+        if spec is not None and spec.kind == IMMEDIATE:
+            if order.command in T1_ONLY:
+                return O.Rejected(order, f"{order.command} is handled by the command terminal, not queued (OV-02b)")
+            return O.apply_immediate(self.state, order, self.cfg)
+        return O.submit(self.state, order, self.cfg)
+
     def handle_order(self, payload: dict) -> None:
         """MSG-01 -> MSG-06 / MSG-07.  Immediate state-changing commands are applied at once (D-92)."""
         try:
@@ -208,14 +280,7 @@ class Engine:
         if order.command == "new":
             self.handle_new(order)
             return
-        spec = lookup(order.command)
-        if spec is not None and spec.kind == IMMEDIATE:
-            if order.command in ("help", "status", "fleet", "end", "quit"):
-                self._publish(M.ORDER_REJECTED, M.OrderRejected(order.to_dict(), f"{order.command} is handled by the command terminal, not queued (OV-02b)").to_dict())
-                return
-            result = O.apply_immediate(self.state, order, self.cfg)
-        else:
-            result = O.submit(self.state, order, self.cfg)
+        result = self.apply_order(order)
         if isinstance(result, O.Rejected):
             log.info("rejected %s: %s", order.text(), result.reason)
             self._publish(M.ORDER_REJECTED, M.OrderRejected(order.to_dict(), result.reason).to_dict())
@@ -225,11 +290,24 @@ class Engine:
         for ev in result.events:
             self.event_log(ev.get("type", "system"), ev.get("severity", "info"), ev.get("text", ""))
         self.state_changed()
-        if spec is not None and spec.kind == IMMEDIATE:
-            self.publish_hello()   # views redraw from the changed snapshot (D-91)
+        self.publish_hello()   # D-91 / D-99: views (PNL-07) redraw on every accepted or cancelled order
+
+    def apply_script_line(self, line: str) -> tuple[bool, str]:
+        """D-104 ``--player-script``: one order for the player's active ship, applied as T1 would send it."""
+        ship_id = self.state.player.active_ship or ""
+        try:
+            order = parse_tokens(line.split(), ship_id)
+        except CommandError as e:
+            return False, f"script order {line!r} not parsed: {e}"
+        if order.command == "new":
+            return False, "script order 'new' is not supported in the sim"
+        result = self.apply_order(order)
+        if isinstance(result, O.Rejected):
+            return False, f"script order {order.text()!r} rejected: {result.reason}"
+        return True, f"script order {order.text()!r} accepted" + (f": {result.text}" if result.text else "")
 
     def handle_new(self, order: Order) -> None:
-        """CMD-19 / OV-09c: delete the save, regenerate, announce."""
+        """CMD-19 / OV-09c: delete the save, regenerate, announce (also the way out of game over, D-105)."""
         try:
             seed = parse_new(order.args)
         except CommandError as e:
@@ -281,11 +359,11 @@ def _pid_exists(pid: int) -> bool:
 
 
 def run_engine_process(cfg: GameConfig, *, seed: int | None, pub_port: int, pull_port: int, save_path: Path,
-                       resume: bool = True) -> int:
-    """``python -m starbour --role engine`` (C1)."""
+                       resume: bool = True, teleport: Position | None = None) -> int:
+    """``python -m starbour --role engine`` (C1); ``--teleport`` is the D-104 debug placement (D-110)."""
     from starbour import runtime
     engine = Engine(cfg, seed=seed, save_path=save_path, pub_port=pub_port, pull_port=pull_port, resume=resume,
-                    launcher_pid=runtime.launcher_pid())
+                    launcher_pid=runtime.launcher_pid(), teleport=teleport)
     try:
         engine.start()
     except Exception as e:   # noqa: BLE001 - a port in use is the usual cause

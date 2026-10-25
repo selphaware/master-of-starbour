@@ -93,6 +93,26 @@ def status_lines(snapshot: dict, cfg: GameConfig) -> list[Text]:
     return out
 
 
+def shields_lines(snapshot: dict) -> list[Text]:
+    """CMD-09: current / max shields of the active ship, with the hazard drain when one applies (HZ-03, CM-05)."""
+    _, ship = _player(snapshot)
+    t = Text(no_wrap=True)
+    if not ship:
+        t.append("  no active ship", style=P.STYLES["bad"])
+        return [t]
+    sc, sm = float(ship.get("shield_current", 0)), float(ship.get("shield_max", 0))
+    style = P.STYLES["good"] if sm and sc / sm > 0.5 else P.STYLES["warn"] if sc > 0 else P.STYLES["bad"]
+    t.append(f"  shields {sc:g} / {sm:g}", style=style)
+    hz = ship.get("hazard") if isinstance(ship.get("hazard"), dict) else None
+    if hz and hz.get("drain"):
+        t.append(f"  draining {hz['drain']} per turn in the {str(hz.get('kind', '')).replace('_', ' ')}'s cell (HZ-03)", style=P.STYLES["warn"])
+    elif hz:
+        t.append("  no recharge inside a pull range (CM-05)", style=P.STYLES["label"])
+    elif sc < sm:
+        t.append("  recharging outside hazards (CM-05)", style=P.STYLES["label"])
+    return [t]
+
+
 def fleet_table(snapshot: dict) -> Table:
     """CMD-04: every owned ship, its location and state."""
     cap, _ = _player(snapshot)

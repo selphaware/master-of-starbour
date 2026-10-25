@@ -1,8 +1,8 @@
-"""Text -> Order | CommandError - CMD-01...20, UX-03, D-73.  Pure: no state, no I/O.
+"""Text -> Order | CommandError - CMD-01...21, UX-03, D-73, D-98.  Pure: no state, no I/O.
 
 Syntax is checked here; validity against the game (speed vs engine power, target inside
-the sector) is checked in ``starbour.engine.orders`` against the state.  Every message
-names the CMD id so T1 and T3 can echo it (UX-03, OUT-13).
+the sector, warp reach) is checked in ``starbour.engine.orders`` against the state.  Every
+message names the CMD id so T1 and T3 can echo it (UX-03, OUT-13).
 """
 from __future__ import annotations
 
@@ -20,22 +20,28 @@ class CommandError(Exception):
 
 @dataclass(frozen=True, slots=True)
 class Order:
-    """One parsed command, player or AI.  ``args`` are the strings that travel on the bus (MSG-01)."""
+    """One parsed command, player or AI.  ``args`` are the strings that travel on the bus (MSG-01).
+
+    ``persisting`` marks a move the engine re-queued because the ship has not arrived yet
+    (CMD-06, D-98); it counts as the ship's queued move (OV-02b) and survives save/load.
+    """
 
     command: str
     args: tuple[str, ...] = ()
     ship_id: str = ""
     kind: str = QUEUED
+    persisting: bool = False
 
     def to_dict(self) -> dict:
-        return {"command": self.command, "args": list(self.args), "ship_id": self.ship_id}
+        return {"command": self.command, "args": list(self.args), "ship_id": self.ship_id, "persisting": self.persisting}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Order":
         command = str(d.get("command", "")).lower()
         spec = lookup(command)
         kind = spec.kind if spec else QUEUED
-        return cls(spec.name if spec else command, tuple(str(a) for a in d.get("args") or ()), str(d.get("ship_id") or ""), kind)
+        return cls(spec.name if spec else command, tuple(str(a) for a in d.get("args") or ()), str(d.get("ship_id") or ""), kind,
+                   bool(d.get("persisting", False)))
 
     def text(self) -> str:
         return " ".join((self.command, *self.args))
@@ -56,6 +62,15 @@ class MoveSpec:
         return self.dx, self.dy
 
 
+@dataclass(frozen=True, slots=True)
+class WarpSpec:
+    """CMD-07: ``warp gx gy sx sy [factor]`` - factor None = the ship's full warp core power."""
+
+    galaxy: tuple[int, int]
+    sector: tuple[int, int]
+    factor: float | None
+
+
 def tokenize(text: str) -> list[str]:
     try:
         return shlex.split(text, posix=True)
@@ -73,6 +88,8 @@ def parse(text: str, ship_id: str = "") -> Order:
 
 def parse_tokens(tokens: list[str], ship_id: str = "") -> Order:
     name, args = tokens[0].lower(), [str(a) for a in tokens[1:]]
+    if name == "all" and [a.lower() for a in args] == ["stop"]:   # CMD-21 alias 'all stop'
+        name, args = "stop", ["all"]
     spec = lookup(name)
     if spec is None:
         raise CommandError(f"unknown command {name!r} - type 'help' for the list (CMD-01)")
@@ -115,6 +132,40 @@ def parse_move(args: list[str] | tuple[str, ...]) -> MoveSpec:
         if speed <= 0:
             raise CommandError("move speed must be greater than 0 (CMD-06)")
     return MoveSpec(dx, dy, sa, speed)
+
+
+def parse_warp(args: list[str] | tuple[str, ...]) -> WarpSpec:
+    """CMD-07: ``warp gx gy sx sy [factor]``; coordinates are whole numbers >= 0, factor > 0."""
+    if len(args) not in (4, 5):
+        raise CommandError("warp needs <gx gy> <sx sy> and an optional factor (CMD-07)")
+    gx, gy = _int(args[0], "warp gx", "CMD-07"), _int(args[1], "warp gy", "CMD-07")
+    sx, sy = _int(args[2], "warp sx", "CMD-07"), _int(args[3], "warp sy", "CMD-07")
+    if min(gx, gy, sx, sy) < 0:
+        raise CommandError("warp: coordinates cannot be negative (CMD-07)")
+    factor: float | None = None
+    if len(args) == 5:
+        try:
+            factor = float(args[4])
+        except ValueError:
+            raise CommandError(f"warp factor must be a number, got {args[4]!r} (CMD-07)") from None
+        if factor <= 0:
+            raise CommandError("warp factor must be greater than 0 (CMD-07)")
+    return WarpSpec((gx, gy), (sx, sy), factor)
+
+
+def parse_stop(args: list[str] | tuple[str, ...]) -> bool:
+    """CMD-21: True for 'stop all' (every owned ship), False for the active ship only."""
+    if not args:
+        return False
+    if len(args) == 1 and args[0].lower() == "all":
+        return True
+    raise CommandError("stop takes no argument, or 'all' (CMD-21)")
+
+
+def parse_shields(args: list[str] | tuple[str, ...]) -> None:
+    """CMD-09: 'shields' or 'shields status'."""
+    if args and not (len(args) == 1 and args[0].lower() == "status"):
+        raise CommandError("shields takes no argument, or 'status' (CMD-09)")
 
 
 def parse_view(args: list[str] | tuple[str, ...]) -> str:
@@ -173,12 +224,16 @@ _CHECKERS = {
     "fleet": _no_args("fleet", "CMD-04"),
     "view": lambda a: parse_view(a),
     "move": lambda a: parse_move(a),
+    "warp": lambda a: parse_warp(a),
+    "shields": lambda a: parse_shields(a),
     "scan": _no_args("scan", "CMD-14"),
     "orders": lambda a: parse_orders(a),
     "end": _no_args("end", "CMD-17"),
     "quit": _no_args("quit", "CMD-18"),
     "new": lambda a: parse_new(a),
+    "stop": lambda a: parse_stop(a),
 }
 
-__all__ = ["CommandError", "Order", "MoveSpec", "parse", "parse_tokens", "parse_move", "parse_view", "parse_ship",
-           "parse_orders", "parse_new", "parse_help", "COMMANDS", "IMMEDIATE", "QUEUED", "VIEW_LEVELS"]
+__all__ = ["CommandError", "Order", "MoveSpec", "WarpSpec", "parse", "parse_tokens", "parse_move", "parse_warp", "parse_stop",
+           "parse_shields", "parse_view", "parse_ship", "parse_orders", "parse_new", "parse_help", "COMMANDS", "IMMEDIATE", "QUEUED",
+           "VIEW_LEVELS"]

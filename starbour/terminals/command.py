@@ -1,9 +1,11 @@
-"""T1 Command process - T1, UX-01...08, CMD-*, D-92, D-94.
+"""T1 Command process - T1, UX-01...08, CMD-*, D-92, D-94, D-105, D-112.
 
 prompt_toolkit prompt in the main thread (history, tab completion of commands and ship
 names); a daemon thread listens to the bus, keeps the latest snapshot and prints replies
 above the prompt via ``patch_stdout``.  ``end`` locks the prompt behind a spinner until
-``turn.resolved`` (UX-06).  Without a console (MOS_HEADLESS=1 in tests) T1 only listens.
+``turn.resolved`` (UX-06) and asks first when a hazard countdown is running with no move
+or warp queued (CMD-17, UX-04).  After game over only ``new`` and ``quit`` do anything
+(CMD-19).  Without a console (MOS_HEADLESS=1 in tests) T1 only listens.
 """
 from __future__ import annotations
 
@@ -83,9 +85,17 @@ class Listener(threading.Thread):
                 self.console.print(f"  {ev.text}", style=P.severity_style(ev.severity))
         elif topic == M.SYSTEM_SHUTDOWN:
             self.shutdown.set()
-        elif topic in (M.GAME_OVER, M.GAME_MASTERY):
+        elif topic == M.GAME_OVER:
+            end = M.GameEnd.from_dict(payload)   # OUT-16, CMD-19
+            self.console.print("  GAME OVER", style=P.STYLES["game_over"])
+            self.console.print(f"  {end.cause} - turn {end.turn_no} reached", style=P.STYLES["bad"])
+            if end.summary:
+                self.console.print("  run: " + ", ".join(f"{k.replace('_', ' ')} {v}" for k, v in end.summary.items() if k != "turns"),
+                                   style=P.STYLES["value"])
+            self.console.print("  Type 'new' to start again with a new seed (CMD-19).", style=P.STYLES["confirm"])
+        elif topic == M.GAME_MASTERY:
             end = M.GameEnd.from_dict(payload)
-            self.console.print(f"  {topic}: {end.cause}", style=P.STYLES["bad"] if topic == M.GAME_OVER else P.STYLES["title"])
+            self.console.print(f"  {topic}: {end.cause}", style=P.STYLES["title"])
 
     def current(self) -> tuple[dict | None, int]:
         with self.lock:
@@ -121,6 +131,25 @@ class CommandTerminal:
         ships = snap.get("ships") or {}
         return [str(ships[s]["name"]) for s in cap.get("ships") or [] if s in ships]
 
+    def active_ship(self) -> dict | None:
+        snap, _ = self.listener.current()
+        if not snap:
+            return None
+        return (snap.get("ships") or {}).get(self.active_ship_id())
+
+    def game_over(self) -> bool:
+        snap, _ = self.listener.current()
+        return bool(snap and snap.get("game_over"))
+
+    def countdown_without_escape(self) -> dict | None:
+        """CMD-17 / UX-04: the active ship's hazard when a countdown runs and no move or warp is queued."""
+        ship = self.active_ship()
+        if not ship or not isinstance(ship.get("hazard"), dict):
+            return None
+        if any(o.get("command") in ("move", "warp") for o in ship.get("orders") or []):
+            return None
+        return ship["hazard"]
+
     def send_order(self, command: str, args: list[str]) -> tuple[str, dict] | None:
         snap, turn_no = self.listener.current()
         self.listener.reply.clear()
@@ -131,8 +160,8 @@ class CommandTerminal:
             self.console.print("  no reply from the engine within 5 s - is it running? (logs/engine.log)", style=P.STYLES["command_error"])
             return None
         reply = self.listener.last_reply
-        if reply and reply[0] == M.ORDER_ACCEPTED and command in ("new", "ship", "scan"):
-            self.listener.updated.wait(REPLY_TIMEOUT_S)   # D-91: the engine sends a fresh hello after an immediate state change
+        if reply and reply[0] == M.ORDER_ACCEPTED:
+            self.listener.updated.wait(REPLY_TIMEOUT_S)   # D-91 / D-99: the engine sends a fresh hello after every accepted order
         return reply
 
     def show_reply(self, reply: tuple[str, dict] | None, order_text: str) -> None:
@@ -203,7 +232,7 @@ class CommandTerminal:
         session: PromptSession = PromptSession(history=FileHistory(str(history_path)))
 
         def completer() -> WordCompleter:
-            words = available_names() + ["universe", "galaxy", "sector", "follow", "cancel"] + self.ship_names()
+            words = available_names() + ["universe", "galaxy", "sector", "follow", "cancel", "all", "status"] + self.ship_names()
             return WordCompleter(words, ignore_case=True)
 
         while not self.listener.shutdown.is_set():
@@ -250,11 +279,25 @@ class CommandTerminal:
                 self.console.print(t)
         elif cmd == "fleet":
             self.console.print(RC.fleet_table(snap))
+        elif cmd == "shields":
+            for t in RC.shields_lines(snap):   # CMD-09: answered from the snapshot (D-92)
+                self.console.print(t)
         elif cmd == "view":
             level = parse_view(args)
             self.push.send(M.VIEW_CHANGED, M.ViewChanged(level).to_dict())
             self.console.print(f"  grid view: {level}", style=P.STYLES["command_ok"])
         elif cmd == "end":
+            if self.game_over():
+                self.console.print("  game over - type 'new' to start again (CMD-19)", style=P.STYLES["command_error"])
+                return True
+            hz = self.countdown_without_escape()
+            if hz is not None:
+                kind = str(hz.get("kind", "hazard")).replace("_", " ")
+                question = (f"A {kind} is pulling you in ({hz.get('turns_left')} turn(s) left) and no move or warp is queued. "
+                            f"End the turn anyway?")
+                if not self.confirm(session, question):   # CMD-17, UX-04
+                    self.console.print("  turn not ended - queue a move or warp first", style=P.STYLES["command_info"])
+                    return True
             self.listener.resolved.clear()
             _, turn_no = self.listener.current()
             self.push.send(M.TURN_END, M.TurnEnd(turn_no).to_dict())
@@ -272,7 +315,8 @@ class CommandTerminal:
                 time.sleep(0.3)
                 return False
         elif cmd == "new":
-            if self.confirm(session, "Start a new game? The current save is deleted."):
+            # CMD-19: offered without confirmation after game over, with confirmation otherwise (UX-04)
+            if self.game_over() or self.confirm(session, "Start a new game? The current save is deleted."):
                 self.pending.clear()
                 self.show_reply(self.send_order("new", args), line)
         else:

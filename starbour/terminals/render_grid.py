@@ -5,6 +5,11 @@ Sector view by default (auto-follow, GRD-02); ``view`` may ask for galaxy or uni
 coordinates are zero-based with labels (GRD-01); fog of war hides unvisited sectors
 (GRD-04); one text line per grid row so a glyph's text position is its cell (GRD-01).
 The viewport is clipped to ``width``/``height`` centred on the ship (GRD-05).
+
+M2 (GRD-03): every cell inside a hazard's pull range is tinted - a star's own cell, a
+black hole's, wormhole's or neutron star's whole sector - and the player's countdown
+(``ships[*].hazard.turns_left``) is written beside the active ship's glyph.  The galaxy
+view marks sectors with known hazards (VW-02).
 """
 from __future__ import annotations
 
@@ -15,6 +20,7 @@ from starbour.config import GameConfig
 from starbour.terminals import palette as P
 
 CELL_W = 2   # glyph + space: 24 cells fit in 48 columns
+SECTOR_WIDE = ("black_hole", "wormhole", "neutron_star")   # HZ-04, HZ-05, HZ-06: the whole sector is in range
 
 
 def _line(*parts: tuple[str, str] | Text) -> Text:
@@ -64,8 +70,22 @@ def _column_labels(x0: int, x1: int, indent: int) -> list[Text]:
     return rows
 
 
+def hazard_tints(terrain: list[dict]) -> tuple[str | None, dict[tuple[int, int], str]]:
+    """GRD-03: (kind tinting the whole sector or None, {cell: kind} for star cells)."""
+    sector_kind: str | None = None
+    cells: dict[tuple[int, int], str] = {}
+    for t in terrain:
+        kind = str(t.get("kind", ""))
+        cell = tuple(int(v) for v in (t.get("cell") or (-1, -1)))
+        if kind in SECTOR_WIDE and sector_kind is None:
+            sector_kind = kind
+        elif kind == "star":
+            cells[cell] = kind
+    return sector_kind, cells
+
+
 def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | None) -> list[Text]:
-    """VW-03 / SYM-*: the active ship's sector."""
+    """VW-03 / SYM-* / GRD-03: the active ship's sector with the hazard overlay."""
     g = P.glyphs(cfg)
     cap, ship = _player_ship(snapshot)
     sw, sh = snapshot.get("sizes", {}).get("sector", list(cfg.sector_size))
@@ -74,6 +94,8 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
     lines: list[Text] = []
     if ship is None:
         lines.append(_line(("No active ship to follow", P.STYLES["bad"])))
+        if snapshot.get("game_over"):
+            lines.append(_line(("GAME OVER - type 'new' in the command terminal to start again (OUT-16)", P.STYLES["game_over"])))
         return lines
     (gx, gy), (sx, sy), (cx, cy) = ship["position"]
     gkey, skey = f"{gx},{gy}", f"{gx},{gy}/{sx},{sy}"
@@ -82,8 +104,12 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
     sector = (snapshot.get("sectors") or {}).get(skey) or {}
     show_terrain = visited or not fog
     cells: dict[tuple[int, int], tuple[str, str]] = {}
+    sector_tint: str | None = None
+    star_tints: dict[tuple[int, int], str] = {}
     if show_terrain:
-        for t in sector.get("terrain") or []:
+        terrain = sector.get("terrain") or []
+        sector_tint, star_tints = hazard_tints(terrain)
+        for t in terrain:
             kind = t.get("kind", "")
             cell = tuple(t.get("cell", (-1, -1)))
             if kind == "star":
@@ -116,25 +142,52 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
         cells[cell] = (g["ship_owned"], P.STYLES["ship_owned"])
     cells[(cx, cy)] = (g["ship_active"], P.STYLES["ship_active"])
 
+    hazard = ship.get("hazard") if isinstance(ship.get("hazard"), dict) else None
+    label = str(hazard.get("turns_left")) if hazard is not None and hazard.get("turns_left") is not None else ""
+
     indent = 3
     visible_cols = max(1, (width - indent) // CELL_W)
     x0, x1 = _window(sw, cx, visible_cols)
-    visible_rows = sh if height is None else max(1, height - 6)
+    visible_rows = sh if height is None else max(1, height - 7)
     y0, y1 = _window(sh, cy, visible_rows)
-    lines.append(_line((f"Sector {sx},{sy}", P.STYLES["title"]), ("  galaxy ", P.STYLES["label"]), (f"{gx},{gy}", P.STYLES["value"]),
-                       ("  turn ", P.STYLES["label"]), (f"{turn_no}", P.STYLES["value"]),
-                       ("  fog ", P.STYLES["label"]), ("on" if fog else "off", P.STYLES["value"]),
-                       ("" if show_terrain else "  (unexplored - terrain hidden)", P.STYLES["warn"])))
+    head = _line((f"Sector {sx},{sy}", P.STYLES["title"]), ("  galaxy ", P.STYLES["label"]), (f"{gx},{gy}", P.STYLES["value"]),
+                 ("  turn ", P.STYLES["label"]), (f"{turn_no}", P.STYLES["value"]),
+                 ("  fog ", P.STYLES["label"]), ("on" if fog else "off", P.STYLES["value"]),
+                 ("" if show_terrain else "  (unexplored - terrain hidden)", P.STYLES["warn"]))
+    lines.append(head)
     lines.extend(_column_labels(x0, x1, indent))
     void_glyph, void_style = g["void"], P.STYLES["void"]
     for y in range(y0, y1):
-        row = Text(f"{y:>2} ", style=P.STYLES["label"], no_wrap=True, overflow="crop")
+        # per-character build so the countdown label can overlay the cell after the ship (GRD-03)
+        chars: list[tuple[str, str]] = [(ch, P.STYLES["label"]) for ch in f"{y:>2} "]
         for x in range(x0, x1):
             glyph, style = cells.get((x, y), (void_glyph, void_style))
-            row.append(glyph.ljust(CELL_W), style=style)
+            tint_kind = sector_tint or star_tints.get((x, y))
+            style = P.tinted(style, tint_kind)
+            text = glyph.ljust(CELL_W)
+            chars.extend((ch, style) for ch in text)
+        if label and y == cy:
+            start = indent + (cx - x0) * CELL_W + 1       # the space after the glyph
+            for i, ch in enumerate(label):
+                pos = start + i
+                if pos < len(chars):
+                    chars[pos] = (ch, P.STYLES["countdown"])
+                else:
+                    chars.append((ch, P.STYLES["countdown"]))
+        row = Text(no_wrap=True, overflow="crop")
+        for ch, style in chars:
+            row.append(ch, style=style)
         lines.append(row)
     if (x0, x1, y0, y1) != (0, sw, 0, sh):
         lines.append(_line((f"viewport x {x0}-{x1 - 1}, y {y0}-{y1 - 1} of {sw}x{sh} (centred on the ship, GRD-05)", P.STYLES["label"])))
+    if hazard is not None:
+        kind = str(hazard.get("kind", "hazard")).replace("_", " ")
+        hc = hazard.get("cell") or ["?", "?"]
+        lines.append(_line((f"Hazard: {kind} at {hc[0]},{hc[1]} - pull {P.number(float(hazard.get('pull', 0)))}, ", P.STYLES["warn"]),
+                           (f"{label} turn(s) until pulled in", P.STYLES["countdown"]),
+                           ((f" - shields drain {hazard.get('drain')} per turn" if hazard.get("drain") else ""), P.STYLES["warn"])))
+    if snapshot.get("game_over"):
+        lines.append(_line(("GAME OVER - type 'new' in the command terminal to start again (OUT-16)", P.STYLES["game_over"])))
     lines.append(_legend(cfg, "sector"))
     return lines
 
@@ -154,6 +207,9 @@ def _legend(cfg: GameConfig, level: str) -> Text:
         style = P.STYLES.get(key, P.STYLES["value"]) if key != "star" else P.star_style("yellow")
         t.append(g[key], style=style)
         t.append(f" {label}  ", style=P.STYLES["label"])
+    if level == "sector":
+        t.append(" ", style=P.tinted(P.STYLES["void"], "black_hole"))
+        t.append(" pull range  ", style=P.STYLES["label"])
     if level == "galaxy":
         t.append(g["sector"], style=P.STYLES["sector_visited"])
         t.append(" visited  ", style=P.STYLES["label"])

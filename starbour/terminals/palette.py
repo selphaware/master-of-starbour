@@ -66,6 +66,17 @@ STYLES: dict[str, str] = {
     "command_error": "bold red",
     "command_info": "grey70",
     "confirm": "bold yellow",
+    "countdown": "bold bright_yellow",   # GRD-03: turns until pulled in, beside the ship
+    "hazard_panel": "bold yellow",       # PNL-06 border
+    "game_over": "bold bright_red",      # OUT-16 banner
+}
+
+# GRD-03 hazard overlay: background tints for cells inside a pull range (display metadata, SYM-05...07)
+HAZARD_BG: dict[str, str] = {
+    "black_hole": "#3a0e0e",    # the whole sector, dark red
+    "wormhole": "#2a1040",      # the whole sector, dark purple
+    "neutron_star": "#2a0a2a",  # the whole sector, dark magenta
+    "star": "#3a2a00",          # the star's own cell, dark amber
 }
 
 # SYM-04: the stellar sequence colour names from [stellar] colour_names -> Rich styles
@@ -94,6 +105,18 @@ def glyphs(cfg: GameConfig) -> dict[str, str]:
 
 def star_style(colour_name: str) -> str:
     return STAR_STYLES.get(colour_name, "white")
+
+
+def tinted(style: str, kind: str | None) -> str:
+    """GRD-03: the cell style with the hazard's background tint added; unchanged when kind is None."""
+    bg = HAZARD_BG.get(kind or "")
+    return f"{style} on {bg}" if bg else style
+
+
+def number(value: float) -> str:
+    """Numbers for the panels: 2 d.p. with trailing zeros dropped (1 -> '1', 0.88 -> '0.88', 3.849 -> '3.85')."""
+    text = f"{float(value):.2f}".rstrip("0").rstrip(".")
+    return text or "0"
 
 
 def severity_style(severity: str) -> str:

@@ -16,7 +16,7 @@ from starbour.bus import messages as M
 from starbour.config import GameConfig
 from starbour.terminals import palette as P
 from starbour.terminals._base import ViewTerminal
-from starbour.terminals.render_output import log_line, turn_lines
+from starbour.terminals.render_output import game_over_lines, log_line, turn_lines
 
 log = logging.getLogger("starbour.terminal")
 
@@ -70,9 +70,13 @@ class OutputTerminal(ViewTerminal):
             if acc.text and acc.order.get("command") in ("new", "ship"):
                 self.lines.append(log_line(acc.text, "muted", "accepted"))
                 self.draw()
-        elif topic in (M.GAME_OVER, M.GAME_MASTERY):
+        elif topic == M.GAME_OVER:
+            for line in game_over_lines(payload, self.console.width):   # OUT-16: cause, turn, summary, 'new'
+                self.lines.append(line)
+            self.draw()
+        elif topic == M.GAME_MASTERY:
             end = M.GameEnd.from_dict(payload)
-            self.lines.append(log_line(f"{topic}: {end.cause}", "highlight" if topic == M.GAME_MASTERY else "alert", "game"))
+            self.lines.append(log_line(f"{topic}: {end.cause}", "highlight", "game"))
             self.draw()
 
 
