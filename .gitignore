@@ -220,3 +220,14 @@ __marimo__/
 .streamlit/secrets.toml
 
 MOS/*
+
+# ---- Master of Starbour (appended by the build kit, 2026-10-25) ----
+# runtime output next to the exe / repo root (BR-20, BR-21, D-61)
+saves/
+logs/
+# gate output (docs/BOOTSTRAP.md layout)
+verify/artifacts/
+# per-user Claude Code settings; the shared .claude/settings.json IS committed
+.claude/settings.local.json
+# the GitHub template ignores *.spec; the PyInstaller spec must be versioned (M5)
+!mos.spec

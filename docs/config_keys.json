@@ -1,0 +1,812 @@
+{
+  "source": "master_of_starbour_blueprint.xlsx",
+  "keys": [
+    {
+      "id": "CFG-01",
+      "section": "fear",
+      "keys": [
+        "battle_won_delta"
+      ],
+      "type": "int",
+      "default": "8",
+      "unit": "",
+      "meaning": "Fear gained for a battle won.",
+      "used_by": "FR-01",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-02",
+      "section": "fear",
+      "keys": [
+        "battle_lost_delta"
+      ],
+      "type": "int",
+      "default": "8",
+      "unit": "",
+      "meaning": "Fear lost for a battle lost (AI only).",
+      "used_by": "FR-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-03",
+      "section": "fear",
+      "keys": [
+        "start"
+      ],
+      "type": "int",
+      "default": "10",
+      "unit": "0–100",
+      "meaning": "Starting fear.",
+      "used_by": "LV-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-04",
+      "section": "respect",
+      "keys": [
+        "win_vs_stronger_delta"
+      ],
+      "type": "int",
+      "default": "10",
+      "unit": "",
+      "meaning": "Respect gained for beating a stronger opponent.",
+      "used_by": "FR-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-05",
+      "section": "respect",
+      "keys": [
+        "win_vs_weaker_peace_delta"
+      ],
+      "type": "int",
+      "default": "8",
+      "unit": "",
+      "meaning": "Respect lost for beating a weaker opponent who offered peace.",
+      "used_by": "FR-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-06",
+      "section": "respect",
+      "keys": [
+        "win_vs_weaker_started_delta"
+      ],
+      "type": "int",
+      "default": "8",
+      "unit": "",
+      "meaning": "Respect lost for beating a weaker opponent in a fight you started.",
+      "used_by": "FR-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-07",
+      "section": "respect",
+      "keys": [
+        "start_fight_delta"
+      ],
+      "type": "int",
+      "default": "5",
+      "unit": "",
+      "meaning": "Respect lost for starting any fight.",
+      "used_by": "FR-06",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-08",
+      "section": "respect",
+      "keys": [
+        "trade_accepted_delta"
+      ],
+      "type": "int",
+      "default": "3",
+      "unit": "",
+      "meaning": "Respect gained per accepted trade.",
+      "used_by": "FR-07",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-09",
+      "section": "respect",
+      "keys": [
+        "special_item_delta"
+      ],
+      "type": "int",
+      "default": "6",
+      "unit": "",
+      "meaning": "Respect gained per special item.",
+      "used_by": "FR-08",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-10",
+      "section": "respect",
+      "keys": [
+        "start"
+      ],
+      "type": "int",
+      "default": "10",
+      "unit": "0–100",
+      "meaning": "Starting respect.",
+      "used_by": "LV-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-11",
+      "section": "reputation",
+      "keys": [
+        "scale_min",
+        "scale_max"
+      ],
+      "type": "float",
+      "default": "0.5, 2.0",
+      "unit": "",
+      "meaning": "Clamp on the strength-ratio multiplier.",
+      "used_by": "LV-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-12",
+      "section": "stellar",
+      "keys": [
+        "temp_scale"
+      ],
+      "type": "float",
+      "default": "2700",
+      "unit": "K",
+      "meaning": "temperature = temp_scale × energy^0.25.",
+      "used_by": "DQ-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-13",
+      "section": "stellar",
+      "keys": [
+        "energy_low_max"
+      ],
+      "type": "float",
+      "default": "5",
+      "unit": "",
+      "meaning": "Energy below this = low bucket.",
+      "used_by": "EB-01",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-14",
+      "section": "stellar",
+      "keys": [
+        "energy_medium_max"
+      ],
+      "type": "float",
+      "default": "100",
+      "unit": "",
+      "meaning": "Energy below this = medium; above = high.",
+      "used_by": "EB-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-15",
+      "section": "stellar",
+      "keys": [
+        "colour_thresholds"
+      ],
+      "type": "list",
+      "default": "3700,5200,6000,7500,10000,30000",
+      "unit": "K",
+      "meaning": "red | orange | yellow | yellow-white | white | blue-white | blue.",
+      "used_by": "DQ-04, SYM-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-16",
+      "section": "stellar",
+      "keys": [
+        "blackhole_mass"
+      ],
+      "type": "float",
+      "default": "20",
+      "unit": "",
+      "meaning": "Pull at distance d = k_g × mass / (1 + d)^falloff.",
+      "used_by": "HZ-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-17",
+      "section": "stellar",
+      "keys": [
+        "neutron_mass"
+      ],
+      "type": "float",
+      "default": "8",
+      "unit": "",
+      "meaning": "As above, weaker.",
+      "used_by": "HZ-06",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-18",
+      "section": "hazards",
+      "keys": [
+        "k_g"
+      ],
+      "type": "float",
+      "default": "1",
+      "unit": "",
+      "meaning": "Gravity constant.",
+      "used_by": "DQ-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-19",
+      "section": "hazards",
+      "keys": [
+        "falloff"
+      ],
+      "type": "float",
+      "default": "1.5",
+      "unit": "",
+      "meaning": "Pull falloff exponent with distance.",
+      "used_by": "DQ-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-20",
+      "section": "hazards",
+      "keys": [
+        "pull_turns_scale"
+      ],
+      "type": "int",
+      "default": "7",
+      "unit": "turns",
+      "meaning": "Turns until pulled in = ceil(scale / pull). Sun-like star = 7.",
+      "used_by": "HZ-02",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-21",
+      "section": "hazards",
+      "keys": [
+        "drain_low",
+        "drain_medium",
+        "drain_high"
+      ],
+      "type": "int",
+      "default": "5, 10, 20",
+      "unit": "shield / turn",
+      "meaning": "Shield drain in a star's cell by bucket.",
+      "used_by": "HZ-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-22",
+      "section": "movement",
+      "keys": [
+        "impulse_max",
+        "warp_max"
+      ],
+      "type": "float",
+      "default": "10",
+      "unit": "",
+      "meaning": "Upper bound for engine and warp core.",
+      "used_by": "SH-04, SH-05",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-23",
+      "section": "movement",
+      "keys": [
+        "warp_curve_base",
+        "warp_curve_exponent"
+      ],
+      "type": "float",
+      "default": "16, 4",
+      "unit": "",
+      "meaning": "reach = w × base^((w/10)^exponent); w = 10 → anywhere.",
+      "used_by": "MV-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-24",
+      "section": "battle",
+      "keys": [
+        "phaser_range",
+        "torpedo_range"
+      ],
+      "type": "int",
+      "default": "2, 5",
+      "unit": "cells",
+      "meaning": "Weapon ranges.",
+      "used_by": "CM-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-25",
+      "section": "battle",
+      "keys": [
+        "torpedo_hit_base",
+        "torpedo_evade_per_engine",
+        "torpedo_damage"
+      ],
+      "type": "float",
+      "default": "0.7, 0.03, 25",
+      "unit": "",
+      "meaning": "Torpedo hit chance and damage.",
+      "used_by": "CM-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-26",
+      "section": "battle",
+      "keys": [
+        "phaser_damage_per_unit"
+      ],
+      "type": "float",
+      "default": "5",
+      "unit": "",
+      "meaning": "Phaser damage per power unit at distance 0.",
+      "used_by": "CM-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-27",
+      "section": "battle",
+      "keys": [
+        "shield_recharge"
+      ],
+      "type": "int",
+      "default": "5",
+      "unit": "/ turn",
+      "meaning": "Recharge outside battle and hazards.",
+      "used_by": "CM-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-28",
+      "section": "battle",
+      "keys": [
+        "peace_loot_max"
+      ],
+      "type": "int",
+      "default": "50",
+      "unit": "%",
+      "meaning": "Max share transferred on peace.",
+      "used_by": "CB-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-29",
+      "section": "ai",
+      "keys": [
+        "attack_ratio_min",
+        "attack_fear_max"
+      ],
+      "type": "float",
+      "default": "1.3, 50",
+      "unit": "",
+      "meaning": "When AI captains attack.",
+      "used_by": "CM-10, EF-01",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-30",
+      "section": "ai",
+      "keys": [
+        "peace_shield_pct",
+        "escape_shield_pct"
+      ],
+      "type": "int",
+      "default": "30, 15",
+      "unit": "%",
+      "meaning": "When AI offers peace / tries to escape.",
+      "used_by": "CM-10",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-31",
+      "section": "ai",
+      "keys": [
+        "planet_attack_respect_max"
+      ],
+      "type": "int",
+      "default": "20",
+      "unit": "",
+      "meaning": "Planets may attack below this respect.",
+      "used_by": "EF-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-32",
+      "section": "economy",
+      "keys": [
+        "silver_per_gold"
+      ],
+      "type": "int",
+      "default": "20",
+      "unit": "",
+      "meaning": "1 gold = 20 silver.",
+      "used_by": "TR-01",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-33",
+      "section": "upgrades",
+      "keys": [
+        "torpedoes"
+      ],
+      "type": "list",
+      "default": "iridium:4, positronium:10",
+      "unit": "ammo",
+      "meaning": "Elements that add torpedoes, and how many.",
+      "used_by": "UP-01",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-34",
+      "section": "upgrades",
+      "keys": [
+        "phasers"
+      ],
+      "type": "list",
+      "default": "osmium:0.5, sunstone:1, adamantine:2",
+      "unit": "power",
+      "meaning": "Elements that raise phaser power (cap 10).",
+      "used_by": "UP-02",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-35",
+      "section": "upgrades",
+      "keys": [
+        "shields"
+      ],
+      "type": "list",
+      "default": "rhodium:5, sapphire:10, orichalcum:25",
+      "unit": "shield_max",
+      "meaning": "Elements that raise max shields (cap 100).",
+      "used_by": "UP-03",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-36",
+      "section": "upgrades",
+      "keys": [
+        "engine"
+      ],
+      "type": "list",
+      "default": "moonstone:0.5, star_iron:1.5",
+      "unit": "power",
+      "meaning": "Elements that raise engine power (cap 10).",
+      "used_by": "UP-04",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-37",
+      "section": "upgrades",
+      "keys": [
+        "warp"
+      ],
+      "type": "list",
+      "default": "antihydrogen:0.5, aetherite:1.5",
+      "unit": "power",
+      "meaning": "Elements that raise warp core power (cap 10).",
+      "used_by": "UP-05",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-38",
+      "section": "prices",
+      "keys": [
+        "food_buy",
+        "food_sell",
+        "water_buy",
+        "water_sell"
+      ],
+      "type": "int",
+      "default": "2, 1, 2, 1",
+      "unit": "silver",
+      "meaning": "Planet prices for supplies.",
+      "used_by": "PRC-01, PRC-02",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-39",
+      "section": "prices",
+      "keys": [
+        "torpedo_buy",
+        "torpedo_sell"
+      ],
+      "type": "int",
+      "default": "10, 5",
+      "unit": "silver",
+      "meaning": "Planet prices for torpedoes.",
+      "used_by": "PRC-03",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-40",
+      "section": "prices",
+      "keys": [
+        "element_sell_pct"
+      ],
+      "type": "int",
+      "default": "60",
+      "unit": "%",
+      "meaning": "What a planet pays for an element, as % of its value.",
+      "used_by": "PRC-04",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-41",
+      "section": "prices",
+      "keys": [
+        "ship_kestrel",
+        "ship_corsair"
+      ],
+      "type": "int",
+      "default": "40, 120",
+      "unit": "gold",
+      "meaning": "Ship purchase prices.",
+      "used_by": "PRC-05",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-42",
+      "section": "elements",
+      "keys": [
+        "<name> = category",
+        "value",
+        "rarity"
+      ],
+      "type": "list",
+      "default": "see tab 11",
+      "unit": "",
+      "meaning": "One line per element in the catalogue; the game never hard-codes elements.",
+      "used_by": "EL-01…12",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-43",
+      "section": "economy",
+      "keys": [
+        "planet_refuse_respect",
+        "planet_price_band",
+        "respect_price_band"
+      ],
+      "type": "int",
+      "default": "20, 20, 10",
+      "unit": "%",
+      "meaning": "Trade effects of respect.",
+      "used_by": "EF-03, EF-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-44",
+      "section": "ai",
+      "keys": [
+        "yield_fear_min"
+      ],
+      "type": "int",
+      "default": "80",
+      "unit": "",
+      "meaning": "Fear at which weaker AI captains surrender their ship.",
+      "used_by": "EF-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-45",
+      "section": "supplies",
+      "keys": [
+        "food_start",
+        "water_start"
+      ],
+      "type": "int",
+      "default": "30, 30",
+      "unit": "",
+      "meaning": "Starting supplies; −1 each per turn.",
+      "used_by": "CP-07",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-46",
+      "section": "supplies",
+      "keys": [
+        "warn_turns"
+      ],
+      "type": "int",
+      "default": "5",
+      "unit": "turns",
+      "meaning": "Warn when food or water is at or below this.",
+      "used_by": "SUP-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-47",
+      "section": "supplies",
+      "keys": [
+        "mutiny_turns_at_zero"
+      ],
+      "type": "int",
+      "default": "3",
+      "unit": "turns",
+      "meaning": "Consecutive turns at 0 before the crew mutiny.",
+      "used_by": "SUP-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-48",
+      "section": "supplies",
+      "keys": [
+        "mutiny_ship_class",
+        "mutiny_supplies",
+        "mutiny_fear_delta"
+      ],
+      "type": "mixed",
+      "default": "Kestrel, 10, 10",
+      "unit": "",
+      "meaning": "What the demoted captain gets, and the fear hit.",
+      "used_by": "SUP-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-49",
+      "section": "endgame",
+      "keys": [
+        "respect_min",
+        "fear_min"
+      ],
+      "type": "int",
+      "default": "90, 90",
+      "unit": "",
+      "meaning": "Eligibility thresholds.",
+      "used_by": "EG-02, EG-03",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-50",
+      "section": "endgame",
+      "keys": [
+        "wealth_min_silver"
+      ],
+      "type": "int",
+      "default": "2000",
+      "unit": "silver-equiv.",
+      "meaning": "Eligibility wealth threshold.",
+      "used_by": "EG-01",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-51",
+      "section": "endgame",
+      "keys": [
+        "required_special_categories"
+      ],
+      "type": "int",
+      "default": "3",
+      "unit": "",
+      "meaning": "Special items needed (one per category).",
+      "used_by": "EG-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-52",
+      "section": "endgame",
+      "keys": [
+        "guard_ships"
+      ],
+      "type": "int",
+      "default": "4",
+      "unit": "",
+      "meaning": "Guardians at the ultimate item.",
+      "used_by": "EG-06, CM-13",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-53",
+      "section": "world",
+      "keys": [
+        "seed"
+      ],
+      "type": "int",
+      "default": "random",
+      "unit": "",
+      "meaning": "World-generation seed; shown on T4 so a run can be repeated.",
+      "used_by": "SP-01",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-54",
+      "section": "world",
+      "keys": [
+        "universe_size",
+        "galaxy_size",
+        "sector_size"
+      ],
+      "type": "M×N",
+      "default": "8×8, 16×16, 24×24",
+      "unit": "cells",
+      "meaning": "Grid dimensions.",
+      "used_by": "VW-01…03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-55",
+      "section": "world",
+      "keys": [
+        "fog_of_war"
+      ],
+      "type": "bool",
+      "default": "on",
+      "unit": "",
+      "meaning": "On: sector contents hidden until visited / scanned.",
+      "used_by": "GRD-04",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-56",
+      "section": "world",
+      "keys": [
+        "special_items_per_galaxy",
+        "normal_items_per_galaxy"
+      ],
+      "type": "int",
+      "default": "10, 100",
+      "unit": "",
+      "meaning": "Item density.",
+      "used_by": "SP-03",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-57",
+      "section": "world",
+      "keys": [
+        "ai_captains_per_galaxy"
+      ],
+      "type": "int",
+      "default": "3",
+      "unit": "",
+      "meaning": "AI captains generated per galaxy.",
+      "used_by": "SP-06",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-58",
+      "section": "world",
+      "keys": [
+        "safe_start"
+      ],
+      "type": "bool",
+      "default": "true",
+      "unit": "",
+      "meaning": "Start sector has a planet and no hole.",
+      "used_by": "SP-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-59",
+      "section": "bus",
+      "keys": [
+        "pub_port",
+        "pull_port"
+      ],
+      "type": "int",
+      "default": "5555, 5556",
+      "unit": "",
+      "meaning": "ZeroMQ localhost ports.",
+      "used_by": "BUS-03",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-60",
+      "section": "ui",
+      "keys": [
+        "log_lines"
+      ],
+      "type": "int",
+      "default": "500",
+      "unit": "",
+      "meaning": "T3 scrollback.",
+      "used_by": "OB-02",
+      "status": "Proposed"
+    }
+  ]
+}

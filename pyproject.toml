@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "master-of-starbour"
+version = "0.1.0"
+description = "Master of Starbour — a text-based, turn-based starship strategy game for Windows terminals."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Usman Ahmad"}]
+requires-python = ">=3.12,<3.13"
+# Runtime (BR-10, D-63). Pinned loosely; the lock is the venv MOS.
+dependencies = [
+  "rich>=13.7",
+  "prompt_toolkit>=3.0.43",
+  "pyzmq>=26.0",
+]
+
+[project.optional-dependencies]
+# Gate and build tools. Installed by Usman up front: pip install -e .[dev]
+dev = [
+  "pytest>=8.2",
+  "pytest-timeout>=2.3",
+  "psutil>=5.9",
+  "openpyxl>=3.1",
+  "pyinstaller>=6.6",
+]
+
+[project.scripts]
+mos = "mos.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["mos*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --timeout=10 -p no:cacheprovider"
+timeout_method = "thread"
+markers = [
+  "slow: touches sockets or processes; skipped by the --quick gate",
+]
