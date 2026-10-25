@@ -1,6 +1,6 @@
 # CONTRACTS.md — the interfaces the gates drive
 
-One place for every interface shared between the game (`mos/`) and the harness
+One place for every interface shared between the game (`starbour/`) and the harness
 (`verify/`). `docs/BOOTSTRAP.md` builds gates against these; `specs/M1.md` builds the
 game to them. If a contract must change, change it **here first**, then the gate,
 then the game, and log a D-nn row. IDs cite `docs/DESIGN.md`.
@@ -9,29 +9,29 @@ then the game, and log a D-nn row. IDs cite `docs/DESIGN.md`.
 
 | Process | Command | Window |
 |---|---|---|
-| Launcher (TL) | `python -m mos` (no arguments) | the console it was started from |
-| Engine (T0) | `python -m mos --role engine` | none (`CREATE_NO_WINDOW`); logs to `logs/engine.log` |
-| T1 Command | `python -m mos --role command` | new console (`CREATE_NEW_CONSOLE`) |
-| T2 Grid | `python -m mos --role grid` | new console |
-| T3 Output | `python -m mos --role output` | new console |
-| T4 Status | `python -m mos --role status` | new console |
-| Headless sim (D-55) | `python -m mos sim [options]` | none |
+| Launcher (TL) | `python -m starbour` (no arguments) | the console it was started from |
+| Engine (T0) | `python -m starbour --role engine` | none (`CREATE_NO_WINDOW`); logs to `logs/engine.log` |
+| T1 Command | `python -m starbour --role command` | new console (`CREATE_NEW_CONSOLE`) |
+| T2 Grid | `python -m starbour --role grid` | new console |
+| T3 Output | `python -m starbour --role output` | new console |
+| T4 Status | `python -m starbour --role status` | new console |
+| Headless sim (D-55) | `python -m starbour sim [options]` | none |
 
 `python` means `E:\CODE\master-of-starbour\MOS\Scripts\python.exe` in dev and
-`mos.exe` when frozen (BR-15: `mos.exe --role <role>`). The launcher sets
+`starbour.exe` when frozen (BR-15: `starbour.exe --role <role>`). The launcher sets
 `PYTHONUTF8=1` and `MOS_LAUNCHER_PID=<its pid>` in every child's environment (D-59,
 D-68). Every child exits within 2 s of `MOS_LAUNCHER_PID` no longer existing.
 
 Common options for every role: `--config PATH` (default: `controls_config.ini` from
-`mos.paths.root()`), `--pub-port N`, `--pull-port N` (default: `[bus]`), `--log-level`,
+`starbour.paths.root()`), `--pub-port N`, `--pull-port N` (default: `[bus]`), `--log-level`,
 and for the launcher and engine `--seed N` (overrides `[world] seed` for a new game;
-the launcher passes it to the engine). `python -m mos` must expose a `main()` in
-`mos/__main__.py` (the `mos` console script in `pyproject.toml` points at it).
+the launcher passes it to the engine). `python -m starbour` must expose a `main()` in
+`starbour/__main__.py` (the `starbour` console script in `pyproject.toml` points at it).
 
 ## C2 — Headless simulation
 
 ```
-python -m mos sim --seed 1234 --turns 30 --ai-player --report verify\artifacts\sim.json
+python -m starbour sim --seed 1234 --turns 30 --ai-player --report verify\artifacts\sim.json
                   [--config PATH] [--save-dir DIR] [--bus] [--pub-port N --pull-port N]
 ```
 
@@ -105,7 +105,7 @@ launcher connect `PUSH`; terminals connect `SUB` with subscription `""` (all top
 | `order.accepted` (MSG-07) | engine → all | `{"order": {…}, "queue_position": 2}` |
 | `system.shutdown` (MSG-08) | launcher/T1 → engine → all | `{"reason": "command terminal closed"}` |
 | `game.over` / `game.mastery` (MSG-09) | engine → all | `{"turn_no": 57, "cause": "…", "summary": {…}}` |
-| `state.hello` `[ASSUMED]` | engine → all, on connect and every 2 s until the first turn | `{"turn_no": 0, "snapshot": {…}, "seed": 1234, "version": "0.1.0"}` — so a terminal opened late (or reopened, TL) can draw immediately |
+| `state.hello` `[ASSUMED]` | engine → all, every 2 s for the whole game (D-70, D-83) | `{"turn_no": 0, "snapshot": {…}, "seed": 1234, "version": "0.1.0"}` — so a terminal opened late (or reopened, TL) can draw immediately; terminals render it only when its `turn_no` is newer than the one they last drew |
 
 Snapshot shape (MSG-03) — the full state, BUS-07:
 
@@ -138,7 +138,7 @@ per turn (`snapshot_bytes`).
 
 ## C4 — Terminal render API
 
-Each terminal has a pure function in `mos/terminals/render_<role>.py`:
+Each terminal has a pure function in `starbour/terminals/render_<role>.py`:
 
 ```python
 def render(snapshot: dict, view: dict, cfg: GameConfig, width: int = 120) -> rich.console.RenderableType
@@ -165,7 +165,7 @@ Unset in normal play. The launcher passes the variable through to children.
 
 `saves\game.json`, written atomically (temp file + replace) at the end of every
 turn (TP-08). Contents: the snapshot plus `rng_state`. Deleted on game over
-(OV-09c). `mos.engine.save.load()` returns a state whose snapshot hash equals the
+(OV-09c). `starbour.engine.save.load()` returns a state whose snapshot hash equals the
 saved one.
 
 ## C7 — Exit codes shared by every gate and script
@@ -177,3 +177,18 @@ saved one.
 | 2 | (hook only) deliverable failure fed back to the model |
 | 3 | `HARNESS ERROR` — wrong interpreter, missing dependency, missing workbook; not a code problem |
 | 4 | config validation failed — message names `[section] key` |
+
+## C8 — Conventions the gates settled during the harness build (D-77…D-85)
+
+The harness could not change this file, so it logged what it had to assume. These are
+now part of the contract; the M1 builder follows them (full text in `docs/DECISIONS.md`):
+
+- **D-77** supplies prose: a warning event contains `suppl` and one of `warn`/`low`/`mutiny`; the mutiny event contains `mutin`; mutiny timing is judged from `final.mutinies`, never prose.
+- **D-78** T3's `render()` takes the whole `turn.resolved` payload (`{turn_no, snapshot, events}`) as its first argument; T1, T2, T4 take the snapshot. Events appear in the given (phase) order.
+- **D-79** names: `starbour.config.load_config(path) -> GameConfig` and `state.snapshot_hash()`; expose exactly these.
+- **D-80** smoke/03 bound: the best single turn's `ai_ships_moved` ≥ 50 % of (`final.ships` − 1).
+- **D-81** ascii glyph set: the active ship is `^` (unicode `▲`, SYM-10).
+- **D-82** tier budgets (quick 15 s / full 90 s / live 180 s) are `WARN`; per-check bounds are hard.
+- **D-83** `state.hello` every 2 s for the whole game (C3 above already says so).
+- **D-84** the gates pass explicit free ports with `--pub-port N --pull-port N`; `0 = random` is not relied on.
+- **D-85** the live gate moves `saves\game.json` aside and restores it; it starts the launcher with `--seed 1234`.

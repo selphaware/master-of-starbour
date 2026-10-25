@@ -230,4 +230,4 @@ verify/artifacts/
 # per-user Claude Code settings; the shared .claude/settings.json IS committed
 .claude/settings.local.json
 # the GitHub template ignores *.spec; the PyInstaller spec must be versioned (M5)
-!mos.spec
+!starbour.spec

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe *)",
+      "Bash(\"E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe\" *)",
+      "Bash(E:/CODE/master-of-starbour/MOS/Scripts/python.exe *)",
+      "PowerShell(E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe *)",
+      "PowerShell(& E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe *)",
+      "Bash(git *)",
+      "PowerShell(git *)",
+      "Read(/**)",
+      "Edit(/**)"
+    ],
+    "deny": [
+      "Edit(/verify/**)",
+      "Edit(/.claude/settings.json)",
+      "Edit(/docs/master_of_starbour_blueprint.xlsx)",
+      "Edit(/docs/DESIGN.md)",
+      "Edit(/docs/config_keys.json)",
+      "Edit(/docs/CONTRACTS.md)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe\" \"E:\\CODE\\master-of-starbour\\verify\\hook_gate.py\"",
+            "timeout": 90
+          }
+        ]
+      }
+    ]
+  }
+}

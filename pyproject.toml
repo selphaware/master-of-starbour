@@ -28,10 +28,10 @@ dev = [
 ]
 
 [project.scripts]
-mos = "mos.__main__:main"
+starbour = "starbour.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["mos*"]
+include = ["starbour*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

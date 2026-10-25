@@ -25,8 +25,8 @@ $Py = Join-Path $Root "MOS\Scripts\python.exe"
 if (-not (Test-Path $Py)) {
   Write-Error "Interpreter not found at $Py — create the venv MOS first (docs\SETUP.md step 1)."
 }
-if (-not (Test-Path (Join-Path $Root "mos\__main__.py"))) {
-  Write-Error "mos package not built yet — run milestone M1 first (specs\M1.md)."
+if (-not (Test-Path (Join-Path $Root "starbour\__main__.py"))) {
+  Write-Error "starbour package not built yet — run milestone M1 first (specs\M1.md)."
 }
 
 $env:PYTHONUTF8 = "1"
@@ -36,7 +36,7 @@ if ($Heartbeat) {
   $env:MOS_HEARTBEAT_DIR = $hb
 }
 
-$args = @("-m", "mos")
+$args = @("-m", "starbour")
 if ($PSBoundParameters.ContainsKey("Seed")) { $args += @("--seed", "$Seed") }
 if ($Config -ne "") { $args += @("--config", $Config) }
 

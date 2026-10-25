@@ -13,17 +13,17 @@ ends the turn; every captain's orders resolve at once.
 
 **Status:** in development. The design is in `docs/master_of_starbour_blueprint.xlsx`
 (rendered as `docs/DESIGN.md`); the build is milestone-driven (`specs/`). Releases
-will appear under GitHub Releases as a zipped one-folder build (`mos.exe`).
+will appear under GitHub Releases as a zipped one-folder build (`starbour.exe`).
 
 ## Play (from a release)
 
 1. Download the latest zip from Releases and extract it anywhere.
-2. Run `mos.exe`. Four windows open.
+2. Run `starbour.exe`. Four windows open.
 3. Type `help` in the Command window.
 
 The build is not code-signed yet, so Windows SmartScreen will warn on first run:
 choose *More info → Run anyway*. Everything tunable is in `controls_config.ini`
-next to `mos.exe`; your save is `saves\game.json`.
+next to `starbour.exe`; your save is `saves\game.json`.
 
 ## Build from source
 

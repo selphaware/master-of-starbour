@@ -31,7 +31,7 @@ Release` now. Everything else is reference.
 > network access at runtime.
 
 **The deliverable:**
-> The `mos` package (`python -m mos`), built milestone by milestone from
+> The `starbour` package (`python -m starbour`), built milestone by milestone from
 > `specs/M1.md` … `specs/M5.md`. M1 = engine + bus + grids + launcher + four
 > terminals + impulse movement + supplies/mutiny + headless sim. The gate's argument
 > is the repo root (`.`).
@@ -64,7 +64,7 @@ Release` now. Everything else is reference.
 >    `python.exe --role engine` keeps running (and holds the ports, so the next
 >    launch fails or silently talks to the old engine). Or the launcher exits and
 >    leaves four windows behind.
-> 5. **The exe opens and exits.** (M5) `mos.exe` starts, spawns nothing or spawns
+> 5. **The exe opens and exits.** (M5) `starbour.exe` starts, spawns nothing or spawns
 >    children that die on a missing module, and exits 0.
 > 6. **Game over / mutiny / mastery not fired.** The condition is met in state
 >    (shields 0 and a hit; food 0 for 3 turns; the ultimate item picked up) but the
@@ -140,7 +140,7 @@ and report them before writing any harness file.
    HARNESS checks, not game checks.
 8. **`.gitignore`.** Confirm `MOS/`, `saves/`, `logs/`, `verify/artifacts/`,
    `dist/`, `build/` and `.claude/settings.local.json` are ignored and that
-   `!mos.spec` un-ignores the PyInstaller spec (the GitHub template ignores
+   `!starbour.spec` un-ignores the PyInstaller spec (the GitHub template ignores
    `*.spec`). Fix only what is missing.
 9. **Report all of the above back to me before writing any harness file.** Say
    plainly if anything here was wrong.
@@ -170,7 +170,7 @@ Requirements for every gate:
 - **Binary.** Exit 0 pass, 1 fail. Exit 3 + `HARNESS ERROR …` when the interpreter,
   a dependency or the workbook is wrong — and never blame the code for that.
 - **Specific messages.** Not "verification failed" but
-  `FAIL smoke/02 AI never acts: 0 AI orders executed in turns 1..30 (need ≥ 1 every turn) — see mos/engine/ai.py decide(); OV-10, SP-06`.
+  `FAIL smoke/02 AI never acts: 0 AI orders executed in turns 1..30 (need ≥ 1 every turn) — see starbour/engine/ai.py decide(); OV-10, SP-06`.
   Each check has a stable code (`smoke/01` …) and cites the blueprint ID. The
   message is fed back to the model; a vague message costs an iteration.
 - **Fast enough for its tier.** `--quick` ≤ 15 s; full smoke ≤ 90 s; live ≤ 3 min.
@@ -178,9 +178,9 @@ Requirements for every gate:
 - **Thresholds from the real data.** Where this brief gives a number (e.g. "AI
   orders ≥ 1 every turn"), confirm in M1 that the default config can meet it; if it
   cannot, the gate is wrong, not the game — report, do not thrash.
-- **Distinguishes harness from deliverable failure.** Missing `mos` package before
+- **Distinguishes harness from deliverable failure.** Missing `starbour` package before
   M1 starts is a *deliverable* failure with a clear message
-  (`mos package not found at E:\…\mos\__init__.py — M1 not built yet`), not a crash.
+  (`starbour package not found at E:\…\starbour\__init__.py — M1 not built yet`), not a crash.
 
 ### Gate 1 — `verify\smoke_test.py <repo-root> [--quick] [--selftest]`
 
@@ -189,9 +189,9 @@ HARNESS ERROR; otherwise run all and report every failure):
 
 | Code | Check | Catches | IDs |
 |---|---|---|---|
-| smoke/00 | interpreter is the MOS venv; deps import; `tools\blueprint_to_design.py --check` current; `controls_config.ini` parses and validates (`mos.config` exit 4 message if not) | harness drift; ignored keys | CFG-*, D-53 |
+| smoke/00 | interpreter is the MOS venv; deps import; `tools\blueprint_to_design.py --check` current; `controls_config.ini` parses and validates (`starbour.config` exit 4 message if not) | harness drift; ignored keys | CFG-*, D-53 |
 | smoke/01 | `pytest tests -q -x --timeout 10` (`--quick`: `-m "not slow"`) | unit regressions | — |
-| smoke/02 | `python -m mos sim --seed 1234 --turns 30 --ai-player --report …` exits 0 in ≤ 20 s; `turns_completed == 30`; `turn_no` strictly 1..30 | turns don't advance | OV-02, TP-01…08 |
+| smoke/02 | `python -m starbour sim --seed 1234 --turns 30 --ai-player --report …` exits 0 in ≤ 20 s; `turns_completed == 30`; `turn_no` strictly 1..30 | turns don't advance | OV-02, TP-01…08 |
 | smoke/03 | every turn `orders_executed.ai ≥ 1`; over the run ≥ 50 % of AI ships changed `position` at least once | AI never acts | OV-10, SP-06 |
 | smoke/04 | consecutive `snapshot_hash` values all differ | frozen state | BUS-07 |
 | smoke/05 | `player.food == food_start − t` and same for water for t ≤ food_start (no trade in M1); a `supplies` warning event appears when food ≤ `warn_turns` | upkeep wired to config | SUP-01, SUP-02, CFG-45/46 |
@@ -217,12 +217,12 @@ hook. Sets `MOS_HEARTBEAT_DIR` to a temp dir and uses the default ports.
 | Code | Check | Catches | IDs |
 |---|---|---|---|
 | live/01 | ports 5555/5556 free before start, else `HARNESS ERROR` naming the PID that holds them | stale engine from a previous run | BUS-06 |
-| live/02 | `python -m mos` → within 15 s the launcher has children with `--role engine`, `command`, `grid`, `output`, `status` (psutil cmdline match) | spawn failure | TL, BR-15 |
+| live/02 | `python -m starbour` → within 15 s the launcher has children with `--role engine`, `command`, `grid`, `output`, `status` (psutil cmdline match) | spawn failure | TL, BR-15 |
 | live/03 | gate connects SUB + PUSH; `state.hello` arrives; pushes `turn.end` ×3 → three `turn.resolved`; heartbeat files for grid/output/status reach `turn_no 3` within 3 s of the third publish | stale window | BUS-05, D-66 |
 | live/04 | kill the `--role grid` process → a new `--role grid` child exists within 5 s and its heartbeat reaches the current turn | reopen rule | TL |
 | live/05 | kill the `--role command` process → within 10 s the launcher and all children are gone; `saves\game.json` exists; no process has `--role` and this repo path in its cmdline | orphans; no autosave | BUS-06, OV-12 |
 | live/06 | launch again; terminate the launcher → all children gone within 10 s | orphans | BUS-06, D-59 |
-| live/07 | (M5) same as 02–06 against `dist\mos\mos.exe`; plus the launcher is still alive 10 s after start | exe opens and exits | BR-14/15 |
+| live/07 | (M5) same as 02–06 against `dist\starbour\starbour.exe`; plus the launcher is still alive 10 s after start | exe opens and exits | BR-14/15 |
 
 Always clean up: on any failure, kill everything the gate started before exiting.
 
@@ -241,7 +241,7 @@ the selftest exercises the **checkers** and the **bus client** against fixtures:
   `MOS_LAUNCHER_PID`; broken: spawns a child that ignores it) makes live/06's
   orphan check pass and fail — this one opens no window.
 - Run from the repo root and from a temp dir; report if they disagree.
-- Confirm the "`mos` package not found" path produces the specific message and exit
+- Confirm the "`starbour` package not found" path produces the specific message and exit
   1, not a traceback.
 
 Run the selftest. Do not proceed until it discriminates correctly.
@@ -253,7 +253,7 @@ Run the selftest. Do not proceed until it discriminates correctly.
 ### The verification hook — the inner loop
 - `verify\hook_gate.py`: a `PostToolUse` hook matching `Write|Edit|MultiEdit`.
   Python stdlib only. Reads the tool-use JSON on stdin, extracts the file path, and
-  **only acts for paths under `mos\`, `tests\`, `controls_config.ini` or
+  **only acts for paths under `starbour\`, `tests\`, `controls_config.ini` or
   `pyproject.toml`** — exits 0 silently for everything else (docs, specs, verify).
 - Runs `E:\CODE\master-of-starbour\MOS\Scripts\python.exe verify\smoke_test.py . --quick`
   with a 60 s timeout. Exit 2 with the gate's output on stderr on failure; exit 0
@@ -261,7 +261,7 @@ Run the selftest. Do not proceed until it discriminates correctly.
   the timeout fired (say "the quick gate exceeded 60 s — the loop may be hanging").
 - **Pin the interpreter with the absolute path** in `.claude\settings.json`. A bare
   `python` that resolves to a stub dies silently.
-- Before M1 exists, a write under `mos\` will make the hook report "mos package not
+- Before M1 exists, a write under `starbour\` will make the hook report "starbour package not
   found / sim not runnable" — that is correct and is what the live-fire test looks for.
 
 ### `.claude\settings.json`
@@ -294,7 +294,7 @@ Before you tell me it is done:
    (each gate discriminates good from broken fixtures, with the right codes).
 2. The hook logic is proven **by direct invocation**: pipe a simulated tool-use JSON
    payload into `verify\hook_gate.py` on stdin and confirm exit 2 with a useful
-   message for a write under `mos\` (no package yet), exit 0 for a write under
+   message for a write under `starbour\` (no package yet), exit 0 for a write under
    `docs\`, and exit 0 with `HARNESS ERROR` when the interpreter path in the payload
    environment is wrong.
    **Important:** the live hook CANNOT fire in this session — hooks register at

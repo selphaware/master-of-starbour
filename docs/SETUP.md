@@ -29,10 +29,10 @@ dev/gate packages (pytest, pytest-timeout, psutil, openpyxl, pyinstaller) from
 `pyproject.toml`. You install these, not Claude Code: the gates self-test with this
 interpreter, so it must exist before the harness does.
 
-`[VERIFY]` The `mos` package does not exist until M1, so the editable install has
+`[VERIFY]` The `starbour` package does not exist until M1, so the editable install has
 nothing to link yet. If pip refuses for that reason, install the same packages
-directly and re-run `-e .[dev]` once M1 is green (it only matters for the `mos`
-console script; `python -m mos` from the repo root works either way):
+directly and re-run `-e .[dev]` once M1 is green (it only matters for the `starbour`
+console script; `python -m starbour` from the repo root works either way):
 
 ```powershell
 E:\CODE\master-of-starbour\MOS\Scripts\python.exe -m pip install rich prompt_toolkit pyzmq pytest pytest-timeout psutil openpyxl pyinstaller
@@ -62,9 +62,15 @@ cd E:\CODE\master-of-starbour
 claude
 ```
 
-`/model` → the current **Fable** model (Fable 5.1 at the time of writing), highest
-effort. Harness generation is environment discovery plus multi-file work, where
-Fable's lead is largest. Then paste:
+Set the model and effort first (both are Claude Code slash commands):
+
+```
+/model fable
+/effort xhigh
+```
+
+Harness generation is environment discovery plus multi-file work, where Fable's
+lead is largest. Then paste:
 
 ```
 python is E:\CODE\master-of-starbour\MOS\Scripts\python.exe
@@ -73,7 +79,7 @@ Read docs/BOOTSTRAP.md and follow it.
 
 It will report Phase 0 (ask it to wait for your go-ahead if it does not), build
 `verify\`, `.claude\settings.json` and `docs\ENVIRONMENT.md`,
-run both selftests, and stop. **It must not write anything under `mos\`.**
+run both selftests, and stop. **It must not write anything under `starbour\`.**
 
 ✔ check when it stops:
 
@@ -81,7 +87,7 @@ run both selftests, and stop. **It must not write anything under `mos\`.**
 git status --short                                      # only verify/, .claude/, docs/ENVIRONMENT.md, .gitignore
 E:\CODE\master-of-starbour\MOS\Scripts\python.exe verify\smoke_test.py --selftest   # ✔ exit 0, lists each checker pass/fail pair
 E:\CODE\master-of-starbour\MOS\Scripts\python.exe verify\live_test.py --selftest    # ✔ exit 0
-Get-Content .claude\settings.json | Select-String "MOS\\Scripts\\python.exe"       # ✔ the hook uses the absolute path
+Get-Content .claude\settings.json | Select-String -SimpleMatch 'MOS\\Scripts\\python.exe'   # ✔ 5 matches: hook + permissions use the absolute path
 ```
 
 ## 4. Restart, confirm the hook, live-fire it ⚠️
@@ -105,16 +111,16 @@ if prompted. If it is missing or shows bare `python`, stop and fix `settings.jso
 Live-fire — never trust a harness you have not watched reject something:
 
 ```
-Create mos/__init__.py containing only the line  raise RuntimeError("live-fire")
+Create starbour/__init__.py containing only the line  raise RuntimeError("live-fire")
 Make only that one write, then stop. Do not fix it.
 ```
 
 ✔ expected: immediately after the write, the gate's complaint appears on its own
-(`FAIL smoke/02 … mos package not runnable` or similar) — you did not ask for it.
+(`FAIL smoke/02 … starbour package not runnable` or similar) — you did not ask for it.
 If the file is written and nothing appears, the hook is dead; fix before going on.
 
 ```
-Delete mos/__init__.py.
+Delete starbour/__init__.py.
 ```
 ```powershell
 git add -A; git commit -m "Add build-loop harness"
@@ -122,9 +128,13 @@ git add -A; git commit -m "Add build-loop harness"
 
 ## 5. Session 2 — build M1
 
-Fresh session. `/model` → Fable (recommended for M1: Windows process model, bus
-and launcher are discovery-heavy) or Opus; highest effort.
+Fresh session. Fable again for M1 (the Windows process model, bus and launcher
+are discovery-heavy); `/model opus` is the alternative for M2+ builds.
 
+```
+/model fable
+/effort xhigh
+```
 ```
 python is E:\CODE\master-of-starbour\MOS\Scripts\python.exe
 Read specs/M1.md and build it. Don't stop until both
@@ -157,8 +167,15 @@ do not hand-patch the game — that breaks the loop's premise.
 git add -A; git commit -m "M1: engine, bus, grids, launcher, terminals (gates green)"
 ```
 
-Then re-run the same M1 spec on **Sonnet** at default effort in a scratch branch:
-green in ≤ 3 iterations means the spec is robust and Sonnet is your cheap build
+Then re-run the same M1 spec on Sonnet at default effort in a scratch branch
+(`git switch -c sonnet-check` first):
+
+```
+/model sonnet
+/effort auto
+```
+
+Green in ≤ 3 iterations means the spec is robust and Sonnet is your cheap build
 model for M2+; not green means the spec, not the model, needs work.
 
 ## Troubleshooting

@@ -1,0 +1,1597 @@
+{
+ "schema": 1,
+ "seed": 1234,
+ "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+ "turns_requested": 40,
+ "turns_completed": 40,
+ "outcome": "running",
+ "elapsed_s": 2.47,
+ "per_turn": [
+  {
+   "turn_no": 1,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 29,
+    "water": 29,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      13,
+      11
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 13,11 at speed 4",
+    "upkeep: food 29, water 29"
+   ],
+   "snapshot_hash": "bb211a1927db96798512309e26d19bb28175d8b3",
+   "snapshot_bytes": 184250,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 2,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 28,
+    "water": 28,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      14,
+      11
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 14,11 at speed 4",
+    "upkeep: food 28, water 28"
+   ],
+   "snapshot_hash": "779760417e7bc0d66bf52f7b02f850eacb62d7fc",
+   "snapshot_bytes": 184267,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 3,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 27,
+    "water": 27,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      13,
+      11
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 13,11 at speed 4",
+    "upkeep: food 27, water 27"
+   ],
+   "snapshot_hash": "54bf94d60cd267660802f2b2d3406333d22e91d4",
+   "snapshot_bytes": 184284,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 4,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 26,
+    "water": 26,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      14,
+      11
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 14,11 at speed 4",
+    "upkeep: food 26, water 26"
+   ],
+   "snapshot_hash": "a44ffbf6886f5426be1ff2761aae5683e0a36eed",
+   "snapshot_bytes": 184301,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 5,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 25,
+    "water": 25,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      15,
+      12
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 15,12 at speed 4",
+    "upkeep: food 25, water 25"
+   ],
+   "snapshot_hash": "387098d0f871b801c73ab191267adc4c45b4791e",
+   "snapshot_bytes": 184318,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 6,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 24,
+    "water": 24,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      14,
+      12
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 14,12 at speed 4",
+    "upkeep: food 24, water 24"
+   ],
+   "snapshot_hash": "5b8abd5f078f07c9b5834463eafe31f72abf7856",
+   "snapshot_bytes": 184335,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 7,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 23,
+    "water": 23,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      15,
+      12
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 15,12 at speed 4",
+    "upkeep: food 23, water 23"
+   ],
+   "snapshot_hash": "2acf4a21852dc5336855f0aededb4b697c9c6a11",
+   "snapshot_bytes": 184352,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 8,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 22,
+    "water": 22,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      16,
+      12
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 16,12 at speed 4",
+    "upkeep: food 22, water 22"
+   ],
+   "snapshot_hash": "c7736423e076193b5617807b98b4f5305bb09e4a",
+   "snapshot_bytes": 184369,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 9,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 21,
+    "water": 21,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      15,
+      12
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 15,12 at speed 4",
+    "upkeep: food 21, water 21"
+   ],
+   "snapshot_hash": "7339e3ea1ac93a986edaf963fae72086d6f84bd8",
+   "snapshot_bytes": 184386,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 10,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 20,
+    "water": 20,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      16,
+      13
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 16,13 at speed 4",
+    "upkeep: food 20, water 20"
+   ],
+   "snapshot_hash": "5d2a526bc829ffbc07947ca6e3bd15474cef1319",
+   "snapshot_bytes": 184403,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 11,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 19,
+    "water": 19,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      17,
+      13
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 17,13 at speed 4",
+    "upkeep: food 19, water 19"
+   ],
+   "snapshot_hash": "db623f68c72793dc48c1a11c92e05ef8f415f327",
+   "snapshot_bytes": 184420,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 12,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 18,
+    "water": 18,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      16,
+      13
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 16,13 at speed 4",
+    "upkeep: food 18, water 18"
+   ],
+   "snapshot_hash": "d8ebb2b95a9d2db8439fc74f2db3fe94a3631475",
+   "snapshot_bytes": 184437,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 13,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 17,
+    "water": 17,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      17,
+      13
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 17,13 at speed 4",
+    "upkeep: food 17, water 17"
+   ],
+   "snapshot_hash": "81d0f0f0b9e4a872560e4f02b9ed69fe52cff826",
+   "snapshot_bytes": 184454,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 14,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 16,
+    "water": 16,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      18,
+      13
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 18,13 at speed 4",
+    "upkeep: food 16, water 16"
+   ],
+   "snapshot_hash": "bb04b4bbc1ecd5b8ef0befffc50574e250689aed",
+   "snapshot_bytes": 184471,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 15,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 15,
+    "water": 15,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      17,
+      14
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 17,14 at speed 4",
+    "upkeep: food 15, water 15"
+   ],
+   "snapshot_hash": "4ba8e25448fd41c02868af24744df870e1e3d0a5",
+   "snapshot_bytes": 184488,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 16,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 14,
+    "water": 14,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      18,
+      14
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 18,14 at speed 4",
+    "upkeep: food 14, water 14"
+   ],
+   "snapshot_hash": "2293ba6fd48b70118358df5be60537256416a445",
+   "snapshot_bytes": 184505,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 17,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 13,
+    "water": 13,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      19,
+      14
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 19,14 at speed 4",
+    "upkeep: food 13, water 13"
+   ],
+   "snapshot_hash": "2d72bf1d1cf70736bcae234ec9ebdf282ac6e897",
+   "snapshot_bytes": 184522,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 18,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 12,
+    "water": 12,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      18,
+      14
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 18,14 at speed 4",
+    "upkeep: food 12, water 12"
+   ],
+   "snapshot_hash": "b5017f29c8bf23730a90a8241f701a19b4f59987",
+   "snapshot_bytes": 184539,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 19,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 11,
+    "water": 11,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      19,
+      14
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 19,14 at speed 4",
+    "upkeep: food 11, water 11"
+   ],
+   "snapshot_hash": "a0fdd33fbcbc398a56eb8c0e71c7351ee2f028d7",
+   "snapshot_bytes": 184556,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 20,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 10,
+    "water": 10,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      20,
+      15
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 20,15 at speed 4",
+    "upkeep: food 10, water 10"
+   ],
+   "snapshot_hash": "c98c2a752a91f5575131ba5eeb8fbf21fee2903d",
+   "snapshot_bytes": 184573,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 21,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 9,
+    "water": 9,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      19,
+      15
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 19,15 at speed 4",
+    "upkeep: food 9, water 9"
+   ],
+   "snapshot_hash": "453c1a73e5a8535ca5a41797763fe84c1ff6642f",
+   "snapshot_bytes": 184590,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 22,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 8,
+    "water": 8,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      20,
+      15
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 20,15 at speed 4",
+    "upkeep: food 8, water 8"
+   ],
+   "snapshot_hash": "3d2305a8056165598d282f94763f66c4eeccbcd1",
+   "snapshot_bytes": 184607,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 23,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 7,
+    "water": 7,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      21,
+      15
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 21,15 at speed 4",
+    "upkeep: food 7, water 7"
+   ],
+   "snapshot_hash": "f6ff8faa0682c7608fa7de19e79e39acfcc617a3",
+   "snapshot_bytes": 184624,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 24,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 6,
+    "water": 6,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      20,
+      15
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 20,15 at speed 4",
+    "upkeep: food 6, water 6"
+   ],
+   "snapshot_hash": "3840ea1548feaabe1ae5820c497b26f825239ce0",
+   "snapshot_bytes": 184641,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 25,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 5,
+    "water": 5,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      21,
+      16
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 21,16 at speed 4",
+    "upkeep: food 5, water 5",
+    "supplies warning: 5 turns of food and water left"
+   ],
+   "snapshot_hash": "ea3250d55b3efc18c00214915539719cfd4095b7",
+   "snapshot_bytes": 184658,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 26,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 4,
+    "water": 4,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      22,
+      16
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 22,16 at speed 4",
+    "upkeep: food 4, water 4",
+    "supplies warning: 4 turns of food and water left"
+   ],
+   "snapshot_hash": "dd8e5b0285b0f3ccf87be42b615885e9913aeade",
+   "snapshot_bytes": 184675,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 27,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 3,
+    "water": 3,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      21,
+      16
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 21,16 at speed 4",
+    "upkeep: food 3, water 3",
+    "supplies warning: 3 turns of food and water left"
+   ],
+   "snapshot_hash": "4794c7a6405921139f07ecb9c08bc5c550a1cdb6",
+   "snapshot_bytes": 184692,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 28,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 2,
+    "water": 2,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      22,
+      16
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 22,16 at speed 4",
+    "upkeep: food 2, water 2",
+    "supplies warning: 2 turns of food and water left"
+   ],
+   "snapshot_hash": "95c23d23cd98dc2ab79653e6b86be2cd92ddf9d8",
+   "snapshot_bytes": 184709,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 29,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 1,
+    "water": 1,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      23,
+      16
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 23,16 at speed 4",
+    "upkeep: food 1, water 1",
+    "supplies warning: 1 turns of food and water left"
+   ],
+   "snapshot_hash": "e644adc949bb723311892a6168565c34eaf88615",
+   "snapshot_bytes": 184726,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 30,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 0,
+    "water": 0,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      22,
+      17
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 22,17 at speed 4",
+    "upkeep: food 0, water 0",
+    "supplies warning: food and water at 0 — mutiny in 4 turns"
+   ],
+   "snapshot_hash": "a9971cb7819127a5bcff4509e1fffbaa482d59a6",
+   "snapshot_bytes": 184743,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 31,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 0,
+    "water": 0,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      23,
+      17
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 23,17 at speed 4",
+    "upkeep: food 0, water 0",
+    "supplies warning: food and water at 0 — mutiny in 3 turns"
+   ],
+   "snapshot_hash": "45209c308d16741f7bd7daa4ec87533cbcfe52bb",
+   "snapshot_bytes": 184760,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 32,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 0,
+    "water": 0,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      0,
+      17
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "movement: Lantern moved to 0,17 at speed 4",
+    "upkeep: food 0, water 0",
+    "supplies warning: food and water at 0 — mutiny in 2 turns",
+    "mutiny: the crew seize the Lantern"
+   ],
+   "snapshot_hash": "fdebf87a300ee37819c15824e415e1b7dea87b75",
+   "snapshot_bytes": 184777,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 33,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 10,
+    "water": 10,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      23,
+      17
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 23,17 at speed 4",
+    "upkeep: food 10, water 10",
+    "mutiny: the crew seize the Lantern; Harrow Vey is demoted to a kestrel with 10 food and 10 water; fear −10"
+   ],
+   "snapshot_hash": "03c0cf122f8100fdf5521f744bac200763ff3c6e",
+   "snapshot_bytes": 184794,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 34,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 9,
+    "water": 9,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      0,
+      17
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 0,17 at speed 4",
+    "upkeep: food 9, water 9"
+   ],
+   "snapshot_hash": "c7d68792df5ded88f297c04aa2f78b581eef7f6f",
+   "snapshot_bytes": 184811,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 35,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 8,
+    "water": 8,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      1,
+      18
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 1,18 at speed 4",
+    "upkeep: food 8, water 8"
+   ],
+   "snapshot_hash": "915a03d1b09a2594c128d1d85bfb9eb962f241cc",
+   "snapshot_bytes": 184828,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 36,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 7,
+    "water": 7,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      0,
+      18
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 0,18 at speed 4",
+    "upkeep: food 7, water 7"
+   ],
+   "snapshot_hash": "78b482cd651bfbbcca384a0f13f29f6c443152c3",
+   "snapshot_bytes": 184845,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 37,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 6,
+    "water": 6,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      1,
+      18
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 1,18 at speed 4",
+    "upkeep: food 6, water 6"
+   ],
+   "snapshot_hash": "d5e8b2bd64119efa1aa09c1c93bde654690977ab",
+   "snapshot_bytes": 184862,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 38,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 5,
+    "water": 5,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      2,
+      18
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 2,18 at speed 4",
+    "upkeep: food 5, water 5",
+    "supplies warning: 5 turns of food and water left"
+   ],
+   "snapshot_hash": "303bdd0abfde5488609e13a5f254a169ccb3cf78",
+   "snapshot_bytes": 184879,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 39,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 4,
+    "water": 4,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      1,
+      18
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 1,18 at speed 4",
+    "upkeep: food 4, water 4",
+    "supplies warning: 4 turns of food and water left"
+   ],
+   "snapshot_hash": "02f12cea7b74c5a72fbd64595421bf0795734187",
+   "snapshot_bytes": 184896,
+   "resolve_ms": 41
+  },
+  {
+   "turn_no": 40,
+   "orders_executed": {
+    "player": 1,
+    "ai": 193
+   },
+   "ai_ships_moved": 186,
+   "player": {
+    "food": 3,
+    "water": 3,
+    "fear": 0,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      2,
+      19
+     ]
+    ]
+   },
+   "captains": 194,
+   "events": [
+    "movement: Lantern moved to 2,19 at speed 4",
+    "upkeep: food 3, water 3",
+    "supplies warning: 3 turns of food and water left"
+   ],
+   "snapshot_hash": "80dc77ce457652af47a113b2a6deb816e41be69c",
+   "snapshot_bytes": 184913,
+   "resolve_ms": 41
+  }
+ ],
+ "final": {
+  "captains": 194,
+  "ships": 194,
+  "mutinies": [
+   {
+    "turn_no": 32,
+    "captain": "player",
+    "result": "demoted"
+   }
+  ],
+  "game_over_turn": null,
+  "mastery_turn": null
+ }
+}

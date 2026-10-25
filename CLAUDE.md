@@ -98,11 +98,11 @@ a config key silently ignored.
   turn's `events[]`. Snapshot bytes and redraw time are logged; the target is a
   redraw under 0.5 s (BUS-05).
 - **Headless simulation is a first-class entry point** (D-55):
-  `python -m mos sim --seed N --turns T --ai-player --report PATH`. The engine runs
+  `python -m starbour sim --seed N --turns T --ai-player --report PATH`. The engine runs
   in-process with an AI-controlled player and writes a JSON report. The gates drive
   this; keep it working on every change.
-- **Pure cores, thin shells.** Order parsing/validation (`mos/commands`), turn
-  resolution (`mos/engine/phases.py`), AI decisions (`mos/engine/ai.py`) and every
+- **Pure cores, thin shells.** Order parsing/validation (`starbour/commands`), turn
+  resolution (`starbour/engine/phases.py`), AI decisions (`starbour/engine/ai.py`) and every
   terminal's `render(snapshot, view)` are pure functions of their inputs and are
   unit-tested without sockets, windows or sleeps.
 - **Determinism** (D-67): world generation uses `random.Random(seed)`; in-game
@@ -112,17 +112,17 @@ a config key silently ignored.
   on their own within 2 s if the launcher's PID disappears. Closing T1 or the
   launcher ends the game (autosave first); closing T2/T3/T4 reopens it.
 - **Config, not constants.** Any literal that tunes play (a delta, a threshold, a
-  price, a size, a glyph) is read from `controls_config.ini` via `mos/config.py`,
+  price, a size, a glyph) is read from `controls_config.ini` via `starbour/config.py`,
   which validates every key at start-up and fails loudly on a missing one.
 - **Paths** (D-61): `controls_config.ini`, `saves/` and `logs/` live next to the exe
-  when frozen (`sys.frozen`), else at the repo root. `mos/paths.py` is the only
+  when frozen (`sys.frozen`), else at the repo root. `starbour/paths.py` is the only
   place that decides this.
 
 ## Code conventions
 
 - Python 3.12: `from __future__ import annotations`, dataclasses (`slots=True`),
   `pathlib`, type hints everywhere, no `print` outside terminals (use `logging`).
-- Package `mos` (BR-05). Layout in `specs/M1.md`. Entry point `python -m mos`.
+- Package `starbour` (D-86 — not `mos`: on NTFS that is the venv folder `MOS\`). Layout in `specs/M1.md`. Entry point `python -m starbour`.
 - Tests in `tests/`, pytest, `pytest-timeout` on anything that touches sockets or
   processes (10 s default). Mark slow tests `@pytest.mark.slow`; `--quick` skips them.
 - Cite blueprint IDs in docstrings of the function that implements a rule:

@@ -1,0 +1,94 @@
+{
+ "schema": 1,
+ "seed": 1234,
+ "config_path": "<TMP>\\cfg12.ini",
+ "turns_requested": 2,
+ "turns_completed": 2,
+ "outcome": "running",
+ "elapsed_s": 0.4,
+ "per_turn": [
+  {
+   "turn_no": 1,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 11,
+    "water": 11,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      13,
+      11
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "upkeep: food 11, water 11"
+   ],
+   "snapshot_hash": "c5d9e87a33d9ce900ac1a61df2daad2c66c4a944",
+   "snapshot_bytes": 184000,
+   "resolve_ms": 30
+  },
+  {
+   "turn_no": 2,
+   "orders_executed": {
+    "player": 1,
+    "ai": 192
+   },
+   "ai_ships_moved": 185,
+   "player": {
+    "food": 10,
+    "water": 10,
+    "fear": 10,
+    "respect": 10,
+    "gold": 5,
+    "silver": 50,
+    "ship_class": "kestrel",
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      14,
+      11
+     ]
+    ]
+   },
+   "captains": 193,
+   "events": [
+    "upkeep: food 10, water 10"
+   ],
+   "snapshot_hash": "3730d5b96124f549465dd36b9c9a9ac7e1446017",
+   "snapshot_bytes": 184000,
+   "resolve_ms": 30
+  }
+ ],
+ "final": {
+  "captains": 193,
+  "ships": 193,
+  "mutinies": [],
+  "game_over_turn": null,
+  "mastery_turn": null
+ }
+}
