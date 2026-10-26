@@ -1,4 +1,4 @@
-"""Typed configuration read from controls_config.ini - CFG-01...60, D-49, D-53, D-71.
+"""Typed configuration read from controls_config.ini - CFG-01...73, D-49, D-53, D-71.
 
 Every tunable number the game uses is a field here and nowhere else.  A missing or
 unparsable key raises :class:`ConfigError`, which ``python -m starbour`` turns into
@@ -41,7 +41,7 @@ class ElementSpec:
 
 @dataclass(frozen=True, slots=True)
 class GameConfig:
-    """Every key on tab 15 plus the D-71 / D-89 additions, typed."""
+    """Every key on tab 15 (CFG-01...73), typed as the tab says."""
 
     path: Path
     # [world]
@@ -54,13 +54,15 @@ class GameConfig:
     normal_items_per_galaxy: int
     ai_captains_per_galaxy: int
     safe_start: bool
-    galaxy_fill_pct: float
-    sector_fill_pct: float
-    multi_star_pct: float
+    galaxy_fill_pct: int
+    sector_fill_pct: int
+    multi_star_pct: int
     planets_per_system_max: int
-    hole_pct: float
-    neutron_pct: float
-    wormhole_pct: float
+    planet_distance_min: int
+    planet_distance_max: int
+    hole_pct: int
+    neutron_pct: int
+    wormhole_pct: int
     # [bus]
     pub_port: int
     pull_port: int
@@ -91,6 +93,7 @@ class GameConfig:
     drain_low: int
     drain_medium: int
     drain_high: int
+    wormhole_exit_distance: int
     # [battle]
     phaser_range: int
     torpedo_range: int
@@ -107,6 +110,9 @@ class GameConfig:
     escape_shield_pct: int
     planet_attack_respect_max: int
     yield_fear_min: int
+    peace_shield_pct_at_fear100: int
+    surrender_shield_pct: int
+    roam_every_turns: int
     # [fear]
     fear_battle_won_delta: int
     fear_battle_lost_delta: int
@@ -231,11 +237,17 @@ class _Reader:
     def words(self, section: str, key: str) -> tuple[str, ...]:
         return tuple(p.strip() for p in self.raw(section, key).split(",") if p.strip())
 
-    def pct(self, section: str, key: str) -> float:
-        f = self.number(section, key)
-        if not 0.0 <= f <= 100.0:
-            raise ConfigError(f"[{section}] {key} = {f} must be a percentage 0..100")
-        return f
+    def pct(self, section: str, key: str) -> int:
+        n = self.integer(section, key)
+        if not 0 <= n <= 100:
+            raise ConfigError(f"[{section}] {key} = {n} must be a percentage 0..100")
+        return n
+
+    def at_least(self, section: str, key: str, lowest: int) -> int:
+        n = self.integer(section, key)
+        if n < lowest:
+            raise ConfigError(f"[{section}] {key} = {n} must be at least {lowest}")
+        return n
 
     def section_items(self, section: str) -> list[tuple[str, str]]:
         if not self.cp.has_section(section):
@@ -355,6 +367,9 @@ def load_config(path: Path | str) -> GameConfig:
     base_min, base_max = r.number("stellar", "base_energy_min"), r.number("stellar", "base_energy_max")
     if not 0 < base_min <= base_max:
         raise ConfigError("[stellar] base_energy_min must be > 0 and <= base_energy_max (D-89)")
+    planet_min, planet_max = r.at_least("world", "planet_distance_min", 1), r.integer("world", "planet_distance_max")
+    if planet_min > planet_max:
+        raise ConfigError("[world] planet_distance_min must be <= planet_distance_max (CFG-61, SP-04)")
 
     return GameConfig(
         path=path.resolve(),
@@ -370,7 +385,9 @@ def load_config(path: Path | str) -> GameConfig:
         galaxy_fill_pct=r.pct("world", "galaxy_fill_pct"),
         sector_fill_pct=r.pct("world", "sector_fill_pct"),
         multi_star_pct=r.pct("world", "multi_star_pct"),
-        planets_per_system_max=r.integer("world", "planets_per_system_max"),
+        planets_per_system_max=r.at_least("world", "planets_per_system_max", 0),
+        planet_distance_min=planet_min,
+        planet_distance_max=planet_max,
         hole_pct=r.pct("world", "hole_pct"),
         neutron_pct=r.pct("world", "neutron_pct"),
         wormhole_pct=r.pct("world", "wormhole_pct"),
@@ -399,6 +416,7 @@ def load_config(path: Path | str) -> GameConfig:
         drain_low=r.integer("hazards", "drain_low"),
         drain_medium=r.integer("hazards", "drain_medium"),
         drain_high=r.integer("hazards", "drain_high"),
+        wormhole_exit_distance=r.at_least("hazards", "wormhole_exit_distance", 1),
         phaser_range=r.integer("battle", "phaser_range"),
         torpedo_range=r.integer("battle", "torpedo_range"),
         torpedo_hit_base=r.number("battle", "torpedo_hit_base"),
@@ -413,6 +431,9 @@ def load_config(path: Path | str) -> GameConfig:
         escape_shield_pct=r.integer("ai", "escape_shield_pct"),
         planet_attack_respect_max=r.integer("ai", "planet_attack_respect_max"),
         yield_fear_min=r.integer("ai", "yield_fear_min"),
+        peace_shield_pct_at_fear100=r.pct("ai", "peace_shield_pct_at_fear100"),
+        surrender_shield_pct=r.pct("ai", "surrender_shield_pct"),
+        roam_every_turns=r.at_least("ai", "roam_every_turns", 0),
         fear_battle_won_delta=r.integer("fear", "battle_won_delta"),
         fear_battle_lost_delta=r.integer("fear", "battle_lost_delta"),
         fear_start=r.integer("fear", "start"),

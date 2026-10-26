@@ -444,7 +444,7 @@ def test_ai_moves_directly_away_from_a_hole(small_state: GameState, small_cfg: G
 
 def test_ai_never_ends_on_terrain_and_never_dies_by_a_star(small_cfg: GameConfig) -> None:
     import dataclasses
-    busy = dataclasses.replace(small_cfg, hole_pct=0.0)   # stars and planets everywhere a hole is not
+    busy = dataclasses.replace(small_cfg, hole_pct=0)   # stars and planets everywhere a hole is not
     state = new_game(21, busy)
     rng = game_rng(21)
     for _ in range(30):

@@ -62,7 +62,7 @@ def test_binary_stars_are_adjacent_when_multi() -> None:
     """SP-02 / SYM-13: with multi_star_pct = 100 every extra star sits next to the first."""
     from tests.conftest import INI
     from starbour.config import load_config
-    cfg = dataclasses.replace(load_config(INI), multi_star_pct=100.0, planets_per_system_max=0, hole_pct=0.0)
+    cfg = dataclasses.replace(load_config(INI), multi_star_pct=100, planets_per_system_max=0, hole_pct=0)
     rng = random.Random(5)
     seen_multi = False
     for _ in range(40):

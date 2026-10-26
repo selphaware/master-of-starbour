@@ -29,7 +29,9 @@ def ini_copy(tmp_path: Path, mutate) -> Path:
 def test_every_blueprint_key_has_a_typed_field(cfg: GameConfig) -> None:
     """Each [section] key on tab 15 is read into GameConfig (data sections as dicts)."""
     rows = json.loads(MANIFEST.read_text(encoding="utf-8"))["keys"]
-    data_sections = {"upgrades": cfg.upgrades, "prices": cfg.prices}
+    # CFG-70: [ships] class rows are data (D-53) - names are placeholders, so they key cfg.ships, not fields
+    data_sections = {"upgrades": cfg.upgrades, "prices": cfg.prices,
+                     "ships": {**cfg.ships, "starting_class": cfg.starting_class}}
     prefixed = {"fear": "fear_", "respect": "respect_"}
     for row in rows:
         sec = row["section"]
@@ -110,3 +112,40 @@ def test_cli_exits_4_naming_the_key(tmp_path: Path) -> None:
                        cwd=str(REPO), capture_output=True, text=True, timeout=60)
     assert r.returncode == 4, r.stderr
     assert "[supplies] water_start" in r.stderr
+
+
+def test_cfg_61_to_73_fields_typed(cfg: GameConfig) -> None:
+    """Workbook v2.4 rows CFG-61...73 load with the types tab 15 gives (M3 step 0)."""
+    assert (cfg.planet_distance_min, cfg.planet_distance_max) == (1, 3)                    # CFG-61
+    assert cfg.wormhole_exit_distance == 2                                                  # CFG-62
+    for name in ("galaxy_fill_pct", "sector_fill_pct", "multi_star_pct", "hole_pct", "neutron_pct", "wormhole_pct"):
+        assert type(getattr(cfg, name)) is int, name                                        # CFG-63, 64, 66
+    assert cfg.planets_per_system_max == 3                                                  # CFG-65
+    assert type(cfg.radius_min) is float and type(cfg.base_energy_max) is float             # CFG-67
+    assert (cfg.peace_shield_pct_at_fear100, cfg.surrender_shield_pct) == (60, 20)          # CFG-72
+    assert cfg.roam_every_turns == 10                                                       # CFG-73
+
+
+@pytest.mark.parametrize("section, key, value", [
+    ("world", "planet_distance_min", "0"),
+    ("world", "planet_distance_min", "4"),          # above planet_distance_max = 3
+    ("hazards", "wormhole_exit_distance", "0"),
+    ("ai", "surrender_shield_pct", "120"),
+    ("ai", "peace_shield_pct_at_fear100", "sixty"),
+    ("ai", "roam_every_turns", "-1"),
+    ("world", "hole_pct", "12.5"),
+])
+def test_cfg_61_to_73_invalid_values_rejected(tmp_path: Path, section: str, key: str, value: str) -> None:
+    path = ini_copy(tmp_path, lambda cp: cp.set(section, key, value))
+    with pytest.raises(ConfigError, match=key):
+        load_config(path)
+
+
+@pytest.mark.parametrize("section, key", [
+    ("world", "planet_distance_max"), ("hazards", "wormhole_exit_distance"),
+    ("ai", "peace_shield_pct_at_fear100"), ("ai", "surrender_shield_pct"), ("ai", "roam_every_turns"),
+])
+def test_cfg_61_to_73_missing_key_names_it(tmp_path: Path, section: str, key: str) -> None:
+    path = ini_copy(tmp_path, lambda cp: cp.remove_option(section, key))
+    with pytest.raises(ConfigError, match=rf"\[{section}\] {key}"):
+        load_config(path)
