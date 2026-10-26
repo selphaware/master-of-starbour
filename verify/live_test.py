@@ -326,6 +326,27 @@ def l07(ctx: Ctx) -> list[str]:
     return problems
 
 
+def windows_at_turn(hb_dir: Path, turn_no: int, pids: dict[str, int], wait_s: float = HB_WAIT_S) -> dict:
+    """Wait up to `wait_s` for every view window's heartbeat to read `turn_no` (C5, BUS-05); return what was seen.
+    live/08 calls this from the driver's `after_over` hook, i.e. before 'new' is pushed (specs/M2.md § 3 order)."""
+    waited = C.wait_until(lambda: not C.check_heartbeats(C.read_heartbeats(hb_dir), turn_no, pids=pids), wait_s, 0.1)
+    hbs = C.read_heartbeats(hb_dir)
+    return {"turn_no": turn_no, "waited_s": round(waited, 2), "wait_s": wait_s,
+            "problems": C.check_heartbeats(hbs, turn_no, pids=pids),
+            "render_ms": {r: (hbs[r] or {}).get("render_ms") for r in C.VIEW_ROLES}}
+
+
+def windows_problems(seen: dict | None, turn_no: int) -> list[str]:
+    """live/08 — the heartbeat verdict taken at game.over, before 'new' was pushed (OUT-16, BUS-05, C5)."""
+    if not seen:                       # game.over never arrived: check_game_over already names that
+        return []
+    hb = list(seen.get("problems") or [])
+    if hb:
+        hb[-1] += (f" — waited {seen.get('waited_s', 0.0):.1f} s of {seen.get('wait_s', HB_WAIT_S):.0f} s after game.over at turn {turn_no}, "
+                   f"before 'new' was pushed; every window redraws turn.resolved {turn_no} with the game-over banner (OUT-16, BUS-05, C5)")
+    return hb
+
+
 def l08(ctx: Ctx) -> list[str]:
     """live/08 — (M2) end-to-end game over: launch teleported into a star, N turns → game.over, every
     window at turn N, save deleted, 'new' → hello at turn 0, closing T1 leaves nothing (OV-09b, MSG-09, OUT-16, C9)."""
@@ -368,17 +389,14 @@ def l08(ctx: Ctx) -> list[str]:
         problems.append("the launcher must accept --teleport and pass it to the engine role, as it does --seed (C9 C1 additions, D-104)")
         stop_everything(ctx)
         return problems
+    # Order per specs/M2.md § 3: game.over → every window at turn N → save deleted → 'new' → hello at turn 0 → close T1.
+    # The heartbeats are read inside the driver the moment game.over arrives, before it pushes 'new': afterwards the
+    # windows redraw the new game at turn 0 within milliseconds and a check made here would race them (§ 7 gate note).
+    view_pids = {r: ctx.pids[r] for r in C.VIEW_ROLES if r in ctx.pids}
     obs = C.drive_game_over(ctx.pub_port, ctx.pull_port, turns=n, save_path=save, order_after_over=False, new_game=True, turn_after_new=False,
-                            hello_timeout=15.0, turn_timeout=10.0)
+                            hello_timeout=15.0, turn_timeout=10.0, after_over=lambda _obs: windows_at_turn(ctx.hb_dir, n, view_pids))
     problems = C.check_game_over(obs, n, order_after_over=False, new_game=True, turn_after_new=False)
-    if obs.get("game_over") is not None:
-        view_pids = {r: ctx.pids[r] for r in C.VIEW_ROLES if r in ctx.pids}
-        waited = C.wait_until(lambda: not C.check_heartbeats(C.read_heartbeats(ctx.hb_dir), n, pids=view_pids), HB_WAIT_S, 0.1)
-        hb = C.check_heartbeats(C.read_heartbeats(ctx.hb_dir), n, pids=view_pids)
-        if hb:
-            hb[-1] += (f" — waited {waited:.1f} s after game.over at turn {n}; every window redraws turn.resolved {n} with the game-over "
-                       f"banner (OUT-16, BUS-05, C5)")
-        problems += hb
+    problems += windows_problems(obs.get("after_over"), n)
     kill_role(ctx, "command")
     waited = C.wait_until(lambda: ctx.launcher.poll() is not None and not C.role_processes(ctx.root), SHUTDOWN_WAIT_S, 0.2)
     if ctx.launcher.poll() is None:
@@ -393,9 +411,11 @@ def l08(ctx: Ctx) -> list[str]:
         if tail.strip():
             problems.append("launcher log tail:\n" + textwrap.indent(tail, " " * 10))
     else:
+        seen = obs.get("after_over") or {}
         print(f"         star at {star['cell']} in {star['galaxy']}/{star['sector']} (mass {float(star['mass']):.3f}, pull {pull:.3f}, N = {n}); "
-              f"game.over after {obs.get('game_over_wait_s')} s; windows at turn {n}; save deleted; new → seed "
-              f"{(obs.get('hello_after_new') or {}).get('seed')} at turn 0; everything gone {waited:.1f} s after killing T1")
+              f"game.over after {obs.get('game_over_wait_s')} s; windows at turn {n} after {seen.get('waited_s')} s, read before 'new' "
+              f"(render_ms {seen.get('render_ms')}); save deleted; new → seed {(obs.get('hello_after_new') or {}).get('seed')} at turn 0; "
+              f"everything gone {waited:.1f} s after killing T1")
     return problems
 
 
@@ -558,6 +578,48 @@ def selftest(root: Path) -> int:
                   not problems, problems)
             else:
                 t(f"live/08 driver: stub engine '{mode}' fails naming {expect}", all(any(w in m for m in problems) for w in expect), problems)
+
+    # live/08 order (M2 § 3; § 7 gate note): the heartbeats must be read before 'new' is pushed.  StubWindows redraws
+    # like T2/T3/T4 — a heartbeat per turn.resolved and per state.hello (D-70) — so once 'new' is out the files read
+    # turn 0 within milliseconds, which is what the gate's old order (check after the driver returned) raced.
+    from stub_windows import StubWindows  # noqa: E402
+    with tempfile.TemporaryDirectory() as td:
+        hb_dir = Path(td) / "hb"
+        hb_dir.mkdir()
+        save = Path(td) / "game.json"
+        my_pids = {r: os.getpid() for r in C.VIEW_ROLES}
+        eng = StubEngine("game_over", save_path=save, die_at=7)
+        eng.start()
+        eng.ready.wait(5)
+        win = StubWindows(eng.pub_port, hb_dir)
+        win.start()
+        win.ready.wait(5)
+        new_seen_in_hook: list[bool] = []
+
+        def read_windows(_obs: dict) -> dict:
+            new_seen_in_hook.append(any(str(p.get("command")) == "new" for _, p in eng.received))
+            return windows_at_turn(hb_dir, 7, my_pids, wait_s=3.0)
+        try:
+            first_draw = C.wait_until(lambda: bool(win.drawn), 3.0, 0.05)
+            t(f"stub windows: drew the stub engine's hello before the driver started ({first_draw:.2f} s)", bool(win.drawn))
+            obs = C.drive_game_over(eng.pub_port, eng.pull_port, turns=7, save_path=save, order_after_over=False, new_game=True, turn_after_new=False,
+                                    hello_timeout=10.0, turn_timeout=2.0, reply_timeout=2.0, over_timeout=2.0, file_wait=1.0, after_over=read_windows)
+            problems = C.check_game_over(obs, 7, order_after_over=False, new_game=True, turn_after_new=False) + windows_problems(obs.get("after_over"), 7)
+            seen = obs.get("after_over") or {}
+            new_reached = any(str(p.get("command")) == "new" for _, p in eng.received)
+            t(f"live/08 order: heartbeats read turn 7 inside the driver before 'new' reached the engine (waited {seen.get('waited_s')} s); "
+              f"then new → hello at turn 0 (seed {C._get(obs, 'hello_after_new', 'seed')})",
+              not problems and new_seen_in_hook == [False] and new_reached, problems or {"new seen in hook": new_seen_in_hook, "new reached": new_reached})
+            # the old order: the same assertion made after the driver has returned, i.e. after 'new' and the hello at turn 0
+            drew0 = C.wait_until(lambda: not C.check_heartbeats(C.read_heartbeats(hb_dir), 0, pids=my_pids), 3.0, 0.05)
+            stuck = C.wait_until(lambda: not C.check_heartbeats(C.read_heartbeats(hb_dir), 7, pids=my_pids), 1.0, 0.1)
+            late = C.check_heartbeats(C.read_heartbeats(hb_dir), 7, pids=my_pids)
+            t(f"live/08 order: the old order (heartbeats checked after the driver pushed 'new') fails — the windows drew turn 0 {drew0:.2f} s "
+              f"after the driver returned and never show turn 7 again (polled {stuck:.1f} s)",
+              len(late) == len(C.VIEW_ROLES) and all("turn_no 0 ≠ current turn 7" in m for m in late) and stuck >= 1.0, late)
+        finally:
+            win.stop()
+            eng.stop()
 
     def gate_status(code: str, milestone: str) -> str:
         chk = next(c for c in CHECKS if c.code == code)

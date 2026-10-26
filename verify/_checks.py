@@ -1914,11 +1914,18 @@ def check_order_cases(obs: dict, cases: list[dict]) -> list[str]:
 
 def drive_game_over(pub_port: int, pull_port: int, *, turns: int, save_path: Path | None, order_after_over: bool = True,
                     new_game: bool = True, turn_after_new: bool = True, hello_timeout: float = 15.0, turn_timeout: float = 10.0,
-                    reply_timeout: float = 5.0, over_timeout: float = 5.0, file_wait: float = 3.0) -> dict:
+                    reply_timeout: float = 5.0, over_timeout: float = 5.0, file_wait: float = 3.0,
+                    after_over: Callable[[dict], Any] | None = None) -> dict:
     """smoke/21 and live/08: end `turns` turns with the player parked where it dies at turn `turns`,
-    then exercise the game-over state machine (OV-09b, OV-09c, CMD-19, D-105, C9)."""
+    then exercise the game-over state machine (OV-09b, OV-09c, CMD-19, D-105, C9).
+
+    `after_over(obs)` runs the moment game.over has arrived — before the save check and before anything
+    else is pushed; its return value is kept as obs["after_over"].  live/08 reads the windows' heartbeats
+    there: once 'new' is out the engine publishes state.hello at turn 0 and the windows redraw it within
+    milliseconds, so a heartbeat check made after this driver returns races them (specs/M2.md § 3 orders
+    "heartbeats reach turn N" before "push new"; § 7 gate note)."""
     obs: dict = {"hello": None, "seed": None, "ship_id": None, "resolved": [], "last_snapshot_game_over": None,
-                 "game_over": None, "game_over_wait_s": None, "save_present_after_over": None,
+                 "game_over": None, "game_over_wait_s": None, "after_over": None, "save_present_after_over": None,
                  "after_over_reply": None, "hello_after_over": None, "new_reply": None, "hello_after_new": None,
                  "resolved_after_new": None, "save_present_after_new_turn": None, "notes": []}
     bo = BusObservations()
@@ -1956,6 +1963,8 @@ def drive_game_over(pub_port: int, pull_port: int, *, turns: int, save_path: Pat
         if over is None:
             obs["notes"].append(f"no game.over within {over_timeout:.0f} s of the turn.resolved of turn {turn_no} (topics seen: {dict(bo.topics)})")
             return obs
+        if after_over is not None:
+            obs["after_over"] = after_over(obs)          # live/08: the windows at turn N, read before 'new' goes out
         if save_path is not None:
             wait_until(lambda: not save_path.exists(), file_wait, 0.1)
             obs["save_present_after_over"] = save_path.exists()

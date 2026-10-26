@@ -1665,7 +1665,10 @@ def selftest(root: Path) -> int:
     t("ansi_cells: styles are tracked per character and reset",
       C.ansi_cells("a\x1b[31mb\x1b[0mc")[0] == [("a", ""), ("b", "31"), ("c", "")])
 
-    # 18. gate level, end to end: the new rows SKIP at MILESTONE M1 and FAIL (not crash) at M2 against the M1 game
+    # 18. gate level, end to end: the new rows SKIP at MILESTONE M1 and run to a verdict (PASS or FAIL — never SKIP,
+    # BLOCKED or a crash) at M2 against the game in the tree, with the exit code matching.  Until M2-build the tree
+    # held the M1 game and this branch asserted "all FAIL"; since the build landed (c34fb38) the rows PASS, so the
+    # verdict itself is not asserted here — each row's failure is proved above by its broken fixture (M2 § 3 selftest line).
     if (root / "starbour" / "__init__.py").exists():
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td) / "repo"
@@ -1673,7 +1676,7 @@ def selftest(root: Path) -> int:
             (tmp / "specs").mkdir()
             shutil.copy2(root / "controls_config.ini", tmp / "controls_config.ini")
             sel = ",".join(sorted(M2_CODES))
-            for milestone, want in (("M1", C.SKIP), ("M2", C.FAIL)):
+            for milestone, want in (("M1", C.SKIP), ("M2", None)):
                 (tmp / "specs" / "MILESTONE").write_text(milestone + "\n", encoding="utf-8")
                 res = C.run_cmd([sys.executable, str(HERE / "smoke_test.py"), str(tmp), "--select", sel], tmp, 300.0)
                 out = res.stdout + res.stderr
@@ -1682,11 +1685,17 @@ def selftest(root: Path) -> int:
                     parts = ln.split()
                     if len(parts) >= 2 and parts[1] in M2_CODES and parts[0] in (C.PASS, C.FAIL, C.SKIP, C.BLOCKED):
                         statuses[parts[1]] = parts[0]
-                ok = len(statuses) == len(M2_CODES) and all(s == want for s in statuses.values()) and "unexpected exception inside the gate" not in out
-                ok = ok and (res.returncode == (0 if want == C.SKIP else 1))
-                t(f"gate: with specs/MILESTONE = {milestone} the M1 game makes smoke/13–22 all {want} (exit {res.returncode}, {res.seconds:.1f} s)", ok,
+                complete = len(statuses) == len(M2_CODES) and "unexpected exception inside the gate" not in out
+                if want is not None:
+                    ok = complete and all(s == want for s in statuses.values()) and res.returncode == 0
+                    label = f"the game in the tree makes smoke/13–22 all {want}"
+                else:
+                    ok = complete and all(s in (C.PASS, C.FAIL) for s in statuses.values())
+                    ok = ok and res.returncode == (1 if C.FAIL in statuses.values() else 0)
+                    label = "smoke/13–22 all run to a verdict against the game in the tree (PASS or FAIL, none SKIP/BLOCKED, no crash; exit matches)"
+                t(f"gate: with specs/MILESTONE = {milestone} {label} (exit {res.returncode}, {res.seconds:.1f} s)", ok,
                   f"statuses {statuses}; tail:\n{res.tail(20)}")
-                if want == C.FAIL:
+                if want is None:
                     line = next((ln for ln in out.splitlines() if "smoke/15" in ln), "")
                     if line:
                         print(f"      gate line: {line.strip()[:200]}")
