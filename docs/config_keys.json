@@ -807,6 +807,187 @@
       "meaning": "T3 scrollback.",
       "used_by": "OB-02",
       "status": "Proposed"
+    },
+    {
+      "id": "CFG-61",
+      "section": "world",
+      "keys": [
+        "planet_distance_min",
+        "planet_distance_max"
+      ],
+      "type": "int",
+      "default": "1, 3",
+      "unit": "cells",
+      "meaning": "Chebyshev distance band from a planet to its star.",
+      "used_by": "SP-04",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-62",
+      "section": "hazards",
+      "keys": [
+        "wormhole_exit_distance"
+      ],
+      "type": "int",
+      "default": "2",
+      "unit": "cells",
+      "meaning": "Distance from the partner hole at which a ship emerges from a wormhole; decides which engines can pull away.",
+      "used_by": "HZ-05",
+      "status": "Agreed"
+    },
+    {
+      "id": "CFG-63",
+      "section": "world",
+      "keys": [
+        "galaxy_fill_pct",
+        "sector_fill_pct"
+      ],
+      "type": "int",
+      "default": "80, 80",
+      "unit": "%",
+      "meaning": "Share of universe cells holding a galaxy and of galaxy cells holding a sector; the rest are Void.",
+      "used_by": "WG-01, WG-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-64",
+      "section": "world",
+      "keys": [
+        "multi_star_pct"
+      ],
+      "type": "int",
+      "default": "20",
+      "unit": "%",
+      "meaning": "Share of star systems that are binary or triple (stars in adjacent cells).",
+      "used_by": "SP-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-65",
+      "section": "world",
+      "keys": [
+        "planets_per_system_max"
+      ],
+      "type": "int",
+      "default": "3",
+      "unit": "",
+      "meaning": "Planets per star system, 0 … max.",
+      "used_by": "SP-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-66",
+      "section": "world",
+      "keys": [
+        "hole_pct",
+        "neutron_pct",
+        "wormhole_pct"
+      ],
+      "type": "int",
+      "default": "15, 50, 30",
+      "unit": "%",
+      "meaning": "Share of sectors with a hole; share of holes that are neutron stars; share of black holes paired as wormholes.",
+      "used_by": "SP-07, ST-02…04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-67",
+      "section": "stellar",
+      "keys": [
+        "radius_min",
+        "radius_max",
+        "base_energy_min",
+        "base_energy_max"
+      ],
+      "type": "float",
+      "default": "0.3, 3.0, 1, 9",
+      "unit": "",
+      "meaning": "Uniform draws for generated stars (the tab 7 examples span 0.3 … 3 and 2 … 8).",
+      "used_by": "ST-01, DQ-01, DQ-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-68",
+      "section": "stellar",
+      "keys": [
+        "colour_names"
+      ],
+      "type": "list",
+      "default": "red, orange, yellow, yellow-white, white, blue-white, blue",
+      "unit": "",
+      "meaning": "Colour names, one more than colour_thresholds.",
+      "used_by": "DQ-04, SYM-04",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-69",
+      "section": "ui",
+      "keys": [
+        "glyph_set"
+      ],
+      "type": "str",
+      "default": "unicode",
+      "unit": "unicode | ascii",
+      "meaning": "T2 glyph set; ascii for consoles whose font lacks ★ ◎ ▲.",
+      "used_by": "SYM-01…14",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-70",
+      "section": "ships",
+      "keys": [
+        "kestrel",
+        "corsair",
+        "bastion",
+        "starting_class"
+      ],
+      "type": "list",
+      "default": "6,3,60,4,3 · 12,5,80,6,5 · 20,8,100,3,4 · kestrel",
+      "unit": "torp, phaser, shield, engine, warp",
+      "meaning": "Ship classes and the player's starting class.",
+      "used_by": "CLS-01…03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-71",
+      "section": "captain",
+      "keys": [
+        "gold_start",
+        "silver_start"
+      ],
+      "type": "int",
+      "default": "5, 50",
+      "unit": "coins",
+      "meaning": "Starting wealth.",
+      "used_by": "CP-02, CP-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-72",
+      "section": "ai",
+      "keys": [
+        "peace_shield_pct_at_fear100",
+        "surrender_shield_pct"
+      ],
+      "type": "int",
+      "default": "60, 20",
+      "unit": "%",
+      "meaning": "AI offers peace below a shield % that rises with the player's fear (CFG-30 at fear 0 → this at fear 100); at fear ≥ yield_fear_min a weaker AI surrenders its ship below surrender_shield_pct.",
+      "used_by": "EF-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-73",
+      "section": "ai",
+      "keys": [
+        "roam_every_turns"
+      ],
+      "type": "int",
+      "default": "10",
+      "unit": "turns",
+      "meaning": "An AI captain warps to a random reachable sector this often; 0 = never.",
+      "used_by": "OV-10, D-103",
+      "status": "Proposed"
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 **Generated from `docs/master_of_starbour_blueprint.xlsx` by `tools/blueprint_to_design.py`. Do not edit by hand — edit the workbook and regenerate.**
 
-Workbook version: v2.3 · 2026-10-25 · your blueprint + chat facts (A1–A22) + your answers to Q-01…Q-37 (tab 16) + M1 playtest changes (CMD-06, CMD-21, PNL-07, D-98, D-99). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
+Workbook version: v2.4 · 2026-10-26 · your blueprint + chat facts (A1–A28) + your answers to Q-01…Q-37 (tab 16) + M1/M2 playtest changes (CMD-06/21, PNL-07, SP-04, HZ-05, SUP-04b, CFG-61…73, D-98/99, D-114…117). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
 
 How to read this file:
 
@@ -38,9 +38,9 @@ Contents:
 
 ## 0 Index
 
-**Master of Starbour — Design Blueprint (structured v2.3)**
+**Master of Starbour — Design Blueprint (structured v2.4)**
 
-*v2.3 · 2026-10-25 · your blueprint + chat facts (A1–A22) + your answers to Q-01…Q-37 (tab 16) + M1 playtest changes (CMD-06, CMD-21, PNL-07, D-98, D-99). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
+*v2.4 · 2026-10-26 · your blueprint + chat facts (A1–A28) + your answers to Q-01…Q-37 (tab 16) + M1/M2 playtest changes (CMD-06/21, PNL-07, SP-04, HZ-05, SUP-04b, CFG-61…73, D-98/99, D-114…117). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
 
 ### Project
 
@@ -65,21 +65,21 @@ Live counts from each tab's Status column. Proposed = Claude's proposal awaiting
 | 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | 4 | 21 | 0 | 0 | 0 | 25 | 0.16 | 0 |
 | 5 T3 Output | Terminals | Message types, log behaviour | 5 | 5 | 12 | 0 | 0 | 22 | 0.2273 | 0 |
 | 5b T4 Status | Terminals | Permanent status panels | 2 | 5 | 0 | 0 | 0 | 7 | 0.2857 | 0 |
-| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | 6 | 6 | 0 | 0 | 0 | 12 | 0.5 | 0 |
+| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | 7 | 5 | 0 | 0 | 0 | 12 | 0.5833 | 0 |
 | 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | 5 | 7 | 0 | 0 | 0 | 12 | 0.4167 | 0 |
 | 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | 5 | 5 | 0 | 0 | 0 | 10 | 0.5 | 0 |
 | 9 Ships | Entities | Ship attributes, movement, warp curve, classes | 7 | 11 | 0 | 1 | 0 | 19 | 0.3684 | 1 |
-| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | 13 | 10 | 0 | 0 | 0 | 23 | 0.5652 | 0 |
+| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | 14 | 9 | 0 | 0 | 0 | 23 | 0.6087 | 0 |
 | 11 Items & Planets | Entities | Items, element catalogue, planets | 14 | 21 | 0 | 0 | 0 | 35 | 0.4 | 0 |
 | 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | 17 | 3 | 0 | 0 | 0 | 20 | 0.85 | 0 |
-| 13 Combat | Rules | Combat model recommendation, outcomes, loot | 6 | 11 | 0 | 0 | 0 | 17 | 0.3529 | 0 |
-| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | 8 | 14 | 0 | 0 | 0 | 22 | 0.3636 | 0 |
-| 15 Config Keys | Config | Config keys for controls_config.ini | 17 | 43 | 0 | 0 | 0 | 60 | 0.2833 | 0 |
+| 13 Combat | Rules | Combat model recommendation, outcomes, loot | 8 | 9 | 0 | 0 | 0 | 17 | 0.4706 | 0 |
+| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | 9 | 13 | 0 | 0 | 0 | 22 | 0.4091 | 0 |
+| 15 Config Keys | Config | Config keys for controls_config.ini | 19 | 54 | 0 | 0 | 0 | 73 | 0.2603 | 0 |
 | 16 Open Questions | Questions | Open design questions, answers, resolution | 37 | 0 | 0 | 0 | 0 | 37 | 1 | — |
-| 17 Decisions | Decisions | Decision log | 55 | 0 | 0 | 0 | 0 | 55 | 1 | — |
-| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | 17 | 7 | 0 | 0 | 9 | 33 | 0.5152 | 8 |
+| 17 Decisions | Decisions | Decision log | 59 | 0 | 0 | 0 | 0 | 59 | 1 | — |
+| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | 25 | 8 | 0 | 0 | 0 | 33 | 0.7576 | 0 |
 | Source v1 | Source | Original blueprint, verbatim, plus chat addendum | — | — | — | — | — | — | — | — |
-| Total |  |  | 261 | 191 | 22 | 1 | 9 | 484 | 0.5393 | 9 |
+| Total |  |  | 280 | 198 | 22 | 1 | 0 | 501 | 0.5589 | 1 |
 
 ### Legend
 
@@ -406,7 +406,7 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | SP-01 | Seed | Everything is generated from one seed; the same seed gives the same universe. | Wormhole pairs fixed at seeding. | [world] seed | Q-08 | Ans Q-08, Q-11 | Agreed |
 | SP-02 | Star systems | One star per cell; binary / triple systems are stars in adjacent cells. |  | [world] multi_star_pct | Q-06 | Ans Q-06 | Agreed |
 | SP-03 | Item density | About 10 special items and 100 normal items per galaxy. |  | [world] special_items_per_galaxy = 10, normal_items_per_galaxy = 100 | Q-07 | Ans Q-07 | Agreed |
-| SP-04 | Planets | Planets sit in a cell adjacent to a star; 0–3 per system. |  | [world] planets_per_system_max = 3 |  | Claude | Proposed |
+| SP-04 | Planets | Planets sit at a Chebyshev distance planet_distance_min … planet_distance_max from their star (both config; 1 … 3 by default, so some systems are compact and some spread); 0–3 per system. A planet's cell is never inside another star's cell. |  | [world] planets_per_system_max = 3, planet_distance_min = 1, planet_distance_max = 3 |  | Claude; Chat A24 | Agreed |
 | SP-05 | Starting position | Player starts in a sector with a planet and no black hole or neutron star. |  | [world] safe_start = true | Q-08 | Claude | Proposed |
 | SP-06 | AI captains | 3 AI captains per galaxy, placed in random safe sectors. |  | [world] ai_captains_per_galaxy = 3 | Q-13 | Claude | Proposed |
 | SP-07 | Sector density | Per sector: 0–3 stars, 0–1 black hole or neutron star (never with the player's start), items per SP-03. |  | [world] * |  | Claude | Proposed |
@@ -486,7 +486,7 @@ Inputs are placeholders; tune in playtest.
 | HZ-02 | Star | Ship in the same cell | Pull nets against speed; if the ship does not get out, it is pulled in after N turns and destroyed. | N = ceil(pull_turns_scale / pull); Sun-like ≈ 7 turns | [hazards] pull_turns_scale = 7 | Q-02 | BP r66–67; Ans Q-02 | Agreed |
 | HZ-03 | Star | Ship in the same cell | Shields drain each turn by the star's bucket. | low 5 · medium 10 · high 20 per turn (of 100) | [hazards] drain_low = 5, drain_medium = 10, drain_high = 20 | Q-03 | Ans Q-03; Claude | Proposed |
 | HZ-04 | Black hole | Ship anywhere in the sector | Pull nets against speed at every distance; a ship whose engine ≤ pull cannot move away. Pulled in and destroyed after N turns if it does not get out. | see calculator | [stellar] blackhole_mass = 20 | Q-02 | BP r70, r72; Ans Q-02 | Agreed |
-| HZ-05 | Wormhole | Ship pulled into a wormhole black hole | Emerges at the fixed partner (same or other galaxy), alive; pulled in again if it stays. |  |  | Q-11 | BP r71–72; Ans Q-11 | Agreed |
+| HZ-05 | Wormhole | Ship pulled into a wormhole black hole | Emerges alive at the free cell nearest to wormhole_exit_distance cells from the partner hole (same or other galaxy), countdown reset, inside the partner's pull; pulled in again if it does not get out. At the default 2 a Kestrel (engine 4) is held and a Corsair (engine 6) pulls away — the exit distance decides which engines escape (see the calculator). |  | [hazards] wormhole_exit_distance = 2 | Q-11 | BP r71–72; Ans Q-11; Chat A25–A28 (distance: Claude's 2, agreed) | Agreed |
 | HZ-06 | Neutron star | Ship anywhere in the sector | As a black hole with lower mass; no shield drain; no wormhole. | see calculator | [stellar] neutron_mass = 8 | Q-09 | Ans Q-09; Claude | Proposed |
 | HZ-07 | Planet | Ship in the same cell | No hazard; trading and landing happen here. |  |  | Q-21 | Claude | Proposed |
 | HZ-08 | Countdown reset | Ship leaves the pull range (star: the cell; hole: the sector) | Countdown resets to N. |  |  | Q-02 | Claude | Proposed |
@@ -612,7 +612,7 @@ Captain class — Captain = {name, gold_coins, silver_coins, items, fear_level, 
 | ID | Rule | Statement | Notes | Example | Open Q | Origin | Status |
 |---|---|---|---|---|---|---|---|
 | FL-01 | Switching | The command terminal switches the active ship; each ship has its own order queue. |  |  | Q-13 | BP r13; Claude | Proposed |
-| FL-02 | Acquiring ships | Buy from a planet (price in gold) or capture: a ship whose captain accepts peace at 0 shields surrenders it. |  |  | Q-13 | Claude | Proposed |
+| FL-02 | Acquiring ships | Buy from a planet (price in gold) or capture: a ship whose captain accepts peace at 0 shields surrenders it. |  |  | Q-13 | Claude; Chat A26 | Agreed |
 | FL-03 | Inactive ships | Hold position unless in the active ship's cell (then they move with it). |  |  | Q-13 | Claude | Proposed |
 | FL-04 | Game over | Game over when the player's active ship is destroyed — the captain is on it. Other owned ships do not save the run. |  |  | Q-29 | Ans Q-29; Chat A10 | Agreed |
 | FL-05 | Fleet in battle | All ships in range fight under the same rules; strength for fear / respect is the fleet total. |  |  | Q-13, Q-22 | Ans Q-13, Q-22 | Agreed |
@@ -658,7 +658,7 @@ Your rule: at zero food or water the crew mutiny and the captain is demoted to a
 | SUP-02 | Warning | T3 / T4 warn when either is ≤ warn_turns; at 0 the mutiny countdown shows. |  | [supplies] warn_turns = 5 | Q-19 | Claude | Proposed |
 | SUP-03 | Mutiny | After mutiny_turns_at_zero consecutive turns with food or water at 0, the crew mutiny and take the active ship. | Not game over. | [supplies] mutiny_turns_at_zero = 3 | Q-19 | Chat A11 | Agreed |
 | SUP-04 | With a fleet | If the captain owns other ships, the captain moves to one of them (the nearest — Proposed detail) and carries on. |  |  | Q-19 | Chat A19; Claude (nearest) | Agreed |
-| SUP-04b | Without a fleet | If no other ship is available, the captain is demoted: a Kestrel-class ship in the same cell with mutiny_supplies food and water; coins and items kept; fear −mutiny_fear_delta. |  | [supplies] mutiny_ship_class = Kestrel, mutiny_supplies = 10, mutiny_fear_delta = 10 | Q-19 | Chat A11, A19; Claude (values) | Agreed |
+| SUP-04b | Without a fleet | If no other ship is available, the captain is demoted: a Kestrel-class ship with mutiny_supplies food and water appears at the nearest cell of the same sector that is outside every hazard's pull range (the same cell when that cell is safe); coins and items kept; fear −mutiny_fear_delta. The mutineers keep the old ship where it is. |  | [supplies] mutiny_ship_class = Kestrel, mutiny_supplies = 10, mutiny_fear_delta = 10 | Q-19 | Chat A11, A19, A28; Claude (values, placement) | Agreed |
 | SUP-04c | The mutineers | They keep the taken ship and become a new AI captain. |  |  | Q-19 | Chat A18 | Agreed |
 | SUP-05 | Mastery | A Master of Starbour has infinite wealth, so supplies never run out. |  |  | Q-37 | Claude | Proposed |
 
@@ -774,9 +774,9 @@ One exchange per turn; battle = being in weapon range. Alternatives and failure 
 |---|---|---|---|---|---|---|---|---|
 | CM-01 | Starting a fight | Any 'fire' order on a target not already in battle with you starts one; costs respect; asks for confirmation. |  |  | [respect] start_fight_delta | Q-23 | BP r100; Ans Q-34 | Agreed |
 | CM-02 | Range | Phasers 2 cells, torpedoes 5 cells (Chebyshev). Being inside any enemy's range = in battle. | Gives escape a meaning without dice. | [ALTERNATIVE] same-cell only — too binary with 24 × 24 sectors. | [battle] phaser_range = 2, torpedo_range = 5 | Q-12 | Claude | Proposed |
-| CM-03 | Torpedoes | Ammo; each fired torpedo hits with p = 0.7 − 0.03 × target engine; damage 25. | Fast ships dodge. | [RISK] randomness in a deterministic game — keep the seed in the RNG so replays match. | [battle] torpedo_hit_base = 0.7, torpedo_evade_per_engine = 0.03, torpedo_damage = 25 | Q-12 | Claude | Proposed |
+| CM-03 | Torpedoes | Ammo; each fired torpedo hits with p = 0.7 − 0.03 × target engine; damage 25. | Fast ships dodge. | [RISK] randomness in a deterministic game — keep the seed in the RNG so replays match. | [battle] torpedo_hit_base = 0.7, torpedo_evade_per_engine = 0.03, torpedo_damage = 25 | Q-12 | Claude; Chat A26 | Agreed |
 | CM-04 | Phasers | Always hit; damage = phasers × 5 × (1 − distance / 3). | Reliable close-range weapon. |  | [battle] phaser_damage_per_unit = 5 | Q-12 | Claude | Proposed |
-| CM-05 | Shields | Absorb all damage; at 0 the next hit destroys (Q-03). Recharge 5 / turn outside battle and hazards. |  |  | [battle] shield_recharge = 5 | Q-03 | Ans Q-03; Claude | Proposed |
+| CM-05 | Shields | Absorb all damage; at 0 the next hit destroys (Q-03). Recharge 5 / turn outside battle and hazards. | Recharge happens anywhere outside hazards and battle (no repair yards exist); the rate is config. |  | [battle] shield_recharge = 5 | Q-03 | Ans Q-03; Claude; Chat A23, A26 | Agreed |
 | CM-06 | Exchange order | Per turn: all torpedoes resolve, then phasers, simultaneously for both sides; destruction checked after. | Both sides can die in the same exchange — rare, dramatic, fair. |  |  | Q-01 | Claude | Proposed |
 | CM-07 | Rounds per turn | One exchange per turn; a battle spans several turns. | Gives time to escape or sue for peace — matches 'battle every 5–7 turns' pacing. | [ALTERNATIVE] resolve to the end in one turn — no decisions mid-battle. |  | Q-12 | Claude | Proposed |
 | CM-08 | Opponent strength | strength = Σ over the fleet of (shield_current + torpedoes × 25 + phasers × 5 × 3). Stronger = strength ratio > 1.0. | Shields and weapons, fleet included (your Q-22). |  |  | Q-22 | Ans Q-22; Claude | Proposed |
@@ -829,7 +829,7 @@ Split agreed (Chat A13): FEAR acts on ships — AI captains yield. RESPECT acts 
 |---|---|---|---|---|---|---|---|---|
 | EF-00 | The split | Fear → ships yield. | Respect → planets comply. |  |  | Q-24 | Chat A13 | Agreed |
 | EF-01 | AI captains — attacking | Attack the player only if the player's fear < attack_fear_max, or they are ≥ attack_ratio_min stronger. | — |  | [ai] attack_fear_max = 50, attack_ratio_min = 1.3 | Q-24 | Claude | Proposed |
-| EF-02 | AI captains — yielding | Offer peace earlier as fear rises (shield threshold 30% at fear 0 → 60% at fear 100); at fear ≥ yield_fear_min a weaker captain surrenders the ship outright when its shields drop below 20%. | Accept the player's peace offers more readily as respect rises. | Surrender = the player gains the ship (FL-02). | [ai] yield_fear_min = 80 | Q-24 | Claude | Proposed |
+| EF-02 | AI captains — yielding | Offer peace earlier as fear rises (shield threshold 30% at fear 0 → 60% at fear 100); at fear ≥ yield_fear_min a weaker captain surrenders the ship outright when its shields drop below 20%. | Accept the player's peace offers more readily as respect rises. | Surrender = the player gains the ship (FL-02). | [ai] peace_shield_pct (at fear 0) = 30, peace_shield_pct_at_fear100 = 60, yield_fear_min = 80, surrender_shield_pct = 20 | Q-24 | Claude; Chat A26 | Agreed |
 | EF-03 | AI captains — trade | — | Accept trades at slightly worse terms for themselves as respect rises (±10%). | Minor; delete if you want respect to be planets-only. | [economy] respect_price_band = 10 | Q-24 | Claude | Proposed |
 | EF-04 | Planets — trade | — | Refuse trade below planet_refuse_respect; prices improve up to planet_price_band % at respect 100. |  | [economy] planet_refuse_respect = 20, planet_price_band = 20 | Q-24 | Chat A13; Claude | Proposed |
 | EF-05 | Planets — attacking | — | May attack if respect < planet_attack_respect_max and they are stronger. |  | [ai] planet_attack_respect_max = 20 | Q-24 | Claude | Proposed |
@@ -909,6 +909,19 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-58 | [world] | safe_start | bool | true |  | Start sector has a planet and no hole. | SP-05 | Q-08 | Claude | Proposed |
 | CFG-59 | [bus] | pub_port, pull_port | int | 5555, 5556 |  | ZeroMQ localhost ports. | BUS-03 | Q-18 | Ans Q-18 | Agreed |
 | CFG-60 | [ui] | log_lines | int | 500 |  | T3 scrollback. | OB-02 | Q-31 | Claude | Proposed |
+| CFG-61 | [world] | planet_distance_min, planet_distance_max | int | 1, 3 | cells | Chebyshev distance band from a planet to its star. | SP-04 |  | Chat A24 | Agreed |
+| CFG-62 | [hazards] | wormhole_exit_distance | int | 2 | cells | Distance from the partner hole at which a ship emerges from a wormhole; decides which engines can pull away. | HZ-05 | Q-11 | Claude; Chat A28 | Agreed |
+| CFG-63 | [world] | galaxy_fill_pct, sector_fill_pct | int | 80, 80 | % | Share of universe cells holding a galaxy and of galaxy cells holding a sector; the rest are Void. | WG-01, WG-02 | Q-05 | Claude (D-71) | Proposed |
+| CFG-64 | [world] | multi_star_pct | int | 20 | % | Share of star systems that are binary or triple (stars in adjacent cells). | SP-02 | Q-06 | Claude (D-71) | Proposed |
+| CFG-65 | [world] | planets_per_system_max | int | 3 |  | Planets per star system, 0 … max. | SP-04 |  | Claude (D-71) | Proposed |
+| CFG-66 | [world] | hole_pct, neutron_pct, wormhole_pct | int | 15, 50, 30 | % | Share of sectors with a hole; share of holes that are neutron stars; share of black holes paired as wormholes. | SP-07, ST-02…04 | Q-09, Q-11 | Claude (D-89) | Proposed |
+| CFG-67 | [stellar] | radius_min, radius_max, base_energy_min, base_energy_max | float | 0.3, 3.0, 1, 9 |  | Uniform draws for generated stars (the tab 7 examples span 0.3 … 3 and 2 … 8). | ST-01, DQ-01, DQ-02 | Q-10 | Claude (D-89) | Proposed |
+| CFG-68 | [stellar] | colour_names | list | red, orange, yellow, yellow-white, white, blue-white, blue |  | Colour names, one more than colour_thresholds. | DQ-04, SYM-04 | Q-10 | Claude (D-71) | Proposed |
+| CFG-69 | [ui] | glyph_set | str | unicode | unicode \| ascii | T2 glyph set; ascii for consoles whose font lacks ★ ◎ ▲. | SYM-01…14 |  | Claude (D-68) | Proposed |
+| CFG-70 | [ships] | kestrel, corsair, bastion, starting_class | list | 6,3,60,4,3 · 12,5,80,6,5 · 20,8,100,3,4 · kestrel | torp, phaser, shield, engine, warp | Ship classes and the player's starting class. | CLS-01…03 |  | Claude (D-71) | Proposed |
+| CFG-71 | [captain] | gold_start, silver_start | int | 5, 50 | coins | Starting wealth. | CP-02, CP-03 | Q-14 | Claude (D-71) | Proposed |
+| CFG-72 | [ai] | peace_shield_pct_at_fear100, surrender_shield_pct | int | 60, 20 | % | AI offers peace below a shield % that rises with the player's fear (CFG-30 at fear 0 → this at fear 100); at fear ≥ yield_fear_min a weaker AI surrenders its ship below surrender_shield_pct. | EF-02 | Q-24 | Claude | Proposed |
+| CFG-73 | [ai] | roam_every_turns | int | 10 | turns | An AI captain warps to a random reachable sector this often; 0 = never. | OV-10, D-103 | Q-13 | Claude | Proposed |
 
 ---
 
@@ -1010,16 +1023,16 @@ Status = whether the file exists yet.
 
 | ID | File | Purpose | Notes | Open Q | Origin | Status |
 |---|---|---|---|---|---|---|
-| KIT-01 | DESIGN.md / PRD | Design document generated from this workbook. |  |  | Project | Not started |
-| KIT-02 | BOOTSTRAP.md | First prompt for Claude Code. |  |  | Project | Not started |
-| KIT-03 | CLAUDE.md | Standing instructions in the repo. |  |  | Project | Not started |
-| KIT-04 | SETUP.md | Python 3.12, venv MOS, dependencies. |  |  | Project | Not started |
-| KIT-05 | DECISIONS.md | Exported from 17 Decisions. |  |  | Project | Not started |
-| KIT-06 | controls_config.ini | Generated from 15 Config Keys. |  |  | BP r111 | Not started |
-| KIT-07 | Milestone specs | M1 engine + bus + grids; M2 movement + hazards; M3 combat + reputation; M4 trade + items + endgame; M5 packaging. |  |  | Claude | Proposed |
-| KIT-08 | build.ps1 / launch.ps1 | Build the exe; launch the processes. |  |  | Project | Not started |
-| KIT-10 | LICENSE | MIT licence text with the copyright line. |  | Q-27 | Chat A20 | Not started |
-| KIT-09 | Gates / harness | Turns advance; AI acts; viewports fresh; no orphans; exe runs; game over fires on destruction; mutiny fires at zero supplies; mastery fires. Includes an AI-only run-to-completion check (robustness, not a pacing target). |  |  | Project; Chat A15 | Not started |
+| KIT-01 | DESIGN.md / PRD | Design document generated from this workbook. | Exists: docs/DESIGN.md (generated) — repo commit 2bc85af or earlier. |  | Project | Agreed |
+| KIT-02 | BOOTSTRAP.md | First prompt for Claude Code. | Exists: docs/BOOTSTRAP.md — repo commit 2bc85af or earlier. |  | Project | Agreed |
+| KIT-03 | CLAUDE.md | Standing instructions in the repo. | Exists: CLAUDE.md — repo commit 2bc85af or earlier. |  | Project | Agreed |
+| KIT-04 | SETUP.md | Python 3.12, venv MOS, dependencies. | Exists: docs/SETUP.md — repo commit 2bc85af or earlier. |  | Project | Agreed |
+| KIT-05 | DECISIONS.md | Exported from 17 Decisions. | Exists: docs/DECISIONS.md (generated + kit rows) — repo commit 2bc85af or earlier. |  | Project | Agreed |
+| KIT-06 | controls_config.ini | Generated from 15 Config Keys. | Exists: controls_config.ini — repo commit 2bc85af or earlier. |  | BP r111 | Agreed |
+| KIT-07 | Milestone specs | Milestone specs: M1 engine + bus + grids (done) · M2 movement + hazards (done) · M3 ship combat + reputation + fleets · M4 planets + trade + items + upgrades · M5 endgame + mastery · M6 packaging. Six, not five: planets and the endgame each earned their own gate set. | specs/M1.md, specs/M2.md exist; specs/M3.md next. |  | Claude | Proposed |
+| KIT-08 | build.ps1 / launch.ps1 | Build the exe; launch the processes. | launch.ps1 and launch.bat exist; build.ps1 arrives with packaging (M6). |  | Project | Proposed |
+| KIT-10 | LICENSE | MIT licence text with the copyright line. | Exists: LICENSE — repo commit 2bc85af or earlier. | Q-27 | Chat A20 | Agreed |
+| KIT-09 | Gates / harness | Turns advance; AI acts; viewports fresh; no orphans; exe runs; game over fires on destruction; mutiny fires at zero supplies; mastery fires. Includes an AI-only run-to-completion check (robustness, not a pacing target). | Exists: verify/ (smoke_test, live_test, hook_gate) — repo commit 2bc85af or earlier. |  | Project; Chat A15 | Agreed |
 
 ---
 
@@ -1139,3 +1152,9 @@ Addendum — stated in chat on 2026-10-25, verbatim.
 - **A20** — Choose the best license for this.
 - **A21** — we should show the queued orders in status.
 - **A22** — when doing e.g. move +0 +10 but engine = 4 i.e. max impulse speed, it correctly moves +0 +4, but should save for the next move for next turn i.e. move +0 +6, then +0 +2... these commands should be queued. we can have a all stop command to cease further moving.
+- **A23** — i noticed the shields increased, is that normal, and why? also i noticed the planets are next to the star, are they in other cells away from the star like our solar system in other sectors?
+- **A24** — Agreed on: Config distance band — `[world] planet_distance_min = 1, planet_distance_max = 3`, so some systems are spread. Cheap, keeps the rule configurable (D-49). I'd recommend this if you want variety.
+- **A25** — wormhole: leave distance at 1, so the user will need to pull away with impulse, but if their impulse engine is not great enough then, yes they are stuck. does that work?
+- **A26** — agreed with your other clarity points
+- **A27** — on the wormhole, what do you recommend, being one cell away?
+- **A28** — go for it  [in answer to: wormhole exit distance 2 recommended; and the demoted captain's Kestrel appearing at the nearest cell outside any pull range]
