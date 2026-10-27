@@ -124,12 +124,20 @@ class CommandTerminal:
         return str(cap.get("active_ship") or "")
 
     def ship_names(self) -> list[str]:
+        """UX-05: owned ship names, plus the ids and names of every ship in the active ship's sector (fire / peace targets)."""
         snap, _ = self.listener.current()
         if not snap:
             return []
         cap = (snap.get("captains") or {}).get(snap.get("player_id")) or {}
         ships = snap.get("ships") or {}
-        return [str(ships[s]["name"]) for s in cap.get("ships") or [] if s in ships]
+        names = [str(ships[s]["name"]) for s in cap.get("ships") or [] if s in ships]
+        active = ships.get(cap.get("active_ship")) or {}
+        pos = active.get("position") or []
+        for sid, s in ships.items():
+            p = s.get("position") or []
+            if len(p) == 3 and len(pos) == 3 and list(p[:2]) == list(pos[:2]) and s.get("captain") != snap.get("player_id"):
+                names += [sid, str(s.get("name", sid)), str(s.get("captain", ""))]
+        return names
 
     def active_ship(self) -> dict | None:
         snap, _ = self.listener.current()
@@ -272,8 +280,17 @@ class CommandTerminal:
         snap, _ = self.listener.current()
         snap = snap or {}
         if cmd == "help":
-            for t in RC.help_text(parse_help(args)):
+            for t in RC.help_text(parse_help(args), self.cfg):
                 self.console.print(t)
+        elif cmd == "fire":
+            # CM-01 / UX-04: firing on a captain you are not yet in battle with starts a fight - confirm first
+            target, tcap, fighting = RC.battle_with(snap, args[1]) if len(args) > 1 else (None, None, False)
+            if target is not None and tcap is not None and not fighting:
+                question = f"Start a fight with {tcap.get('name', tcap.get('id'))}? Respect −{self.cfg.respect_start_fight_delta}"
+                if not self.confirm(session, question):
+                    self.console.print("  fire order not sent", style=P.STYLES["command_info"])
+                    return True
+            self.show_reply(self.send_order(cmd, args), line)
         elif cmd == "status":
             for t in RC.status_lines(snap, self.cfg):
                 self.console.print(t)

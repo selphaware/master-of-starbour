@@ -50,12 +50,20 @@ def test_counts_at_default_sizes(cfg: GameConfig, default_state) -> None:
 
 
 def test_planets_adjacent_to_a_star(small_cfg: GameConfig) -> None:
-    world = generate_world(7, small_cfg)
-    for sector in world.sectors.values():
-        stars = [t.cell for t in sector.terrain() if t.kind == STAR]
-        for t in sector.terrain():
-            if t.kind == PLANET:
-                assert any(chebyshev(t.cell, s) == 1 for s in stars), f"planet at {t.cell} in {sector.key} has no adjacent star (SP-04)"
+    """SP-04 / CFG-61 / D-116: every planet lies planet_distance_min...max (Chebyshev) from a star, and some lie beyond the minimum."""
+    lo, hi = small_cfg.planet_distance_min, small_cfg.planet_distance_max
+    spread = judged = 0
+    for seed in (7, 1234):
+        world = generate_world(seed, small_cfg)
+        for sector in world.sectors.values():
+            stars = [t.cell for t in sector.terrain() if t.kind == STAR]
+            for t in sector.terrain():
+                if t.kind == PLANET:
+                    d = min(chebyshev(t.cell, s) for s in stars)
+                    assert lo <= d <= hi, f"planet at {t.cell} in {sector.key} is {d} from its nearest star, band {lo}...{hi} (SP-04, D-116)"
+                    judged += 1
+                    spread += d > lo
+    assert judged and spread, "the band is used: some planets sit beyond the minimum distance (D-116)"
 
 
 def test_binary_stars_are_adjacent_when_multi() -> None:

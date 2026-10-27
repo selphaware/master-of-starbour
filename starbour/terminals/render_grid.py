@@ -121,26 +121,37 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
                 cell = tuple(item.get("cell", (-1, -1)))
                 special = item.get("rarity") == "special"
                 cells[cell] = (g["item_special" if special else "item"], P.STYLES["item_special" if special else "item"])
-    # ships: active > owned > AI (SYM-14)
+    # ships: active > owned > AI in battle with you > AI (SYM-11, SYM-12, SYM-14); the last target carries the GRD-08 marker
     player_id = snapshot.get("player_id")
+    my_battles = {s.get("in_battle") for s in (snapshot.get("ships") or {}).values() if s.get("captain") == player_id and s.get("in_battle")}
+    target_id = ship.get("target")
     ai_cells: set[tuple[int, int]] = set()
+    battle_cells: set[tuple[int, int]] = set()
     owned_cells: set[tuple[int, int]] = set()
+    target_cell: tuple[int, int] | None = None
     for sid, s in (snapshot.get("ships") or {}).items():
         pos = s.get("position")
         if not pos or list(pos[0]) != [gx, gy] or list(pos[1]) != [sx, sy]:
             continue
         cell = (int(pos[2][0]), int(pos[2][1]))
+        if sid == target_id:
+            target_cell = cell
         if sid == cap.get("active_ship"):
             continue
         if s.get("captain") == player_id:
             owned_cells.add(cell)
+        elif s.get("in_battle") and s.get("in_battle") in my_battles:
+            battle_cells.add(cell)
         else:
             ai_cells.add(cell)
     for cell in ai_cells:
         cells[cell] = (g["ship_ai"], P.STYLES["ship_ai"])
+    for cell in battle_cells:
+        cells[cell] = (g["ship_ai"], P.STYLES["ship_ai_battle"])
     for cell in owned_cells:
         cells[cell] = (g["ship_owned"], P.STYLES["ship_owned"])
     cells[(cx, cy)] = (g["ship_active"], P.STYLES["ship_active"])
+    in_battle = ship.get("in_battle")
 
     hazard = ship.get("hazard") if isinstance(ship.get("hazard"), dict) else None
     label = str(hazard.get("turns_left")) if hazard is not None and hazard.get("turns_left") is not None else ""
@@ -153,6 +164,7 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
     head = _line((f"Sector {sx},{sy}", P.STYLES["title"]), ("  galaxy ", P.STYLES["label"]), (f"{gx},{gy}", P.STYLES["value"]),
                  ("  turn ", P.STYLES["label"]), (f"{turn_no}", P.STYLES["value"]),
                  ("  fog ", P.STYLES["label"]), ("on" if fog else "off", P.STYLES["value"]),
+                 (f"  BATTLE {in_battle}" if in_battle else "", P.STYLES["ship_ai_battle"]),
                  ("" if show_terrain else "  (unexplored - terrain hidden)", P.STYLES["warn"]))
     lines.append(head)
     lines.extend(_column_labels(x0, x1, indent))
@@ -164,6 +176,10 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
             glyph, style = cells.get((x, y), (void_glyph, void_style))
             tint_kind = sector_tint or star_tints.get((x, y))
             style = P.tinted(style, tint_kind)
+            if target_cell == (x, y) and (x, y) != (cx, cy):
+                chars.append((glyph, style))
+                chars.extend((ch, P.tinted(P.STYLES["target"], tint_kind)) for ch in g["target"].ljust(CELL_W - 1))   # GRD-08
+                continue
             text = glyph.ljust(CELL_W)
             chars.extend((ch, style) for ch in text)
         if label and y == cy:
@@ -196,16 +212,17 @@ def _legend(cfg: GameConfig, level: str) -> Text:
     g = P.glyphs(cfg)
     t = Text(no_wrap=True, overflow="crop")
     if level == "sector":
-        entries = (("ship_active", "you"), ("ship_owned", "yours"), ("ship_ai", "AI"), ("star", "star"), ("planet", "planet"),
-                   ("black_hole", "black hole"), ("neutron_star", "neutron"), ("wormhole", "wormhole"), ("item", "item"),
-                   ("item_special", "special"), ("void", "void"))
+        entries = (("ship_active", "you"), ("ship_owned", "yours"), ("ship_ai", "AI"), ("ship_ai_battle", "in battle"), ("target", "target"),
+                   ("star", "star"), ("planet", "planet"), ("black_hole", "black hole"), ("neutron_star", "neutron"), ("wormhole", "wormhole"),
+                   ("item", "item"), ("item_special", "special"), ("void", "void"))
     elif level == "galaxy":
         entries = (("here", "your sector"), ("sector", "sector"), ("void", "void"))
     else:
         entries = (("here", "your galaxy"), ("galaxy", "galaxy"), ("void", "void"))
     for key, label in entries:
         style = P.STYLES.get(key, P.STYLES["value"]) if key != "star" else P.star_style("yellow")
-        t.append(g[key], style=style)
+        glyph = g["ship_ai"] if key == "ship_ai_battle" else (g["ship_ai"] + g["target"] if key == "target" else g[key])
+        t.append(glyph, style=style)
         t.append(f" {label}  ", style=P.STYLES["label"])
     if level == "sector":
         t.append(" ", style=P.tinted(P.STYLES["void"], "black_hole"))

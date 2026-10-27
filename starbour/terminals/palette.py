@@ -25,11 +25,12 @@ GLYPHS: dict[str, dict[str, str]] = {
         "ship_owned": "△",    # SYM-11 white up triangle
         "ship_ai": "▼",       # SYM-12 down triangle
         "here": "◆",          # galaxy/universe view: the cell holding the active ship
+        "target": "<",        # GRD-08: follows the glyph of the ship named in the last fire / peace order
     },
     "ascii": {
         "void": ".", "galaxy": "@", "sector": "#", "star": "*", "neutron_star": "+", "black_hole": "O",
         "wormhole": "0", "planet": "o", "item": "?", "item_special": "$", "ship_active": "^", "ship_owned": "A",
-        "ship_ai": "v", "here": "X",
+        "ship_ai": "v", "here": "X", "target": "<",
     },
 }
 
@@ -49,7 +50,9 @@ STYLES: dict[str, str] = {
     "ship_active": "bold bright_cyan",
     "ship_owned": "cyan",
     "ship_ai": "dark_orange",
-    "ship_ai_battle": "bold red",
+    "ship_ai_battle": "bold red",        # SYM-12: an AI ship in battle with you
+    "target": "bold bright_yellow",      # GRD-08 target marker
+    "battle_panel": "bold red",          # PNL-06 border while in battle
     "title": "bold bright_cyan",
     "subtitle": "bright_cyan",
     "label": "grey70",

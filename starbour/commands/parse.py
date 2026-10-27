@@ -1,8 +1,9 @@
-"""Text -> Order | CommandError - CMD-01...21, UX-03, D-73, D-98.  Pure: no state, no I/O.
+"""Text -> Order | CommandError - CMD-01...21, UX-03, D-73, D-98, D-120, D-122, D-123.  Pure: no state, no I/O.
 
 Syntax is checked here; validity against the game (speed vs engine power, target inside
-the sector, warp reach) is checked in ``starbour.engine.orders`` against the state.  Every
-message names the CMD id so T1 and T3 can echo it (UX-03, OUT-13).
+the sector, warp reach, weapon range, a battle to make peace in) is checked in
+``starbour.engine.orders`` against the state.  Every message names the CMD id so T1 and
+T3 can echo it (UX-03, OUT-13).
 """
 from __future__ import annotations
 
@@ -12,6 +13,10 @@ from dataclasses import dataclass
 from starbour.commands.catalogue import COMMANDS, IMMEDIATE, QUEUED, lookup
 
 VIEW_LEVELS = ("universe", "galaxy", "sector", "follow")
+WEAPONS = ("torpedo", "phaser")
+WEAPON_WORDS = {"torpedo": "torpedo", "torpedoes": "torpedo", "torpedos": "torpedo", "phaser": "phaser", "phasers": "phaser"}
+PEACE_ACTIONS = ("offer", "accept", "reject")
+MOVE_SYNTAX_ERROR = "move 5 7 (absolute) or move +2 -1 (relative) — not a mixture (CMD-06, D-127)"
 
 
 class CommandError(Exception):
@@ -71,6 +76,23 @@ class WarpSpec:
     factor: float | None
 
 
+@dataclass(frozen=True, slots=True)
+class FireSpec:
+    """CMD-08 / D-120: ``fire torpedo <target> [n]`` (n torpedoes, default 1) or ``fire phaser <target>``."""
+
+    weapon: str
+    target: str
+    count: int
+
+
+@dataclass(frozen=True, slots=True)
+class PeaceSpec:
+    """CMD-10 / D-122: ``peace offer | accept | reject <captain>``."""
+
+    action: str
+    captain: str
+
+
 def tokenize(text: str) -> list[str]:
     try:
         return shlex.split(text, posix=True)
@@ -112,6 +134,16 @@ def _signed(value: str) -> bool:
     return value[:1] in ("+", "-") and value[1:].lstrip("0123456789") == "" and len(value) > 1
 
 
+def _speed(value: str, cmd_id: str) -> float:
+    try:
+        speed = float(value)
+    except ValueError:
+        raise CommandError(f"speed must be a number, got {value!r} ({cmd_id})") from None
+    if speed <= 0:
+        raise CommandError(f"speed must be greater than 0 ({cmd_id})")
+    return speed
+
+
 def parse_move(args: list[str] | tuple[str, ...]) -> MoveSpec:
     """CMD-06, D-73: both numbers signed (+3 -1) = relative; both unsigned (12 7) = absolute."""
     if len(args) not in (2, 3):
@@ -119,19 +151,25 @@ def parse_move(args: list[str] | tuple[str, ...]) -> MoveSpec:
     a, b = args[0], args[1]
     sa, sb = _signed(a), _signed(b)
     if sa != sb:
-        raise CommandError("move: use either 'x y' (absolute) or '+dx +dy' (relative), not a mixture (CMD-06, D-73)")
+        raise CommandError(MOVE_SYNTAX_ERROR)
     dx, dy = _int(a, "move x/dx", "CMD-06"), _int(b, "move y/dy", "CMD-06")
     if not sa and (dx < 0 or dy < 0):
         raise CommandError("move: an absolute target cannot be negative (CMD-06)")
     speed: float | None = None
     if len(args) == 3:
-        try:
-            speed = float(args[2])
-        except ValueError:
-            raise CommandError(f"move speed must be a number, got {args[2]!r} (CMD-06)") from None
-        if speed <= 0:
-            raise CommandError("move speed must be greater than 0 (CMD-06)")
+        speed = _speed(args[2], "CMD-06")
     return MoveSpec(dx, dy, sa, speed)
+
+
+def parse_escape(args: list[str] | tuple[str, ...]) -> MoveSpec:
+    """CMD-11 / D-123: ``escape +dx +dy [speed]`` - always relative (an unsigned pair is read as dx dy too)."""
+    if len(args) not in (2, 3):
+        raise CommandError("escape needs <+dx +dy> and an optional speed (CMD-11)")
+    dx, dy = _int(args[0], "escape dx", "CMD-11"), _int(args[1], "escape dy", "CMD-11")
+    if dx == 0 and dy == 0:
+        raise CommandError("escape needs a direction: dx and dy cannot both be 0 (CMD-11)")
+    speed: float | None = _speed(args[2], "CMD-11") if len(args) == 3 else None
+    return MoveSpec(dx, dy, True, speed)
 
 
 def parse_warp(args: list[str] | tuple[str, ...]) -> WarpSpec:
@@ -151,6 +189,32 @@ def parse_warp(args: list[str] | tuple[str, ...]) -> WarpSpec:
         if factor <= 0:
             raise CommandError("warp factor must be greater than 0 (CMD-07)")
     return WarpSpec((gx, gy), (sx, sy), factor)
+
+
+def parse_fire(args: list[str] | tuple[str, ...]) -> FireSpec:
+    """CMD-08 / D-120: ``fire torpedo <target> [n]`` or ``fire phaser <target>``."""
+    if len(args) < 2:
+        raise CommandError("fire needs a weapon (torpedo | phaser) and a target ship (CMD-08)")
+    weapon = WEAPON_WORDS.get(args[0].lower(), "")
+    if weapon not in WEAPONS:
+        raise CommandError(f"fire: weapon must be torpedo or phaser, got {args[0]!r} (CMD-08)")
+    if weapon == "phaser":
+        if len(args) != 2:
+            raise CommandError("fire phaser <target> takes no count (CMD-08)")
+        return FireSpec(weapon, args[1], 1)
+    if len(args) > 3:
+        raise CommandError("fire torpedo <target> [n] (CMD-08)")
+    count = _int(args[2], "fire torpedo n", "CMD-08") if len(args) == 3 else 1
+    if count < 1:
+        raise CommandError("fire torpedo n: n counts from 1 (CMD-08)")
+    return FireSpec(weapon, args[1], count)
+
+
+def parse_peace(args: list[str] | tuple[str, ...]) -> PeaceSpec:
+    """CMD-10 / D-122: ``peace offer | accept | reject <captain>``."""
+    if len(args) < 2 or args[0].lower() not in PEACE_ACTIONS:
+        raise CommandError("peace needs offer | accept | reject and a captain (name or id) (CMD-10)")
+    return PeaceSpec(args[0].lower(), " ".join(args[1:]))
 
 
 def parse_stop(args: list[str] | tuple[str, ...]) -> bool:
@@ -178,7 +242,7 @@ def parse_view(args: list[str] | tuple[str, ...]) -> str:
 def parse_ship(args: list[str] | tuple[str, ...]) -> str:
     """CMD-03."""
     if not args:
-        raise CommandError("ship needs a ship name or fleet number (CMD-03)")
+        raise CommandError("ship needs a ship name, fleet number or id (CMD-03)")
     return " ".join(args)
 
 
@@ -225,7 +289,10 @@ _CHECKERS = {
     "view": lambda a: parse_view(a),
     "move": lambda a: parse_move(a),
     "warp": lambda a: parse_warp(a),
+    "fire": lambda a: parse_fire(a),
     "shields": lambda a: parse_shields(a),
+    "peace": lambda a: parse_peace(a),
+    "escape": lambda a: parse_escape(a),
     "scan": _no_args("scan", "CMD-14"),
     "orders": lambda a: parse_orders(a),
     "end": _no_args("end", "CMD-17"),
@@ -234,6 +301,6 @@ _CHECKERS = {
     "stop": lambda a: parse_stop(a),
 }
 
-__all__ = ["CommandError", "Order", "MoveSpec", "WarpSpec", "parse", "parse_tokens", "parse_move", "parse_warp", "parse_stop",
-           "parse_shields", "parse_view", "parse_ship", "parse_orders", "parse_new", "parse_help", "COMMANDS", "IMMEDIATE", "QUEUED",
-           "VIEW_LEVELS"]
+__all__ = ["CommandError", "Order", "MoveSpec", "WarpSpec", "FireSpec", "PeaceSpec", "parse", "parse_tokens", "parse_move", "parse_escape",
+           "parse_warp", "parse_fire", "parse_peace", "parse_stop", "parse_shields", "parse_view", "parse_ship", "parse_orders", "parse_new",
+           "parse_help", "COMMANDS", "IMMEDIATE", "QUEUED", "VIEW_LEVELS", "WEAPONS", "PEACE_ACTIONS", "MOVE_SYNTAX_ERROR"]

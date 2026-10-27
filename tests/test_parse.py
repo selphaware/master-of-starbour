@@ -1,11 +1,11 @@
-"""Command parsing - every CMD-* syntax; rejections name the id (CMD-01...20, UX-03, D-73)."""
+"""Command parsing - every CMD-* syntax; rejections name the id (CMD-01...21, UX-03, D-73, D-120, D-122, D-127)."""
 from __future__ import annotations
 
 import pytest
 
-from starbour.commands.catalogue import COMMANDS, available_names, help_lines, lookup
-from starbour.commands.parse import (IMMEDIATE, QUEUED, CommandError, Order, parse, parse_help, parse_move, parse_new,
-                                     parse_orders, parse_shields, parse_ship, parse_stop, parse_view, parse_warp)
+from starbour.commands.catalogue import COMMANDS, available_names, help_lines, lookup, order_kind
+from starbour.commands.parse import (IMMEDIATE, QUEUED, CommandError, Order, parse, parse_escape, parse_fire, parse_help, parse_move,
+                                     parse_new, parse_orders, parse_peace, parse_shields, parse_ship, parse_stop, parse_view, parse_warp)
 
 
 @pytest.mark.parametrize("text, name, kind", [
@@ -33,9 +33,19 @@ def test_every_m2_syntax_parses(text: str, name: str, kind: str) -> None:
         assert order.args == ("all",)
 
 
+@pytest.mark.parametrize("text, name", [
+    ("fire torpedo s-017", "fire"), ("fire torpedo s-017 3", "fire"), ("fire phaser s-017", "fire"), ("fire torpedoes Grey", "fire"),
+    ("peace offer c-004", "peace"), ("peace accept c-004", "peace"), ("peace reject Harrow Vey", "peace"),
+    ("escape +4 +0", "escape"), ("escape -1 +2 3", "escape"), ("escape 2 0", "escape"),
+])
+def test_every_m3_syntax_parses(text: str, name: str) -> None:
+    """CMD-08, CMD-10, CMD-11 (D-120, D-122, D-123): fire, peace and escape are queued orders from M3."""
+    order = parse(text, "s-000")
+    assert order.command == name and order.kind == QUEUED
+
+
 @pytest.mark.parametrize("text, cmd_id", [
-    ("fire torpedo x", "CMD-08"), ("peace offer x", "CMD-10"),
-    ("escape 1 1", "CMD-11"), ("trade x give y for z", "CMD-12"), ("upgrade engine with moonstone", "CMD-13"),
+    ("trade x give y for z", "CMD-12"), ("upgrade engine with moonstone", "CMD-13"),
     ("pickup i-1", "CMD-15"), ("buy food 3", "CMD-20"), ("sell food 3", "CMD-20"),
 ])
 def test_later_milestone_commands_rejected_by_id(text: str, cmd_id: str) -> None:
@@ -51,6 +61,9 @@ def test_later_milestone_commands_rejected_by_id(text: str, cmd_id: str) -> None
     ("quit now", "CMD-18"), ("scan deep", "CMD-14"), ("status all", "CMD-02"), ("fleet all", "CMD-04"), ("help a b", "CMD-01"),
     ("warp 1 2 3", "CMD-07"), ("warp a 2 3 4", "CMD-07"), ("warp 1 2 3 4 0", "CMD-07"), ("warp -1 2 3 4", "CMD-07"),
     ("stop now", "CMD-21"), ("shields up", "CMD-09"),
+    ("fire", "CMD-08"), ("fire laser s-1", "CMD-08"), ("fire torpedo s-1 0", "CMD-08"), ("fire torpedo s-1 x", "CMD-08"),
+    ("fire phaser s-1 2", "CMD-08"), ("peace", "CMD-10"), ("peace offer", "CMD-10"), ("peace surrender c-1", "CMD-10"),
+    ("escape", "CMD-11"), ("escape +0 +0", "CMD-11"), ("escape a b", "CMD-11"), ("escape +1 +1 0", "CMD-11"),
 ])
 def test_bad_syntax_names_the_id(text: str, cmd_id: str) -> None:
     with pytest.raises(CommandError, match=cmd_id):
@@ -63,6 +76,22 @@ def test_move_absolute_vs_relative() -> None:
     r = parse_move(["+3", "-1", "2.5"])
     assert (r.dx, r.dy, r.relative, r.speed) == (3, -1, True, 2.5) and r.target((10, 10)) == (13, 9)
     assert parse_move(["+0", "+0"]).relative
+    with pytest.raises(CommandError, match=r"move 5 7 \(absolute\) or move \+2 -1 \(relative\)"):   # D-127 wording
+        parse_move(["+3", "1"])
+
+
+def test_m3_helpers() -> None:
+    f = parse_fire(["torpedo", "s-017", "3"])
+    assert (f.weapon, f.target, f.count) == ("torpedo", "s-017", 3)
+    assert parse_fire(["phaser", "Grey Heron"]).count == 1 and parse_fire(["torpedoes", "s-1"]).weapon == "torpedo"
+    p = parse_peace(["offer", "Harrow", "Vey"])
+    assert (p.action, p.captain) == ("offer", "Harrow Vey")
+    e = parse_escape(["+4", "+0"])
+    assert (e.dx, e.dy, e.relative, e.speed) == (4, 0, True, None) and e.target((3, 3)) == (7, 3)
+    assert parse_escape(["2", "-1", "3"]).relative and parse_escape(["2", "-1", "3"]).speed == 3.0
+    assert order_kind("move", ()) == order_kind("escape", ("+1", "+0")) == "move", "escape is a move (OV-02b, D-123)"
+    assert order_kind("fire", ("torpedo", "s-1")) != order_kind("fire", ("phaser", "s-1")), "a torpedo and a phaser volley are different kinds (D-120)"
+    assert order_kind("fire", ("Torpedo", "s-1")) == "fire:torpedo" and order_kind("peace", ("offer", "c-1")) == "peace"
 
 
 def test_helpers() -> None:
@@ -95,10 +124,14 @@ def test_warp_and_stop_helpers() -> None:
 def test_catalogue_covers_cmd_01_to_21() -> None:
     ids = {c.id for c in COMMANDS.values()}
     assert ids == {f"CMD-{n:02d}" for n in range(1, 22)}
-    assert "move" in available_names() and "warp" in available_names() and "stop" in available_names() and "shields" in available_names()
-    assert "fire" not in available_names()
+    for name in ("move", "warp", "stop", "shields", "fire", "peace", "escape"):
+        assert name in available_names(), name
+    assert "trade" not in available_names()
     assert lookup("?") is COMMANDS["help"] and lookup("nope") is None
-    lines = help_lines()
-    assert any("move" in ln for ln in lines) and any("M3+" in ln for ln in lines)
-    assert help_lines("fire")[0].endswith("(not available until M3)")
+    lines = help_lines(shield_recharge=5)
+    assert any("move" in ln for ln in lines) and any("M4+" in ln for ln in lines)
+    assert lines[-1] == "Shields recharge 5 a turn outside hazards and battle (CM-05); planet cells are safe (HZ-07).", "D-127 footer"
+    assert help_lines("trade")[0].endswith("(not available until M4)")
+    assert not help_lines("fire")[0].endswith("(not available until M3)")
     assert "persists" in help_lines("move")[1], "CMD-06 help text says the move persists (D-98)"
+    assert any("recharge 5 a turn outside hazards and battle" in ln for ln in help_lines("shields", 5)), "help shields names the recharge (CM-05, D-127)"

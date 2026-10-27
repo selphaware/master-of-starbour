@@ -94,6 +94,15 @@ class GeneralGrid(Generic[T]):
                     out.append((nx, ny))
         return sorted(out)
 
+    def ring(self, x: int, y: int, lo: int, hi: int) -> list[Coord]:
+        """The in-bounds cells at Chebyshev distance lo...hi from (x, y), sorted (SP-04 planet band, D-116)."""
+        out = []
+        for ny in range(max(0, y - hi), min(self._height, y + hi + 1)):
+            for nx in range(max(0, x - hi), min(self._width, x + hi + 1)):
+                if lo <= max(abs(nx - x), abs(ny - y)) <= hi:
+                    out.append((nx, ny))
+        return out
+
     def free_cells(self) -> list[Coord]:
         """Every Void coordinate, sorted (row-major)."""
         return [(x, y) for y in range(self._height) for x in range(self._width) if (x, y) not in self._cells]
@@ -102,6 +111,10 @@ class GeneralGrid(Generic[T]):
 def chebyshev(a: Coord, b: Coord) -> int:
     """Chebyshev (king's-move) distance between two cells - MV-01, CM-02."""
     return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+
+
+def manhattan(a: Coord, b: Coord) -> int:
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def nearest_free_cell(grid: GeneralGrid, around: tuple[float, float]) -> Coord | None:
@@ -118,6 +131,23 @@ def nearest_free_cell(grid: GeneralGrid, around: tuple[float, float]) -> Coord |
             if (x, y) in grid:
                 continue
             key = (max(abs(x - ax), abs(y - ay)), abs(x - ax) + abs(y - ay), x, y)
+            if best is None or key < best[0]:
+                best = (key, (x, y))
+    return best[1] if best else None
+
+
+def free_cell_at_distance(grid: GeneralGrid, around: Coord, distance: int) -> Coord | None:
+    """The Void cell nearest to exactly ``distance`` (Chebyshev) from ``around`` - HZ-05 wormhole exit (CFG-62, D-114).
+
+    Ordered by |d - distance|, then Manhattan distance, then x, then y (D-113 style), so an
+    axis-aligned cell at the exact distance wins over a diagonal one.  None when the grid is full.
+    """
+    best: tuple[tuple[int, int, int, int], Coord] | None = None
+    for y in range(grid.height):
+        for x in range(grid.width):
+            if (x, y) in grid:
+                continue
+            key = (abs(chebyshev((x, y), around) - int(distance)), manhattan((x, y), around), x, y)
             if best is None or key < best[0]:
                 best = (key, (x, y))
     return best[1] if best else None

@@ -97,8 +97,9 @@ HEARTBEAT_RETRIES = 8
 HEARTBEAT_RETRY_S = 0.01
 
 
-def write_heartbeat(role: str, turn_no: int, render_ms: float) -> None:
+def write_heartbeat(role: str, turn_no: int, render_ms: float, extra: dict | None = None) -> None:
     """C5 / D-66: <MOS_HEARTBEAT_DIR>/<role>.json after every redraw; a no-op in normal play.
+    ``extra`` adds role-specific fields (M3: the status window's ``in_battle``, C10 / live/09).
 
     Windows refuses ``os.replace`` while another process has the target open for reading
     (WinError 5) - exactly what the live gate does every 100 ms - so the replace is retried
@@ -111,7 +112,9 @@ def write_heartbeat(role: str, turn_no: int, render_ms: float) -> None:
     log = logging.getLogger("starbour.heartbeat")
     try:
         hb.mkdir(parents=True, exist_ok=True)
-        text = json.dumps({"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": round(render_ms, 1)})
+        doc = {"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": round(render_ms, 1)}
+        doc.update(extra or {})
+        text = json.dumps(doc)
         tmp, final = hb / f"{role}.json.tmp", hb / f"{role}.json"
         tmp.write_text(text, encoding="utf-8")
         for attempt in range(HEARTBEAT_RETRIES):

@@ -4,26 +4,31 @@
 owner, BUS-04) and returns ``(state, events)``; the turn's counters land in
 ``state.last_stats``.  M2 resolves orders, impulse movement netted by gravity with
 persistent moves (TP-02), warp (TP-02), hazards - countdowns, drain, destruction and
-wormhole crossings (TP-03), upkeep, mutiny and shield recharge (TP-06); combat, trade and
-reputation are named phases that log ``skipped (M3/M4)`` so they are never silently
-absent.  No I/O, no clocks.
+wormhole crossings (TP-03), upkeep, mutiny and shield recharge (TP-06).  M3 adds combat
+(TP-04, ``starbour.engine.combat``), reputation (TP-07, ``starbour.engine.reputation``),
+fleet movement (MV-06), the wormhole exit distance (D-114), the mutiny placement
+(D-115, D-129) and the AI's battle, roaming and yielding rules (``starbour.engine.ai``).
+Trade is a named phase that logs ``skipped (M4)`` so it is never silently absent.  No
+I/O, no clocks.
 """
 from __future__ import annotations
 
 import random
 
-from starbour.commands.parse import CommandError, Order, parse_move, parse_warp
+from starbour.commands.parse import CommandError, Order, parse_escape, parse_move, parse_warp
 from starbour.config import GameConfig
 from starbour.engine import ai
+from starbour.engine import combat as CB
 from starbour.engine import hazards as H
 from starbour.engine import movement as MV
+from starbour.engine import reputation as R
 from starbour.engine.orders import take_all, warp_factor
 from starbour.engine.state import GameState
 from starbour.entities.captain import Captain
 from starbour.entities.ship import Ship
 from starbour.world import names
 from starbour.world.generate import flatten_cell
-from starbour.world.grid import Coord, chebyshev, nearest_free_cell
+from starbour.world.grid import Coord, chebyshev, free_cell_at_distance, nearest_free_cell
 from starbour.world.stellar import WORMHOLE
 
 PHASES: tuple[tuple[str, str], ...] = (
@@ -34,6 +39,7 @@ PHASE_ORDER = {code: i for i, (code, _) in enumerate(PHASES)}
 PHASE_TITLES = dict(PHASES)
 
 SEVERITIES = ("muted", "info", "warning", "alert", "error", "highlight")
+COMBAT_ORDERS = ("fire", "peace", CB.SURRENDER)    # resolved in TP-04, not TP-02
 
 # re-exported for the M1 tests and callers (the rules live in starbour.engine.movement)
 impulse_cells = MV.impulse_cells
@@ -57,26 +63,62 @@ def sector_text(galaxy: Coord, sector: Coord) -> str:
 # --------------------------------------------------------------------------- TP-01 orders
 
 def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: list[dict], stats: dict,
-                 ai_player: bool) -> dict[str, list[Order]]:
-    """TP-01: the player's queued orders (persisting moves included, D-98) plus every AI captain's decisions (OV-10)."""
+                 ai_player: bool, ai_passive: bool = False) -> dict[str, list[Order]]:
+    """TP-01: the player's queued orders (persisting moves included, D-98) plus every AI captain's decisions (OV-10, D-125)."""
     by_ship: dict[str, list[Order]] = take_all(state)
     player_count = sum(len(q) for q in by_ship.values())
+    index = state.ships_by_sector()
     if ai_player and not state.game_over:
-        for order in ai.decide(state.player, state, rng, cfg):
+        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index):
             if order.ship_id not in by_ship:
                 by_ship[order.ship_id] = [order]
                 player_count += 1
+            else:
+                by_ship[order.ship_id].append(order)
+                player_count += 1
     ai_count = 0
+    watched = _watched(state)
     for cid in sorted(state.captains):
         cap = state.captains[cid]
         if cap.is_player:
             continue
-        for order in ai.decide(cap, state, rng, cfg):
+        for order in ai.decide(cap, state, rng, cfg, passive=ai_passive, index=index):
             by_ship.setdefault(order.ship_id, []).append(order)
             ai_count += 1
+            if order.command == "fire":
+                open_ai_battle(state, cfg, order, by_ship, events, stats, watched, ai_player)
     stats["orders_executed"] = {"player": player_count, "ai": ai_count}
     events.append(event("TP-01", "orders", "muted", f"Orders: {player_count} from you, {ai_count} from AI captains", ["TP-01"]))
     return by_ship
+
+
+def open_ai_battle(state: GameState, cfg: GameConfig, order: Order, by_ship: dict[str, list[Order]], events: list[dict], stats: dict,
+                   watched: tuple[Coord, Coord] | None, ai_player: bool) -> None:
+    """CM-01 / D-119 / D-128 / D-132: an AI's fire opens its battle when the order is accepted (TP-01), so the target holds its
+    cell - an AI-decided move or warp the targeted captain already planned this turn is dropped (its ships are in a battle now).
+    The human player's own queued moves stand."""
+    ship = state.ships.get(order.ship_id)
+    target = state.ships.get(order.args[1]) if len(order.args) > 1 else None
+    if ship is None or target is None or target.captain_id == ship.captain_id:
+        return
+    if CB.open_battle_between(state, ship.captain_id, target.captain_id) is not None:
+        return
+    bt, ev = CB.open_battle(state, cfg, ship, target, state.turn_no, stats["reputation"])
+    stats["battles_opened"] = stats.get("battles_opened", 0) + 1
+    if state.player_id not in bt.sides:
+        stats["ai_vs_ai_opened"] = stats.get("ai_vs_ai_opened", 0) + 1
+    if target.captain_id != state.player_id or ai_player:
+        tcap = state.captains.get(target.captain_id)
+        for sid in (tcap.ships if tcap else []):
+            s = state.ships.get(sid)
+            if s is None or s.galaxy != bt.galaxy or s.sector != bt.sector or sid not in by_ship:
+                continue
+            kept = [o for o in by_ship[sid] if o.command not in ("move", "warp")]
+            if len(kept) != len(by_ship[sid]):
+                by_ship[sid] = kept
+                stats["held_for_battle"] = stats.get("held_for_battle", 0) + 1
+    if state.player_id in bt.sides or (watched is not None and (bt.galaxy, bt.sector) == watched):
+        events.append(dict(ev, phase="TP-01"))
 
 
 # --------------------------------------------------------------------------- TP-02 movement
@@ -88,15 +130,16 @@ def _watched(state: GameState) -> tuple[Coord, Coord] | None:
 
 def resolve_impulse(state: GameState, cfg: GameConfig, ship: Ship, order: Order, events: list[dict], stats: dict,
                     visible: bool) -> bool:
-    """MV-01 / CMD-06 / D-98: floor(speed - pull at departure) cells towards the target; the rest persists.
+    """MV-01 / CMD-06 / CMD-11 / D-98: floor(speed - pull at departure) cells towards the target; the rest persists.
 
     Returns True when the ship changed cell.  A ship whose cells come to <= 0 is held by
-    gravity (HZ-04) and keeps its order for next turn.
+    gravity (HZ-04) and keeps its order for next turn.  An ``escape`` is the same move;
+    whether it left every enemy's range is judged in TP-04 (CB-02, D-123).
     """
     try:
-        spec = parse_move(order.args)
+        spec = parse_escape(order.args) if order.command == "escape" else parse_move(order.args)
     except CommandError as e:
-        events.append(event("TP-02", "error", "error", f"{ship.name}: {e}", ["CMD-06"]))
+        events.append(event("TP-02", "error", "error", f"{ship.name}: {e}", ["CMD-06" if order.command == "move" else "CMD-11"]))
         return False
     speed = min(spec.speed if spec.speed is not None else ship.engine, ship.engine)
     pull = state.pull_at(ship)                     # MV-03 / M2 section 5: the pull at the departure cell
@@ -119,7 +162,7 @@ def resolve_impulse(state: GameState, cfg: GameConfig, ship: Ship, order: Order,
         args: tuple[str, ...] = (MV.signed(rx), MV.signed(ry))
         if len(order.args) == 3:
             args += (order.args[2],)
-        state.queues.setdefault(ship.id, []).insert(0, Order("move", args, ship.id, order.kind, persisting=True))
+        state.queues.setdefault(ship.id, []).insert(0, Order(order.command, args, ship.id, order.kind, persisting=True))
     if visible and cells > 0:
         netted = f", pull {pull:.2f} netted" if pull > 0 else ""
         text = f"{ship.name} moved {old[0]},{old[1]} -> {new[0]},{new[1]} (speed {speed:g}{netted}, {cells} cells)"
@@ -174,8 +217,10 @@ def resolve_warp(state: GameState, cfg: GameConfig, ship: Ship, order: Order, ev
     ship.hazard_key = None
     if ship.captain_id == state.player_id:
         state.mark_visited(dest_g, dest_s)
-    stats["warps"].append({"ship": ship.id, "from": [[old_g[0], old_g[1]], [old_s[0], old_s[1]]], "to": [[dest_g[0], dest_g[1]], [dest_s[0], dest_s[1]]],
-                           "factor": float(factor), "effective": round(eff, 3)})
+    else:
+        stats["roams"] = stats.get("roams", 0) + 1     # C10: AI warps are roams (CFG-73, D-125)
+    stats["warps"].append({"ship": ship.id, "captain": ship.captain_id, "from": [[old_g[0], old_g[1]], [old_s[0], old_s[1]]],
+                           "to": [[dest_g[0], dest_g[1]], [dest_s[0], dest_s[1]]], "factor": float(factor), "effective": round(eff, 3)})
     if visible:
         netted = f", effective {eff:.2f} after pull {pull:.2f}" if pull > 0 else f", effective {eff:g}"
         events.append(event("TP-02", "warp", "info",
@@ -184,9 +229,38 @@ def resolve_warp(state: GameState, cfg: GameConfig, ship: Ship, order: Order, ev
     return True
 
 
+def follow_active_ships(state: GameState, start: dict[str, tuple], by_ship: dict[str, list[Order]], events: list[dict], stats: dict) -> int:
+    """MV-06 / FL-03 / D-124: owned ships that shared the active ship's cell at the start of the turn and had no move or warp
+    of their own go where it went; every other owned ship holds position."""
+    followed = 0
+    for cid in sorted(state.captains):
+        cap = state.captains[cid]
+        active = state.ships.get(cap.active_ship or "")
+        if active is None or active.id not in start or start[active.id] == active.position:
+            continue
+        for sid in cap.ships:
+            other = state.ships.get(sid)
+            if other is None or sid == active.id or start.get(sid) != start[active.id]:
+                continue
+            if any(o.command in ("move", "warp", "escape") for o in by_ship.get(sid, [])):
+                continue
+            moved_sector = other.sector != active.sector or other.galaxy != active.galaxy
+            other.position = active.position
+            if moved_sector:
+                other.hazard_turns = 0
+                other.hazard_key = None
+            followed += 1
+            if cap.is_player:
+                events.append(event("TP-02", "movement", "info", f"{other.name} moves with the {active.name} to {active.cell[0]},{active.cell[1]} (MV-06, FL-03)",
+                                    ["MV-06", "FL-03", "D-124"]))
+    stats["followed"] = followed
+    return followed
+
+
 def phase_movement(state: GameState, cfg: GameConfig, by_ship: dict[str, list[Order]], events: list[dict], stats: dict) -> None:
-    """TP-02: impulse (MV-01, netted by pull) and warp (MV-02...05) for every ship with orders."""
+    """TP-02: impulse (MV-01, netted by pull), escape (CMD-11) and warp (MV-02...05) for every ship with orders; fleet following (MV-06)."""
     watched = _watched(state)
+    start = {sid: s.position for sid, s in state.ships.items()}
     moved_ai = 0
     for sid in sorted(by_ship):
         ship = state.ships.get(sid)
@@ -196,9 +270,9 @@ def phase_movement(state: GameState, cfg: GameConfig, by_ship: dict[str, list[Or
         visible = is_player or (watched is not None and (ship.galaxy, ship.sector) == watched)
         orders = by_ship[sid]
         warp = next((o for o in orders if o.command == "warp"), None)
-        moves = [o for o in orders if o.command == "move"]
+        moves = [o for o in orders if o.command in ("move", "escape")]
         for o in orders:
-            if o.command not in ("move", "warp"):
+            if o.command not in ("move", "escape", "warp") and o.command not in COMBAT_ORDERS:
                 events.append(event("TP-02", "system", "muted", f"{ship.name}: {o.command} orders resolve in a later milestone", ["OV-02b"]))
         moved = False
         if warp is not None:
@@ -213,6 +287,10 @@ def phase_movement(state: GameState, cfg: GameConfig, by_ship: dict[str, list[Or
             stats["player_moved"] = stats.get("player_moved", False) or moved
         elif moved:
             moved_ai += 1
+    follow_active_ships(state, start, by_ship, events, stats)
+    pship = state.active_ship()
+    if pship is not None:
+        state.mark_visited(pship.galaxy, pship.sector)
     stats["ai_ships_moved"] = moved_ai
     # the phase is never silently absent (OB-01 hides AI moves elsewhere; this line says so)
     yours = "you moved" if stats.get("player_moved") else "you held position"
@@ -248,11 +326,11 @@ def destroy_ship(state: GameState, ship: Ship, hazard: H.Hazard, events: list[di
         stats["ai_lost_elsewhere"] = stats.get("ai_lost_elsewhere", 0) + 1
 
 
-def cross_wormhole(state: GameState, ship: Ship, hazard: H.Hazard, events: list[dict], stats: dict, visible: bool) -> None:
-    """HZ-05 / ST-04 / D-102: emerge alive at the free cell nearest the partner hole, counter reset."""
+def cross_wormhole(state: GameState, cfg: GameConfig, ship: Ship, hazard: H.Hazard, events: list[dict], stats: dict, visible: bool) -> None:
+    """HZ-05 / ST-04 / CFG-62 / D-114: emerge alive wormhole_exit_distance cells from the partner hole, counter reset."""
     pg, ps, pc = hazard.partner   # type: ignore[misc]
     sector = state.world.sector(pg, ps)
-    cell = nearest_free_cell(sector.grid, pc) if sector is not None else None
+    cell = free_cell_at_distance(sector.grid, pc, cfg.wormhole_exit_distance) if sector is not None else None
     if cell is None:
         destroy_ship(state, ship, hazard, events, stats, visible)   # [ASSUMED] a missing exit is a plain black hole
         return
@@ -266,8 +344,8 @@ def cross_wormhole(state: GameState, ship: Ship, hazard: H.Hazard, events: list[
     if visible or ship.captain_id == state.player_id:
         events.append(event("TP-03", "hazard", "alert",
                             f"{ship.name} was pulled into the wormhole at {hazard.cell[0]},{hazard.cell[1]} in {old} and emerged in sector "
-                            f"{sector_text(pg, ps)} at cell {cell[0]},{cell[1]} - inside the partner's pull (HZ-05, D-102)",
-                            ["HZ-05", "ST-04", "D-102", "OUT-03"]))
+                            f"{sector_text(pg, ps)} at cell {cell[0]},{cell[1]}, {chebyshev(cell, pc)} cells from the partner hole - inside its pull "
+                            f"(HZ-05, CFG-62, D-114)", ["HZ-05", "ST-04", "D-114", "OUT-03"]))
 
 
 def phase_hazards(state: GameState, cfg: GameConfig, events: list[dict], stats: dict) -> None:
@@ -299,36 +377,48 @@ def phase_hazards(state: GameState, cfg: GameConfig, events: list[dict], stats: 
         visible = is_player or (watched is not None and (ship.galaxy, ship.sector) == watched)
         if left <= 0:
             if hz.kind == WORMHOLE and hz.partner is not None:
-                cross_wormhole(state, ship, hz, events, stats, visible)
+                cross_wormhole(state, cfg, ship, hz, events, stats, visible)
             else:
                 destroy_ship(state, ship, hz, events, stats, visible)
             continue
         if visible:
             drained = f"; shields drained by {drain} to {ship.shield_current:g}" if drain else ""
+            note = ""
+            if is_player and (ship.galaxy, ship.sector) != state.hazard_note_sector:
+                state.hazard_note_sector = (ship.galaxy, ship.sector)     # D-127: once per sector entry
+                note = " - planet cells are safe (HZ-07)"
             events.append(event("TP-03", "hazard", "warning",
                                 f"{ship.name} is in the pull of the {kind_text(hz.kind)} at {hz.cell[0]},{hz.cell[1]} ({hz.distance} cells): "
-                                f"pull {hz.pull:.2f}, {left} turn(s) until pulled in{drained} (HZ-0{2 if hz.kind == 'star' else 4}, D-100)",
-                                ["OUT-03", "HZ-02", "HZ-04", "D-100"]))
+                                f"pull {hz.pull:.2f}, {left} turn(s) until pulled in{drained} (HZ-0{2 if hz.kind == 'star' else 4}, D-100){note}",
+                                ["OUT-03", "HZ-02", "HZ-04", "D-100", "HZ-07"]))
     elsewhere = stats.get("ai_lost_elsewhere", 0)
     tail = f"; {elsewhere} AI ship(s) lost to hazards elsewhere" if elsewhere else ""
     events.append(event("TP-03", "hazard", "muted",
                         f"Hazards: {in_range} ship(s) inside a pull range, {len(stats['destroyed'])} destroyed{tail}", ["TP-03", "D-105"]))
 
 
+# --------------------------------------------------------------------------- TP-04 combat
+
+def phase_combat(state: GameState, cfg: GameConfig, rng: random.Random, by_ship: dict[str, list[Order]], events: list[dict], stats: dict) -> None:
+    """TP-04 / CM-01...12 / CB-01...04: ``starbour.engine.combat`` does the work; the player's active sector is the watched one."""
+    CB.phase_combat(state, cfg, rng, by_ship, events, stats, _watched(state))
+
+
 # --------------------------------------------------------------------------- TP-06 upkeep, mutiny & recharge
 
 def mutiny(state: GameState, cap: Captain, cfg: GameConfig, rng: random.Random, stats: dict) -> list[dict]:
-    """SUP-03, SUP-04, SUP-04b, SUP-04c, D-47, D-51, D-52, D-72: the crew take the active ship."""
+    """SUP-03, SUP-04, SUP-04b, SUP-04c, D-47, D-51, D-52, D-72, D-115, D-129: the crew take the active ship."""
     out: list[dict] = []
     old_ship = state.ships[cap.active_ship]
     others = [s for s in cap.ships if s != old_ship.id and s in state.ships]
     cap.ships = [s for s in cap.ships if s != old_ship.id]
-    # the mutineers keep the ship and become a new AI captain (SUP-04c, D-52)
+    # the mutineers keep the ship where it is and become a new AI captain (SUP-04c, D-52, D-115)
     mid = state.new_captain_id()
     mutineers = Captain.new(mid, names.captain_name(rng), False, cfg, gold=0, silver=0)   # [ASSUMED] D-93: no coins
     mutineers.ships = [old_ship.id]
     mutineers.active_ship = old_ship.id
     old_ship.captain_id = mid
+    old_ship.target = None
     state.captains[mid] = mutineers
     state.queues.pop(old_ship.id, None)
     if others:
@@ -339,11 +429,13 @@ def mutiny(state: GameState, cap: Captain, cfg: GameConfig, rng: random.Random, 
     else:
         spec = cfg.ship_class(cfg.mutiny_ship_class)
         sid = state.new_ship_id()
-        new_ship = Ship.of_class(sid, names.ship_name(rng), spec, cap.id, old_ship.position)
+        cell = state.mutiny_cell(old_ship, spec.engine)
+        new_ship = Ship.of_class(sid, names.ship_name(rng), spec, cap.id, (old_ship.galaxy, old_ship.sector, cell))
         state.ships[sid] = new_ship
         cap.ships.append(sid)
         cap.active_ship = sid
-        result, where = "demoted", f"is demoted to a {spec.name.capitalize()}-class ship, the {new_ship.name}"
+        placed = f" at {cell[0]},{cell[1]}" + (" (the nearest cell outside every pull range, D-115)" if cell != old_ship.cell else "")
+        result, where = "demoted", f"is demoted to a {spec.name.capitalize()}-class ship, the {new_ship.name}{placed}"
     fear_before = cap.fear
     cap.food = cap.water = cfg.mutiny_supplies
     cap.zero_turns = 0
@@ -353,7 +445,7 @@ def mutiny(state: GameState, cap: Captain, cfg: GameConfig, rng: random.Random, 
     out.append(event("TP-06", "mutiny", "alert",
                      f"Mutiny! The crew seize the {old_ship.name}; {cap.name} {where} with {cfg.mutiny_supplies} food and "
                      f"{cfg.mutiny_supplies} water; fear {fear_before} -> {cap.fear}",
-                     ["SUP-03", "SUP-04" if others else "SUP-04b", "OUT-18"]))
+                     ["SUP-03", "SUP-04" if others else "SUP-04b", "OUT-18", "D-115", "D-129"]))
     out.append(event("TP-06", "mutiny", "info", f"The mutineers under {mutineers.name} now captain the {old_ship.name}", ["SUP-04c"]))
     stats.setdefault("mutinies", []).append({"turn_no": state.turn_no, "captain": "player" if cap.is_player else cap.id, "result": result})
     return out
@@ -383,37 +475,68 @@ def phase_upkeep(state: GameState, cfg: GameConfig, rng: random.Random, events: 
 
 
 def phase_recharge(state: GameState, cfg: GameConfig, events: list[dict], stats: dict) -> None:
-    """TP-06 / CM-05 / SH-03 / CFG-27: shields recharge outside any hazard (no battle before M3), capped at shield_max."""
+    """TP-06 / CM-05 / SH-03 / CFG-27: shields recharge outside any hazard and outside battle, capped at shield_max."""
     player_ship = state.active_ship()
+    battled = set(stats.get("battled") or ())
     for sid in sorted(state.ships):
         ship = state.ships[sid]
         if ship.hazard_key is not None or ship.shield_current >= ship.shield_max:
+            continue
+        if sid in battled or state.battle_of_ship(ship) is not None:
+            if player_ship is not None and ship.id == player_ship.id:
+                events.append(event("TP-06", "shields", "muted", f"Shields hold at {ship.shield_current:g} / {ship.shield_max:g}: no recharge in battle (CM-05)",
+                                    ["CM-05", "SH-03"]))
             continue
         before = ship.shield_current
         ship.shield_current = H.recharge(ship.shield_current, ship.shield_max, cfg.shield_recharge)
         if player_ship is not None and ship.id == player_ship.id:
             events.append(event("TP-06", "shields", "info",
-                                f"Shields recharge {before:g} -> {ship.shield_current:g} / {ship.shield_max:g} (+{cfg.shield_recharge:g} outside hazards, CM-05)",
+                                f"Shields recharge {before:g} -> {ship.shield_current:g} / {ship.shield_max:g} (+{cfg.shield_recharge:g} outside hazards and battle, CM-05)",
                                 ["CM-05", "SH-03", "CFG-27"]))
+
+
+# --------------------------------------------------------------------------- TP-07 reputation
+
+def phase_reputation(state: GameState, cfg: GameConfig, events: list[dict], stats: dict) -> None:
+    """TP-07 / FR-01...10 / LV-01 / LV-05 / OUT-09: apply the rows TP-04 collected; ints clamped 0...100."""
+    rows = stats.get("reputation") or []
+    applied = 0
+    for row in rows:
+        cap = state.captains.get(str(row.get("captain")))
+        if cap is None:
+            continue
+        delta = R.Delta(cap.id, str(row["rule"]), int(row["fear"]), int(row["respect"]), float(row.get("scale", 1.0)))
+        cap.fear, cap.respect = R.apply(cap.fear, cap.respect, delta)
+        applied += 1
+        if cap.is_player:
+            scaled = f" (x {delta.scale:.2f}, LV-03)" if abs(delta.scale - 1.0) > 1e-9 else ""
+            events.append(event("TP-07", "reputation", "info",
+                                f"{delta.rule}: fear {delta.fear:+d}, respect {delta.respect:+d} -> fear {cap.fear}, respect {cap.respect}{scaled}",
+                                ["OUT-09", delta.rule, "LV-03"]))
+    events.append(event("TP-07", "reputation", "muted", f"Reputation: {applied} change(s) applied" + ("" if applied else " (FR-10: nothing moves without a battle)"),
+                        ["TP-07", "FR-10"]))
 
 
 # --------------------------------------------------------------------------- the turn
 
-def resolve_turn(state: GameState, cfg: GameConfig, rng: random.Random, *, ai_player: bool = False) -> tuple[GameState, list[dict]]:
+def resolve_turn(state: GameState, cfg: GameConfig, rng: random.Random, *, ai_player: bool = False,
+                 ai_passive: bool = False) -> tuple[GameState, list[dict]]:
     """Resolve one turn in the fixed order TP-01...08 (OV-02); ``state.turn_no`` increments first."""
     state.turn_no += 1
     events: list[dict] = []
     stats: dict = {"turn_no": state.turn_no, "orders_executed": {"player": 0, "ai": 0}, "ai_ships_moved": 0,
                    "mutinies": [], "player_moved": False, "warps": [], "destroyed": [], "game_over": None, "player_lost": None,
-                   "wormhole_crossings": 0}
-    by_ship = phase_orders(state, cfg, rng, events, stats, ai_player)
+                   "wormhole_crossings": 0, "battles": [], "reputation": list(state.pending_reputation), "captures": [], "roams": 0,
+                   "battles_opened": 0, "ai_vs_ai_opened": 0, "exchanges": 0}
+    state.pending_reputation = []
+    by_ship = phase_orders(state, cfg, rng, events, stats, ai_player, ai_passive)
     phase_movement(state, cfg, by_ship, events, stats)
     phase_hazards(state, cfg, events, stats)
-    events.append(event("TP-04", "system", "muted", "Combat: skipped (M3)", ["TP-04"]))
+    phase_combat(state, cfg, rng, by_ship, events, stats)
     events.append(event("TP-05", "system", "muted", "Trade & pickup: skipped (M4)", ["TP-05"]))
     phase_upkeep(state, cfg, rng, events, stats)
     phase_recharge(state, cfg, events, stats)
-    events.append(event("TP-07", "system", "muted", "Reputation: skipped (M3)", ["TP-07"]))
+    phase_reputation(state, cfg, events, stats)
     oe = stats["orders_executed"]
     events.append(event("TP-08", "summary", "info",
                         f"Turn {state.turn_no} resolved: {oe['player']} order(s) from you, {oe['ai']} from AI captains", ["OUT-01"]))

@@ -1,4 +1,4 @@
-"""The engine process loop - T0, BUS-01...07, MSG-01...09, D-57, D-70, D-83, D-104, D-105.
+"""The engine process loop - T0, BUS-01...07, MSG-01...09, D-57, D-70, D-83, D-104, D-105, D-125, D-126.
 
 Binds PUB and PULL, polls PULL, applies orders, resolves a turn on ``turn.end`` and
 publishes ``turn.resolved`` with the full snapshot, autosaves, publishes ``state.hello``
@@ -9,6 +9,10 @@ Game over (OV-09b, OV-09c, CMD-19, C9): the turn the player's active ship is des
 save is deleted *before* ``game.over`` is published; afterwards every order except ``new``
 and ``quit`` is rejected and ``turn.end`` resolves nothing.  The in-process sim stops there
 (D-106); the bus engine stays up until ``new`` or a shutdown (D-107).
+
+Debug affordances (C10): ``--spawn "<class> gx gy sx sy cx cy [fear] [respect]"`` places an
+AI captain before turn 1 (D-126) and ``--ai passive`` keeps every AI captain from opening a
+battle (D-125).  Both are logged as WARNING and ignored on a resumed game.
 """
 from __future__ import annotations
 
@@ -38,6 +42,7 @@ WARMUP_S = 10.0        # D-91: for the first seconds hello goes out every WARMUP
 WARMUP_INTERVAL_S = 0.5
 GAME_OVER_REASON = "game over - type new to start again (CMD-19)"
 T1_ONLY = ("help", "status", "fleet", "shields", "end", "quit")   # answered by T1 from its snapshot (D-92)
+AI_MODES = ("normal", "passive")
 
 
 def pick_seed(cfg: GameConfig, requested: int | None) -> int:
@@ -61,18 +66,33 @@ def parse_teleport(text: str) -> Position:
     return (g[0], g[1]), (g[2], g[3]), (g[4], g[5])
 
 
+def parse_spawn(text: str) -> tuple[str, Position, int | None, int | None]:
+    """C10 / D-126: ``--spawn "<class> gx gy sx sy cx cy [fear] [respect]"`` -> (class, position, fear, respect)."""
+    parts = text.replace(",", " ").split()
+    if len(parts) not in (7, 8, 9):
+        raise ValueError(f'--spawn needs "<class> gx gy sx sy cx cy [fear] [respect]", got {text!r} (C10, D-126)')
+    try:
+        nums = [int(p) for p in parts[1:]]
+    except ValueError:
+        raise ValueError(f'--spawn needs integers after the class name, got {text!r} (C10, D-126)') from None
+    fear = nums[6] if len(nums) > 6 else None
+    respect = nums[7] if len(nums) > 7 else None
+    return parts[0].lower(), ((nums[0], nums[1]), (nums[2], nums[3]), (nums[4], nums[5])), fear, respect
+
+
 class Engine:
     """One game, one engine (BUS-04)."""
 
     def __init__(self, cfg: GameConfig, *, seed: int | None = None, save_path: Path | None = None, pub_port: int = 0,
                  pull_port: int = 0, bus: bool = True, ai_player: bool = False, max_turns: int | None = None,
                  recorder: Any = None, resume: bool = True, launcher_pid: int | None = None,
-                 teleport: Position | None = None) -> None:
+                 teleport: Position | None = None, spawns: list[str] | None = None, ai_passive: bool = False) -> None:
         self.cfg = cfg
         self.save_path = Path(save_path) if save_path else None
         self.want_pub, self.want_pull = pub_port, pull_port
         self.bus = bus
         self.ai_player = ai_player
+        self.ai_passive = ai_passive
         self.max_turns = max_turns
         self.recorder = recorder
         self.launcher_pid = launcher_pid
@@ -98,6 +118,10 @@ class Engine:
             self._new_game(pick_seed(cfg, seed))
         if teleport is not None:
             self.apply_teleport(teleport)
+        for text in spawns or []:
+            self.apply_spawn(text)
+        if ai_passive:
+            log.warning("DEBUG --ai passive (D-125): AI captains never open a battle this game")
 
     # ------------------------------------------------------------------ lifecycle
     def _new_game(self, seed: int) -> None:
@@ -116,6 +140,17 @@ class Engine:
         ship = self.state.teleport(position)
         self._hello_bytes = None
         log.warning("DEBUG teleport (D-104): %s placed at galaxy %s sector %s cell %s", ship.name, ship.galaxy, ship.sector, ship.cell)
+
+    def apply_spawn(self, text: str) -> None:
+        """D-126 debug affordance: an AI captain with one ship before turn 1; ignored on a resumed game."""
+        if self.state.turn_no != 0:
+            log.warning("--spawn %r ignored: the game resumed at turn %d (D-126 spawns before turn 1)", text, self.state.turn_no)
+            return
+        cls, position, fear, respect = parse_spawn(text)
+        cap, ship = self.state.spawn(cls, position, fear, respect)
+        self._hello_bytes = None
+        log.warning("DEBUG spawn (D-126): %s (%s) in the %s (%s, %s) at galaxy %s sector %s cell %s, fear %d respect %d",
+                    cap.name, cap.id, ship.name, ship.id, ship.cls, ship.galaxy, ship.sector, ship.cell, cap.fear, cap.respect)
 
     def start(self) -> None:
         """Bind the sockets (bus mode), save the opening state, say hello."""
@@ -188,7 +223,7 @@ class Engine:
     def resolve_and_publish(self) -> dict:
         """TP-01...08: resolve, publish turn.resolved (MSG-03), autosave (OV-12) or game.over (MSG-09), record (C2)."""
         t0 = time.perf_counter()
-        self.state, events = resolve_turn(self.state, self.cfg, self.rng, ai_player=self.ai_player)
+        self.state, events = resolve_turn(self.state, self.cfg, self.rng, ai_player=self.ai_player, ai_passive=self.ai_passive)
         snapshot = self.state.snapshot()
         snap_hash = hash_snapshot(snapshot)
         payload = M.TurnResolved(self.state.turn_no, snapshot, events).to_dict()
@@ -293,12 +328,24 @@ class Engine:
         self.publish_hello()   # D-91 / D-99: views (PNL-07) redraw on every accepted or cancelled order
 
     def apply_script_line(self, line: str) -> tuple[bool, str]:
-        """D-104 ``--player-script``: one order for the player's active ship, applied as T1 would send it."""
+        """D-104 / C10 ``--player-script``: orders for the player's active ship, applied as T1 would send them;
+        several orders on one line are separated by ';' (one turn).  Returns (all accepted, the replies joined)."""
+        replies: list[str] = []
+        ok_all = True
+        for part in [p.strip() for p in line.split(";")]:
+            if not part:
+                continue
+            ok, text = self._apply_script_order(part)
+            ok_all = ok_all and ok
+            replies.append(text)
+        return ok_all, " | ".join(replies) if replies else "script line empty"
+
+    def _apply_script_order(self, text: str) -> tuple[bool, str]:
         ship_id = self.state.player.active_ship or ""
         try:
-            order = parse_tokens(line.split(), ship_id)
+            order = parse_tokens(text.split(), ship_id)
         except CommandError as e:
-            return False, f"script order {line!r} not parsed: {e}"
+            return False, f"script order {text!r} not parsed: {e}"
         if order.command == "new":
             return False, "script order 'new' is not supported in the sim"
         result = self.apply_order(order)
@@ -359,14 +406,15 @@ def _pid_exists(pid: int) -> bool:
 
 
 def run_engine_process(cfg: GameConfig, *, seed: int | None, pub_port: int, pull_port: int, save_path: Path,
-                       resume: bool = True, teleport: Position | None = None) -> int:
-    """``python -m starbour --role engine`` (C1); ``--teleport`` is the D-104 debug placement (D-110)."""
+                       resume: bool = True, teleport: Position | None = None, spawns: list[str] | None = None,
+                       ai_passive: bool = False) -> int:
+    """``python -m starbour --role engine`` (C1); ``--teleport`` / ``--spawn`` / ``--ai`` are the debug affordances (D-110, D-125, D-126)."""
     from starbour import runtime
-    engine = Engine(cfg, seed=seed, save_path=save_path, pub_port=pub_port, pull_port=pull_port, resume=resume,
-                    launcher_pid=runtime.launcher_pid(), teleport=teleport)
     try:
+        engine = Engine(cfg, seed=seed, save_path=save_path, pub_port=pub_port, pull_port=pull_port, resume=resume,
+                        launcher_pid=runtime.launcher_pid(), teleport=teleport, spawns=spawns, ai_passive=ai_passive)
         engine.start()
-    except Exception as e:   # noqa: BLE001 - a port in use is the usual cause
+    except Exception as e:   # noqa: BLE001 - a port in use or a bad debug flag is the usual cause
         log.error("engine could not start: %s", e)
         return 1
     runtime.start_parent_watchdog(on_exit=lambda: (engine.autosave(), engine.close()))

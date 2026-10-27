@@ -103,6 +103,7 @@ class GameConfig:
     phaser_damage_per_unit: float
     shield_recharge: int
     peace_loot_max: int
+    phaser_max: float
     # [ai]
     attack_ratio_min: float
     attack_fear_max: float
@@ -276,9 +277,14 @@ def _parse_ships(r: _Reader) -> tuple[dict[str, ShipClass], str]:
         if len(parts) != 5:
             raise ConfigError(f"[ships] {name} must be 'torpedoes, phasers, shield_max, engine, warp', got {value!r} (CLS-01...03)")
         try:
-            ships[name.lower()] = ShipClass(name.lower(), int(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4]))
+            spec = ShipClass(name.lower(), int(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4]))
         except ValueError:
             raise ConfigError(f"[ships] {name} = {value!r} has a non-numeric field (CLS-01...03)") from None
+        # M3 § 4a: degenerate values (engine 0, phasers 0, torpedoes 0 or 600, shield_max 1) are legal test inis;
+        # only negatives are rejected
+        if min(spec.torpedoes, spec.phasers, spec.shield_max, spec.engine, spec.warp) < 0:
+            raise ConfigError(f"[ships] {name} = {value!r} has a negative field (CLS-01...03)")
+        ships[name.lower()] = spec
     if not ships:
         raise ConfigError("[ships] defines no ship class (CLS-01...03)")
     if not starting:
@@ -370,6 +376,10 @@ def load_config(path: Path | str) -> GameConfig:
     planet_min, planet_max = r.at_least("world", "planet_distance_min", 1), r.integer("world", "planet_distance_max")
     if planet_min > planet_max:
         raise ConfigError("[world] planet_distance_min must be <= planet_distance_max (CFG-61, SP-04)")
+    # M3 § 4a: [battle] validation rejects only negatives and distances below 1 (torpedo_damage 0.1 is a legal test ini)
+    for key in ("torpedo_damage", "phaser_damage_per_unit", "torpedo_hit_base", "torpedo_evade_per_engine", "phaser_max"):
+        if r.number("battle", key) < 0:
+            raise ConfigError(f"[battle] {key} = {r.raw('battle', key)} must not be negative (CFG-24...26, D-130)")
 
     return GameConfig(
         path=path.resolve(),
@@ -417,14 +427,15 @@ def load_config(path: Path | str) -> GameConfig:
         drain_medium=r.integer("hazards", "drain_medium"),
         drain_high=r.integer("hazards", "drain_high"),
         wormhole_exit_distance=r.at_least("hazards", "wormhole_exit_distance", 1),
-        phaser_range=r.integer("battle", "phaser_range"),
-        torpedo_range=r.integer("battle", "torpedo_range"),
+        phaser_range=r.at_least("battle", "phaser_range", 1),
+        torpedo_range=r.at_least("battle", "torpedo_range", 1),
         torpedo_hit_base=r.number("battle", "torpedo_hit_base"),
         torpedo_evade_per_engine=r.number("battle", "torpedo_evade_per_engine"),
         torpedo_damage=r.number("battle", "torpedo_damage"),
         phaser_damage_per_unit=r.number("battle", "phaser_damage_per_unit"),
         shield_recharge=r.integer("battle", "shield_recharge"),
-        peace_loot_max=r.integer("battle", "peace_loot_max"),
+        peace_loot_max=r.pct("battle", "peace_loot_max"),
+        phaser_max=r.number("battle", "phaser_max"),
         attack_ratio_min=r.number("ai", "attack_ratio_min"),
         attack_fear_max=r.number("ai", "attack_fear_max"),
         peace_shield_pct=r.integer("ai", "peace_shield_pct"),

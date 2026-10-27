@@ -70,6 +70,8 @@ def ship_panel(snapshot: dict, cap: dict, ship: dict | None, cfg: GameConfig, wi
         _kv(t, "Warp core", f"{ship.get('warp', 0):g} / {cfg.warp_max:g}")
         pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
         _kv(t, "Position", f"galaxy {pos[0][0]},{pos[0][1]}  sector {pos[1][0]},{pos[1][1]}  cell {pos[2][0]},{pos[2][1]}")
+        if ship.get("in_battle"):
+            _kv(t, "Battle", f"in battle {ship.get('in_battle')} - no shield recharge (CM-05)", P.STYLES["bad"])
     return Panel(t, title="Active ship", title_align="left", border_style=P.STYLES["accent"], width=min(width, PANEL_WIDTH))
 
 
@@ -111,6 +113,57 @@ def hazard_panel(ship: dict, cfg: GameConfig, width: int) -> Panel | None:
     _kv(t, "Impulse", f"{cells} cell(s) per turn at full power" + (" - held, warp out" if cells <= 0 else ""),
         P.STYLES["bad"] if cells <= 0 else P.STYLES["value"])
     return Panel(t, title="Hazard", title_align="left", border_style=P.STYLES["hazard_panel"], width=min(width, PANEL_WIDTH))
+
+
+def enemies_in_battle(snapshot: dict, ship: dict, cfg: GameConfig) -> list[dict]:
+    """PNL-06: the other side's ships in the active ship's sector while it is in a battle, nearest first:
+    {id, name, class, distance, shield_current, shield_max, in_range, targeted}."""
+    bid = ship.get("in_battle")
+    if not bid:
+        return []
+    battle = next((b for b in (snapshot.get("battles") or []) if isinstance(b, dict) and b.get("id") == bid), None)
+    sides = [str(s) for s in (battle.get("sides") or [])] if battle else []
+    enemy = next((s for s in sides if s != ship.get("captain")), None)
+    pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
+    cx, cy = int(pos[2][0]), int(pos[2][1])
+    longest = max(int(cfg.torpedo_range) if float(ship.get("torpedoes", 0)) > 0 else 0, int(cfg.phaser_range) if float(ship.get("phasers", 0)) > 0 else 0)
+    out = []
+    for sid, s in (snapshot.get("ships") or {}).items():
+        if not isinstance(s, dict) or s.get("captain") == ship.get("captain"):
+            continue
+        if enemy is not None and s.get("captain") != enemy:
+            continue
+        if enemy is None and s.get("in_battle") != bid:
+            continue
+        p = s.get("position") or []
+        if len(p) != 3 or list(p[0]) != list(pos[0]) or list(p[1]) != list(pos[1]):
+            continue
+        d = max(abs(int(p[2][0]) - cx), abs(int(p[2][1]) - cy))
+        theirs = max(int(cfg.torpedo_range) if float(s.get("torpedoes", 0)) > 0 else 0, int(cfg.phaser_range) if float(s.get("phasers", 0)) > 0 else 0)
+        out.append({"id": sid, "name": str(s.get("name", sid)), "class": str(s.get("class", "")), "distance": d,
+                    "shield_current": float(s.get("shield_current", 0)), "shield_max": float(s.get("shield_max", 0)),
+                    "in_range": d <= max(longest, theirs), "targeted": sid == ship.get("target")})
+    out.sort(key=lambda e: (e["distance"], e["id"]))
+    return out
+
+
+def battle_panel(snapshot: dict, ship: dict | None, cfg: GameConfig, width: int) -> Panel | None:
+    """PNL-06 (battle): enemies in range with name, distance and shields - only while the active ship is in a battle."""
+    if not ship or not ship.get("in_battle"):
+        return None
+    t = Table(box=None, padding=(0, 1), show_header=True, header_style=P.STYLES["label"])
+    for col in ("Enemy", "Class", "Distance", "Shields", "Range"):
+        t.add_column(col, no_wrap=True)
+    rows = enemies_in_battle(snapshot, ship, cfg)
+    for e in rows:
+        mark = " <" if e["targeted"] else ""
+        t.add_row(Text(e["name"] + mark, style=P.STYLES["target"] if e["targeted"] else P.STYLES["ship_ai_battle"]),
+                  e["class"].capitalize(), f"{e['distance']} cell(s)", f"{e['shield_current']:g} / {e['shield_max']:g}",
+                  Text("in range" if e["in_range"] else "out of range", style=P.STYLES["bad"] if e["in_range"] else P.STYLES["label"]))
+    if not rows:
+        t.add_row(Text("no enemy ship in this sector", style=P.STYLES["label"]), "", "", "", "")
+    return Panel(t, title=f"Battle {ship.get('in_battle')} - enemies in range (PNL-06)", title_align="left", border_style=P.STYLES["battle_panel"],
+                 width=min(width, PANEL_WIDTH))
 
 
 def order_lines(ship: dict, cfg: GameConfig) -> list[str]:
@@ -217,5 +270,15 @@ def render(snapshot: dict, view: dict | None, cfg: GameConfig, width: int = 120)
     hz = hazard_panel(ship, cfg, width) if ship else None
     if hz is not None:
         parts.append(hz)
+    bp = battle_panel(snapshot, ship, cfg, width)
+    if bp is not None:
+        parts.append(bp)
     parts += [orders_panel(ship, cfg, width), cargo_panel(cap, cfg, width), fleet_panel(snapshot, cap, width)]
     return Group(*parts)
+
+
+def in_battle(snapshot: dict) -> bool:
+    """C5 (M3 addition, live/09): whether the player's active ship is in a battle - carried by T4's heartbeat."""
+    cap = (snapshot.get("captains") or {}).get(snapshot.get("player_id")) or {}
+    ship = (snapshot.get("ships") or {}).get(cap.get("active_ship")) or {}
+    return bool(ship.get("in_battle"))

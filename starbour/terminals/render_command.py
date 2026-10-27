@@ -134,10 +134,35 @@ def fleet_table(snapshot: dict) -> Table:
     return t
 
 
-def help_text(name: str | None = None) -> list[Text]:
-    """CMD-01 from the catalogue."""
+def help_text(name: str | None = None, cfg: GameConfig | None = None) -> list[Text]:
+    """CMD-01 from the catalogue; the footer names the shield recharge from the config (CM-05, D-127)."""
     out = []
-    for line in help_lines(name):
+    for line in help_lines(name, cfg.shield_recharge if cfg is not None else None):
         style = P.STYLES["title"] if not line.startswith(" ") else P.STYLES["value"]
         out.append(Text(line, style=style, no_wrap=True))
     return out
+
+
+def battle_with(snapshot: dict, target_text: str) -> tuple[dict | None, dict | None, bool]:
+    """CM-01 / UX-04: (target ship, its captain, already in battle with the player) for a 'fire' target by id or name
+    in the player's sector; (None, None, False) when the target is unknown (the engine will say why)."""
+    cap, ship = _player(snapshot)
+    if not ship:
+        return None, None, False
+    wanted = target_text.strip().lower()
+    pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
+    target = None
+    for sid, s in (snapshot.get("ships") or {}).items():
+        p = s.get("position") or []
+        if len(p) != 3 or list(p[0]) != list(pos[0]) or list(p[1]) != list(pos[1]):
+            continue
+        if sid.lower() == wanted or str(s.get("name", "")).lower() == wanted:
+            target = dict(s, id=sid)
+            break
+    if target is None or target.get("captain") == snapshot.get("player_id"):
+        return target, None, False
+    tcap = (snapshot.get("captains") or {}).get(target.get("captain")) or {}
+    pid = snapshot.get("player_id")
+    fighting = any(isinstance(b, dict) and b.get("ended") is None and {str(x) for x in (b.get("sides") or [])} == {pid, target.get("captain")}
+                   for b in (snapshot.get("battles") or []))
+    return target, dict(tcap, id=target.get("captain")), fighting

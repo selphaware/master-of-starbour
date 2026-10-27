@@ -22,10 +22,12 @@ from starbour.world.stellar import BLACK_HOLE, NEUTRON_STAR, STAR, WORMHOLE, Hol
 
 
 def run_turns(state: GameState, cfg: GameConfig, n: int, rng: random.Random | None = None, ai_player: bool = False):
+    """Hazard scenarios run with a passive AI (--ai passive, D-125): from M3 an AI captain would otherwise open fire on a
+    ship parked at 0 shields in a star's cell and end the scenario by combat instead of by the hazard."""
     rng = rng or game_rng(state.seed)
     events: list[dict] = []
     for _ in range(n):
-        state, events = resolve_turn(state, cfg, rng, ai_player=ai_player)
+        state, events = resolve_turn(state, cfg, rng, ai_player=ai_player, ai_passive=True)
     return state, events
 
 
@@ -294,10 +296,12 @@ def test_wormhole_crossing_keeps_the_ship_alive(small_state: GameState, small_cf
     put(small_state, ship, (6, 5))
     small_state, events = run_turns(small_state, small_cfg, 1)
     assert ship.id in small_state.ships and not small_state.game_over
-    assert (ship.galaxy, ship.sector) == other and chebyshev(ship.cell, partner_cell) == 1
+    exit_d = small_cfg.wormhole_exit_distance   # CFG-62 / D-114: 2 with the defaults (was 'nearest free cell', D-102)
+    assert (ship.galaxy, ship.sector) == other and chebyshev(ship.cell, partner_cell) == exit_d
+    assert ship.cell == (2, 4), "the axis-aligned cell at the exit distance with the smallest x wins (D-113 ordering)"
     assert any("wormhole" in s and "emerged" in s for s in texts(events, "TP-03"))
     hz = small_state.hazard_dict(ship)
-    assert hz is not None and hz["kind"] == "wormhole" and hz["distance"] == 1
+    assert hz is not None and hz["kind"] == "wormhole" and hz["distance"] == exit_d
     assert small_state.last_stats["wormhole_crossings"] == 1 and small_state.last_stats["destroyed"] == []
     assert small_state.is_visited(*other)
     # a plain black hole at the same distance destroys (D-102)

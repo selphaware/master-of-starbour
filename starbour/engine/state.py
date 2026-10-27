@@ -1,15 +1,18 @@
-"""GameState, snapshot(), from_snapshot(), snapshot_hash() - BUS-04, BUS-07, C3, C6, C9, D-67, D-87.
+"""GameState, snapshot(), from_snapshot(), snapshot_hash() - BUS-04, BUS-07, C3, C6, C9, C10, D-67, D-87.
 
 The engine is the only owner of this object (BUS-04).  ``snapshot()`` is the full
 dynamic state plus the terrain and items of every sector the player has visited; the
 static terrain of the rest is regenerated from the seed on load (D-87).  Everything is
 emitted in sorted order so the canonical JSON, and therefore the hash, is stable (D-67).
-M2 adds per-ship ``hazard`` and ``move_remaining`` (derived, C9) and ``game_over``.
+M2 adds per-ship ``hazard`` and ``move_remaining`` (derived, C9) and ``game_over``; M3 adds
+open ``battles``, per-ship ``in_battle`` / ``target`` and per-captain ``visible_reputation``
+(C10), the debug ``--spawn`` placement (D-126) and the mutiny placement rule (D-115, D-129).
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import math
 import random
 from dataclasses import dataclass, field
 
@@ -17,11 +20,13 @@ from starbour import __version__
 from starbour.commands.parse import Order
 from starbour.config import GameConfig
 from starbour.engine import hazards as H
+from starbour.entities.battle import Battle
 from starbour.entities.captain import Captain
 from starbour.entities.item import Item
 from starbour.entities.ship import Position, Ship
+from starbour.world import names
 from starbour.world.generate import Sector, World, galaxy_key, generate_world, populate, sector_key
-from starbour.world.grid import Coord
+from starbour.world.grid import Coord, chebyshev, manhattan
 
 
 def canonical_json(obj: object) -> bytes:
@@ -39,6 +44,11 @@ def populate_rng(seed: int) -> random.Random:
     return random.Random(f"starbour-populate-{seed}")
 
 
+def spawn_rng(seed: int, n: int) -> random.Random:
+    """D-126: names for a spawned captain come from their own stream so a spawn never shifts the game RNG (D-67)."""
+    return random.Random(f"starbour-spawn-{seed}-{n}")
+
+
 @dataclass(slots=True)
 class GameState:
     """Everything the engine knows.  Only ``starbour.engine`` mutates it."""
@@ -54,10 +64,15 @@ class GameState:
     view: dict = field(default_factory=lambda: {"level": "follow"})
     next_captain_no: int = 1
     next_ship_no: int = 1
+    next_battle_no: int = 1
     queues: dict[str, list[Order]] = field(default_factory=dict)
+    battles: dict[str, Battle] = field(default_factory=dict)
     game_over_turn: int | None = None
     mastery_turn: int | None = None
     player_mutinies: int = 0                         # for the game.over summary (C9)
+    spawned: list[dict] = field(default_factory=list)   # C10: the ships --spawn created (D-126)
+    pending_reputation: list[dict] = field(default_factory=list)   # FR-06 rows from fires accepted between turns, applied at the next TP-07
+    hazard_note_sector: Coord | None = None          # D-127: 'planet cells are safe' once per sector entry (not saved)
     last_stats: dict = field(default_factory=dict)   # the last resolved turn's counters (not part of the snapshot)
 
     # ---- lookups
@@ -102,8 +117,33 @@ class GameState:
         self.next_ship_no += 1
         return sid
 
+    def new_battle_id(self) -> str:
+        bid = f"b-{self.next_battle_no:03d}"
+        self.next_battle_no += 1
+        return bid
+
     def sizes(self) -> dict:
         return {"universe": list(self.cfg.universe_size), "galaxy": list(self.cfg.galaxy_size), "sector": list(self.cfg.sector_size)}
+
+    def ships_by_sector(self) -> dict[tuple[Coord, Coord], list[Ship]]:
+        """Every ship grouped by (galaxy, sector), ids sorted - built once per phase so the AI never scans every pair."""
+        out: dict[tuple[Coord, Coord], list[Ship]] = {}
+        for sid in sorted(self.ships):
+            s = self.ships[sid]
+            out.setdefault((s.galaxy, s.sector), []).append(s)
+        return out
+
+    # ---- battles (C10)
+    def battle_of_ship(self, ship: Ship) -> Battle | None:
+        """The open battle the ship's captain is in within the ship's sector (``ships[*].in_battle``)."""
+        for bid in sorted(self.battles):
+            bt = self.battles[bid]
+            if bt.open and bt.involves(ship.captain_id) and bt.galaxy == ship.galaxy and bt.sector == ship.sector:
+                return bt
+        return None
+
+    def player_in_battle(self) -> bool:
+        return any(bt.open and bt.involves(self.player_id) for bt in self.battles.values())
 
     # ---- hazards and persisting moves (C9, derived from the world and the queues)
     def hazard_of(self, ship: Ship) -> H.Hazard | None:
@@ -127,7 +167,7 @@ class GameState:
     def persisting_move(self, ship_id: str) -> Order | None:
         """The ship's persisting move, if any (CMD-06, D-98)."""
         for o in self.queues.get(ship_id, []):
-            if o.command == "move" and o.persisting:
+            if o.command in ("move", "escape") and o.persisting:
                 return o
         return None
 
@@ -180,7 +220,58 @@ class GameState:
         self.mark_visited(galaxy, sector)
         return ship
 
-    # ---- snapshot (C3, C9)
+    def spawn(self, class_name: str, position: Position, fear: int | None = None, respect: int | None = None) -> tuple[Captain, Ship]:
+        """D-126 debug ``--spawn``: an AI captain with one ship of ``class_name`` at ``position`` before turn 1 (C10 ``spawned``)."""
+        spec = self.cfg.ship_class(class_name)
+        galaxy, sector, cell = position
+        target = self.world.sector(galaxy, sector)
+        if target is None:
+            raise ValueError(f"--spawn: no sector at galaxy {galaxy[0]},{galaxy[1]} sector {sector[0]},{sector[1]} (Void or outside the universe)")
+        if not target.grid.in_bounds(cell[0], cell[1]):
+            raise ValueError(f"--spawn: cell {cell[0]},{cell[1]} is outside the {target.grid.width}x{target.grid.height} sector")
+        rng = spawn_rng(self.seed, len(self.spawned) + 1)
+        used_c = {c.name for c in self.captains.values()}
+        used_s = {s.name for s in self.ships.values()}
+        cid, sid = self.new_captain_id(), self.new_ship_id()
+        cap = Captain.new(cid, names.unique(names.captain_name, rng, used_c), False, self.cfg, fear=fear, respect=respect)
+        ship = Ship.of_class(sid, names.unique(names.ship_name, rng, used_s), spec, cid, (galaxy, sector, cell))
+        cap.ships = [sid]
+        cap.active_ship = sid
+        self.captains[cid] = cap
+        self.ships[sid] = ship
+        self.spawned.append({"ship": sid, "captain": cid, "class": spec.name, "name": ship.name, "galaxy": [galaxy[0], galaxy[1]],
+                             "sector": [sector[0], sector[1]], "cell": [cell[0], cell[1]], "fear": cap.fear, "respect": cap.respect})
+        return cap, ship
+
+    def mutiny_cell(self, ship: Ship, new_engine: float) -> Coord:
+        """SUP-04b / D-115 / D-129: where a demoted captain's new ship appears.
+
+        The nearest free cell outside every pull range (the same cell when it is safe); when the whole
+        sector is in a hole's range, the nearest cell where the new ship can move (floor(engine - pull)
+        >= 1); failing that, the cell farthest from the strongest hazard.  Nearest = Chebyshev, then
+        Manhattan, then x, then y (D-113 ordering, D-67).
+        """
+        sector = self.sector_of(ship)
+        if sector is None:
+            return ship.cell
+        terrain = sector.terrain()
+        here = ship.cell
+        free = [c for c in sector.grid.free_cells()] or [here]
+
+        def key(c: Coord) -> tuple[int, int, int, int]:
+            return (chebyshev(c, here), manhattan(c, here), c[0], c[1])
+
+        safe = [c for c in free if H.strongest(terrain, c, self.cfg) is None]
+        if safe:
+            return min(safe, key=key)
+        movable = [c for c in free if math.floor(float(new_engine) - H.pull_at(terrain, c, self.cfg) + 1e-9) >= 1]
+        if movable:
+            return min(movable, key=key)
+        hz = H.strongest(terrain, here, self.cfg)
+        anchor = hz.cell if hz is not None else here
+        return max(free, key=lambda c: (chebyshev(c, anchor), manhattan(c, anchor), -c[0], -c[1]))
+
+    # ---- snapshot (C3, C9, C10)
     def snapshot(self) -> dict:
         """The C3 snapshot: full dynamic state plus visited sectors' terrain and items (D-87)."""
         galaxies: dict[str, dict] = {}
@@ -200,25 +291,30 @@ class GameState:
         ships: dict[str, dict] = {}
         for sid in sorted(self.ships):
             ship = self.ships[sid]
-            ships[sid] = ship.to_dict([o.to_dict() for o in self.queues.get(sid, [])], self.hazard_dict(ship), self.move_remaining(sid))
+            bt = self.battle_of_ship(ship)
+            ships[sid] = ship.to_dict([o.to_dict() for o in self.queues.get(sid, [])], self.hazard_dict(ship), self.move_remaining(sid),
+                                      bt.id if bt is not None else None)
         return {
             "turn_no": self.turn_no,
             "seed": self.seed,
             "version": __version__,
             "sizes": self.sizes(),
             "player_id": self.player_id,
-            "captains": {cid: self.captains[cid].to_dict(self.cfg) for cid in sorted(self.captains)},
+            "captains": {cid: self.captains[cid].to_dict(self.cfg, self.turn_no) for cid in sorted(self.captains)},
             "ships": ships,
             "universe": {"galaxies": [[c[0], c[1]] for c in self.world.galaxy_coords()]},
             "galaxies": galaxies,
             "sectors": sectors,
             "fog_of_war": self.cfg.fog_of_war,
             "view": dict(self.view),
-            "counters": {"captain": self.next_captain_no, "ship": self.next_ship_no},
+            "counters": {"captain": self.next_captain_no, "ship": self.next_ship_no, "battle": self.next_battle_no},
+            "battles": [self.battles[bid].to_dict() for bid in sorted(self.battles) if self.battles[bid].open],
             "game_over_turn": self.game_over_turn,
             "mastery_turn": self.mastery_turn,
             "game_over": self.game_over,
             "player_mutinies": self.player_mutinies,
+            "spawned": [dict(s) for s in self.spawned],
+            "pending_reputation": [dict(r) for r in self.pending_reputation],
         }
 
     def snapshot_hash(self) -> str:
@@ -270,11 +366,17 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
         if sector is not None:
             sector.items = [Item.from_dict(i) for i in sec.get("items") or []]
     counters = snap.get("counters") or {}
+    battles = {}
+    for b in snap.get("battles") or []:
+        bt = Battle.from_dict(b)
+        battles[bt.id] = bt
     return GameState(
         cfg, seed, world, captains, ships, str(snap["player_id"]),
         turn_no=int(snap["turn_no"]), visited=visited, view=dict(snap.get("view") or {"level": "follow"}),
         next_captain_no=int(counters.get("captain") or (len(captains) + 1)),
         next_ship_no=int(counters.get("ship") or (len(ships) + 1)),
-        queues=queues, game_over_turn=snap.get("game_over_turn"), mastery_turn=snap.get("mastery_turn"),
-        player_mutinies=int(snap.get("player_mutinies") or 0),
+        next_battle_no=int(counters.get("battle") or (len(battles) + 1)),
+        queues=queues, battles=battles, game_over_turn=snap.get("game_over_turn"), mastery_turn=snap.get("mastery_turn"),
+        player_mutinies=int(snap.get("player_mutinies") or 0), spawned=[dict(s) for s in snap.get("spawned") or []],
+        pending_reputation=[dict(r) for r in snap.get("pending_reputation") or []],
     )

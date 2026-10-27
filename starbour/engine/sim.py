@@ -1,13 +1,14 @@
-"""Headless simulation - D-55, D-104, CONTRACTS C2 and C9.
+"""Headless simulation - D-55, D-104, D-125, D-126, CONTRACTS C2, C9 and C10.
 
     python -m starbour sim --seed 1234 --turns 30 --ai-player --report PATH [--save-dir DIR] [--bus ...]
                            [--teleport "gx gy sx sy cx cy"] [--player-script PATH] [--world-index]
+                           [--spawn "<class> gx gy sx sy cx cy [fear] [respect]"]... [--ai passive]
 
 Runs the engine in-process (or, with ``--bus``, the real ZeroMQ server driven from the
-sockets) and writes the C2 JSON report with the C9 additions.  Exit 0 when the requested
-turns completed or the game ended legitimately; 1 on any exception; 4 on a config error
-(handled in ``__main__``).  ``--player-script`` replaces ``--ai-player``: one order per
-line, one line per turn, blank = no order (D-104).
+sockets) and writes the C2 JSON report with the C9 and C10 additions.  Exit 0 when the
+requested turns completed or the game ended legitimately; 1 on any exception; 4 on a
+config error (handled in ``__main__``).  ``--player-script`` replaces ``--ai-player``: one
+line per turn, blank = no order, several orders separated by ';' (D-104, C10).
 """
 from __future__ import annotations
 
@@ -30,11 +31,12 @@ from starbour.world.stellar import BLACK_HOLE, NEUTRON_STAR, STAR, WORMHOLE
 log = logging.getLogger("starbour.sim")
 SCHEMA = 1
 INDEX_LIMIT = 200   # C9: at most 200 entries per world_index list, nearest to the player's start first
+BATTLE_OUTCOMES = ("destroyed", "peace", "escape", "open")
 
 
 @dataclass
 class Recorder:
-    """Collects the per-turn rows of the C2 report (plus the C9 fields)."""
+    """Collects the per-turn rows of the C2 report (plus the C9 and C10 fields)."""
 
     seed: int
     config_path: str
@@ -44,8 +46,13 @@ class Recorder:
     notes: list[str] = field(default_factory=list)       # script replies, prepended to the next turn's events
     hazard_deaths: int = 0
     warps: int = 0
+    roams: int = 0
+    combat_deaths: int = 0
+    captures: int = 0
+    battle_records: dict[str, dict] = field(default_factory=dict)   # battle id -> its latest record (C10 final counts)
     game_over_cause: str | None = None
     world_index: dict | None = None
+    spawned: list[dict] = field(default_factory=list)
     started: float = field(default_factory=time.perf_counter)
 
     def note(self, text: str) -> None:
@@ -57,8 +64,15 @@ class Recorder:
         self.mutinies.extend(stats.get("mutinies") or [])
         destroyed = list(stats.get("destroyed") or [])
         warps = list(stats.get("warps") or [])
-        self.hazard_deaths += len(destroyed)
+        battles = list(stats.get("battles") or [])
+        captures = list(stats.get("captures") or [])
+        self.hazard_deaths += sum(1 for d in destroyed if d.get("cause") != "combat")
+        self.combat_deaths += sum(1 for d in destroyed if d.get("cause") == "combat")
         self.warps += len(warps)
+        self.roams += int(stats.get("roams") or 0)
+        self.captures += len(captures)
+        for b in battles:
+            self.battle_records[str(b.get("id"))] = b
         over = stats.get("game_over")
         if over:
             self.game_over_cause = str(over.get("cause"))
@@ -72,7 +86,8 @@ class Recorder:
             player = {"ship_class": lost.get("ship_class"), "position": lost.get("position"),
                       "shield_current": lost.get("shield_current"), "shield_max": lost.get("shield_max"),
                       "hazard": lost.get("hazard"), "move_remaining": None}
-        player.update({"food": cap.food, "water": cap.water, "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver})
+        player.update({"food": cap.food, "water": cap.water, "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver,
+                       "in_battle": state.player_in_battle(), "ships": len([s for s in cap.ships if s in state.ships])})
         self.per_turn.append({
             "turn_no": state.turn_no,
             "orders_executed": dict(stats.get("orders_executed") or {"player": 0, "ai": 0}),
@@ -85,10 +100,20 @@ class Recorder:
             "resolve_ms": round(float(stats.get("resolve_ms") or 0.0), 1),
             "warps": warps,
             "destroyed": destroyed,
+            "battles": battles,
+            "reputation": list(stats.get("reputation") or []),
+            "captures": captures,
         })
         self.notes = []
 
     def report(self, state: GameState, outcome: str) -> dict:
+        by_outcome = {k: 0 for k in BATTLE_OUTCOMES}
+        ai_vs_ai = 0
+        for b in self.battle_records.values():
+            by_outcome[str(b.get("ended") or "open")] += 1
+            if state.player_id not in (b.get("sides") or []):
+                ai_vs_ai += 1
+        cap = state.captains.get(state.player_id)
         doc = {
             "schema": SCHEMA,
             "seed": self.seed,
@@ -107,7 +132,16 @@ class Recorder:
                 "game_over_cause": self.game_over_cause,
                 "hazard_deaths": self.hazard_deaths,
                 "warps": self.warps,
+                "battles": len(self.battle_records),
+                "battles_by_outcome": by_outcome,
+                "combat_deaths": self.combat_deaths,
+                "captures": self.captures,
+                "ai_vs_ai_battles": ai_vs_ai,
+                "player_fear": cap.fear if cap else None,
+                "player_respect": cap.respect if cap else None,
+                "roams": self.roams,
             },
+            "spawned": [dict(s) for s in self.spawned],
         }
         if self.world_index is not None:
             doc["world_index"] = self.world_index
@@ -179,8 +213,9 @@ def world_index(state: GameState, cfg: GameConfig) -> dict:
 
 def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool, report_path: Path | None,
             save_dir: Path, bus: bool = False, pub_port: int = 0, pull_port: int = 0, teleport: Position | None = None,
-            script_path: Path | None = None, with_world_index: bool = False) -> int:
-    """C2 / C9.  Always a new game (never resumes) so the gates compare like with like."""
+            script_path: Path | None = None, with_world_index: bool = False, spawns: list[str] | None = None,
+            ai_passive: bool = False) -> int:
+    """C2 / C9 / C10.  Always a new game (never resumes) so the gates compare like with like."""
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     recorder = Recorder(seed, str(cfg.path), turns)
@@ -192,7 +227,9 @@ def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool, report_p
     exit_code = 0
     try:
         engine = Engine(cfg, seed=seed, save_path=save_dir / "game.json", pub_port=pub_port, pull_port=pull_port, bus=bus,
-                        ai_player=ai_player, max_turns=turns, recorder=recorder, resume=False, teleport=teleport)
+                        ai_player=ai_player, max_turns=turns, recorder=recorder, resume=False, teleport=teleport,
+                        spawns=spawns, ai_passive=ai_passive)
+        recorder.spawned = [dict(s) for s in engine.state.spawned]
         if with_world_index:
             recorder.world_index = world_index(engine.state, cfg)
         engine.start()

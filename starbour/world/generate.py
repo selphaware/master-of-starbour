@@ -1,4 +1,4 @@
-"""Seeded world generation - WG-01...03, SP-01...07, ST-01...04, D-67.
+"""Seeded world generation - WG-01...03, SP-01...07, ST-01...04, D-67, D-116, D-131.
 
 Everything comes from ``random.Random(seed)`` in a fixed order: galaxies row-major,
 sectors row-major, then each sector's stars, planets and hole, then the galaxy's items,
@@ -24,6 +24,10 @@ FullCell = tuple[Coord, Coord, Coord]   # (galaxy, sector, cell)
 
 PLAYER_ID = "c-000"
 PLAYER_SHIP_ID = "s-000"
+
+# D-131 [ASSUMED]: AI captains start in a mix of classes (CLS-02 is their *usual* ship) so strength ratios
+# differ and AI-vs-AI battles happen (CM-10, D-125).  Weights by class name; a class missing from [ships] is skipped.
+AI_CLASS_WEIGHTS: tuple[tuple[str, int], ...] = (("corsair", 60), ("kestrel", 25), ("bastion", 15))
 
 
 @dataclass(slots=True)
@@ -88,6 +92,7 @@ class World:
     sectors: dict[tuple[Coord, Coord], Sector]
     wormholes: list[tuple[FullCell, FullCell]]
     static_galaxies: dict[str, dict] = field(default_factory=dict)   # 'gx,gy' -> {sectors, hazards}
+    flat_sectors: dict[Coord, tuple[Coord, Coord]] = field(default_factory=dict)   # MV-02 flattened coords -> (galaxy, sector)
 
     def galaxy(self, coord: Coord) -> Galaxy | None:
         if not self.universe.in_bounds(coord[0], coord[1]):
@@ -124,7 +129,7 @@ def _random_free_cell(grid: GeneralGrid, rng: random.Random) -> Coord:
 
 
 def _fill_sector(sector: Sector, rng: random.Random, cfg: GameConfig, used_planet_names: set[str]) -> None:
-    """SP-02, SP-04, SP-07: 0-3 stars (systems in adjacent cells), planets next to stars, 0-1 hole."""
+    """SP-02, SP-04, SP-07: 0-3 stars (systems in adjacent cells), planets in the band around a star (D-116), 0-1 hole."""
     grid = sector.grid
     n_stars = rng.randint(0, 3)
     star_cells: list[Coord] = []
@@ -148,7 +153,8 @@ def _fill_sector(sector: Sector, rng: random.Random, cfg: GameConfig, used_plane
             grid.set(cell[0], cell[1], StarBody(cell, radius, base, star_mass(radius), prof.colour, prof.bucket))
         for cell in star_cells:
             for _ in range(rng.randint(0, cfg.planets_per_system_max)):
-                candidates = [c for c in grid.neighbours(*cell) if grid.is_void(*c)]
+                # SP-04 / CFG-61 / D-116: Chebyshev distance planet_distance_min...max from the star, never on another star's cell
+                candidates = [c for c in grid.ring(cell[0], cell[1], cfg.planet_distance_min, cfg.planet_distance_max) if grid.is_void(*c)]
                 if not candidates:
                     break
                 pcell = rng.choice(candidates)
@@ -194,6 +200,11 @@ def _pair_wormholes(candidates: list[tuple[Coord, Coord, Hole]], rng: random.Ran
     return pairs
 
 
+def flat_sector(galaxy: Coord, sector: Coord, galaxy_size: Coord) -> Coord:
+    """MV-02: flattened sector coordinates (gx x galaxy_w + sx, gy x galaxy_h + sy)."""
+    return int(galaxy[0]) * int(galaxy_size[0]) + int(sector[0]), int(galaxy[1]) * int(galaxy_size[1]) + int(sector[1])
+
+
 def generate_world(seed: int, cfg: GameConfig) -> World:
     """The static universe for ``seed`` - SP-01: same seed, same world (tests/test_generate.py)."""
     rng = world_rng(seed)
@@ -232,6 +243,7 @@ def generate_world(seed: int, cfg: GameConfig) -> World:
             "sectors": [[c[0], c[1]] for c in galaxy.sector_coords()],
             "hazards": [[c[0], c[1]] for c in galaxy.hazard_coords()],
         }
+    world.flat_sectors = {flat_sector(g, s, cfg.galaxy_size): (g, s) for (g, s) in sectors}
     return world
 
 
@@ -245,9 +257,17 @@ class Population:
 
 
 def ai_ship_class(cfg: GameConfig) -> ShipClass:
-    """[ASSUMED] D-89: AI captains start in a Corsair (CLS-02 'AI captains' usual ship') when
-    [ships] has one, else the starting class."""
+    """[ASSUMED] D-89: the AI's usual ship is the Corsair (CLS-02) when [ships] has one, else the starting class."""
     return cfg.ships.get("corsair", cfg.ships[cfg.starting_class])
+
+
+def ai_ship_classes(cfg: GameConfig) -> tuple[list[ShipClass], list[int]]:
+    """D-131: the class mix AI captains are drawn from (classes present in [ships], with their weights)."""
+    classes = [cfg.ships[n] for n, _ in AI_CLASS_WEIGHTS if n in cfg.ships]
+    weights = [w for n, w in AI_CLASS_WEIGHTS if n in cfg.ships]
+    if not classes:
+        return [ai_ship_class(cfg)], [1]
+    return classes, weights
 
 
 def populate(world: World, cfg: GameConfig, rng: random.Random) -> Population:
@@ -274,7 +294,7 @@ def populate(world: World, cfg: GameConfig, rng: random.Random) -> Population:
     captains[player.id] = player
     ships[pship.id] = pship
     captain_no = ship_no = 1
-    spec = ai_ship_class(cfg)
+    classes, weights = ai_ship_classes(cfg)
     for gcoord, galaxy in world.universe.items():
         coords = galaxy.sector_coords()
         safe = [c for c in coords if not galaxy.grid.get(c[0], c[1]).has_hole()] or coords
@@ -284,6 +304,7 @@ def populate(world: World, cfg: GameConfig, rng: random.Random) -> Population:
             cell = _random_free_cell(sector.grid, rng)
             cid, sid = f"c-{captain_no:03d}", f"s-{ship_no:03d}"
             cap = Captain.new(cid, names.unique(names.captain_name, rng, used_captains), False, cfg)
+            spec = rng.choices(classes, weights)[0]
             ship = Ship.of_class(sid, names.unique(names.ship_name, rng, used_ships), spec, cid, (gcoord, scoord, cell))
             cap.ships = [sid]
             cap.active_ship = sid

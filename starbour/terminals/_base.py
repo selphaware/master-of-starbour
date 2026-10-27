@@ -50,6 +50,10 @@ class ViewTerminal:
     def renderable(self) -> RenderableType:
         return self.render_fn(self.snapshot or {}, self.view, self.cfg, self.console.width, height=self.console.height)
 
+    def heartbeat_fields(self) -> dict:
+        """Role-specific C5 fields (T4 adds ``in_battle``, M3 / live/09)."""
+        return {}
+
     def draw(self) -> None:
         """GRD-06: full redraw; log render_ms; heartbeat (C5)."""
         t0 = time.perf_counter()
@@ -59,7 +63,7 @@ class ViewTerminal:
         ms = (time.perf_counter() - t0) * 1000.0
         self.draws += 1
         log.info("%s drew turn %d in %.1f ms (render_ms)", self.role, self.turn_no, ms)
-        runtime.write_heartbeat(self.role, self.turn_no, ms)
+        runtime.write_heartbeat(self.role, self.turn_no, ms, self.heartbeat_fields())
 
     def accept_snapshot(self, snapshot: dict, turn_no: int) -> None:
         self.snapshot = snapshot

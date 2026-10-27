@@ -12,11 +12,12 @@ from starbour.entities.ship import Ship
 from starbour.world.generate import game_rng
 
 
-def run_turns(state: GameState, cfg: GameConfig, n: int, rng: random.Random | None = None, ai_player: bool = False):
+def run_turns(state: GameState, cfg: GameConfig, n: int, rng: random.Random | None = None, ai_player: bool = False, passive: bool = True):
+    """Supplies and movement scenarios run with a passive AI (--ai passive, D-125) so no M3 battle cuts them short."""
     rng = rng or game_rng(state.seed)
     events = []
     for _ in range(n):
-        state, events = resolve_turn(state, cfg, rng, ai_player=ai_player)
+        state, events = resolve_turn(state, cfg, rng, ai_player=ai_player, ai_passive=passive)
     return state, events
 
 
@@ -32,7 +33,9 @@ def test_turn_no_increments_and_phases_named(small_state: GameState, small_cfg: 
     for code in ("TP-01", "TP-02", "TP-03", "TP-04", "TP-05", "TP-06", "TP-07", "TP-08"):
         assert code in phases, f"{code} must appear, even as 'skipped' (never silently absent)"
     assert any(t.startswith("Hazards:") for t in texts(events, "TP-03")), "TP-03 resolves hazards from M2"
-    assert any("skipped (M3)" in t for t in texts(events, "TP-04"))
+    assert any(t.startswith("Combat:") for t in texts(events, "TP-04")), "TP-04 resolves combat from M3"
+    assert any(t.startswith("Reputation:") for t in texts(events, "TP-07")), "TP-07 applies reputation from M3"
+    assert any("skipped (M4)" in t for t in texts(events, "TP-05"))
     state, _ = run_turns(state, small_cfg, 2)
     assert state.turn_no == 3
 
@@ -71,15 +74,20 @@ def test_ai_moves_every_ship_every_turn(small_state: GameState, small_cfg: GameC
     """OV-10 / SP-06: every AI ship gets an order and (in a 12x12 sector) moves."""
     ai_ships = [s for s in small_state.ships.values() if s.captain_id != small_state.player_id]
     before = {s.id: s.cell for s in ai_ships}
-    state, _ = run_turns(small_state, small_cfg, 1)
+    state, _ = run_turns(small_state, small_cfg, 1, passive=False)
     st = state.last_stats
-    assert st["orders_executed"]["ai"] == len(ai_ships)
+    assert st["orders_executed"]["ai"] >= len(ai_ships)
     assert st["ai_ships_moved"] >= len(ai_ships) * 0.5
     moved = sum(1 for s in ai_ships if state.ships[s.id].cell != before[s.id])
     assert moved == st["ai_ships_moved"]
     for _ in range(5):
-        state, _ = run_turns(state, small_cfg, 1)
+        state, _ = run_turns(state, small_cfg, 1, passive=False)
         assert state.last_stats["orders_executed"]["ai"] >= 1
+    # --ai passive (D-125, D-132): no wandering at all - a spawned opponent stays where the gate put it
+    quiet = new_game(small_state.seed, small_cfg)
+    cells = {s.id: s.cell for s in quiet.ships.values() if s.captain_id != quiet.player_id}
+    quiet, _ = run_turns(quiet, small_cfg, 3)
+    assert all(quiet.ships[s].cell == c for s, c in cells.items() if s in quiet.ships)
 
 
 def test_upkeep_minus_one_player_only(small_state: GameState, small_cfg: GameConfig) -> None:
@@ -127,9 +135,9 @@ def test_mutiny_turn_and_demotion(small_state: GameState, small_cfg: GameConfig)
     assert len(state.captains) == captains_before + 1
     mutineer = state.captains[state.ships[old_ship_id].captain_id]
     assert not mutineer.is_player and mutineer.ships == [old_ship_id] and mutineer.active_ship == old_ship_id
-    # the mutineers act as an AI captain from the next turn
-    state, _ = run_turns(state, small_cfg, 1)
-    assert state.last_stats["orders_executed"]["ai"] == sum(len(c.ships) for c in state.captains.values() if not c.is_player)
+    # the mutineers act as an AI captain from the next turn (a non-passive turn: every AI ship gets at least one order)
+    state, _ = run_turns(state, small_cfg, 1, passive=False)
+    assert state.last_stats["orders_executed"]["ai"] >= sum(len(c.ships) for c in state.captains.values() if not c.is_player)
 
 
 def test_mutiny_with_a_fleet_moves_to_the_nearest_ship(small_state: GameState, small_cfg: GameConfig) -> None:
@@ -170,6 +178,6 @@ def test_two_runs_same_seed_identical(small_cfg: GameConfig) -> None:
 def test_ai_player_drives_the_player(small_state: GameState, small_cfg: GameConfig) -> None:
     ship = small_state.active_ship()
     before = ship.cell
-    state, _ = run_turns(small_state, small_cfg, 1, ai_player=True)
-    assert state.last_stats["orders_executed"]["player"] == 1
+    state, _ = run_turns(small_state, small_cfg, 1, ai_player=True, passive=False)
+    assert state.last_stats["orders_executed"]["player"] >= 1
     assert state.ships[ship.id].cell != before
