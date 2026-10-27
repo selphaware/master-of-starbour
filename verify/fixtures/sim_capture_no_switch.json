@@ -1,0 +1,1352 @@
+{
+ "check": "fleet",
+ "args": [
+  "report",
+  "snapshot"
+ ],
+ "kwargs": {
+  "spawns": [
+   {
+    "ship": "s-900",
+    "captain": "c-900"
+   },
+   {
+    "ship": "s-901",
+    "captain": "c-901"
+   }
+  ],
+  "player_cell": [
+   12,
+   11
+  ],
+  "cells": {
+   "b": [
+    12,
+    11
+   ],
+   "c": [
+    14,
+    11
+   ]
+  },
+  "moves": [
+   [
+    0,
+    1
+   ],
+   [
+    0,
+    4
+   ]
+  ],
+  "persisting_remaining": [
+   0,
+   2
+  ],
+  "what": "fixture fleet"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 15,
+  "turns_completed": 15,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 85,
+     "respect": 5,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 195,
+    "events": [
+     "Turn 1 resolved"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 90.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "phaser",
+        "distance": 0,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 75.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 85,
+     "respect": 5,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 195,
+    "events": [
+     "Turn 2 resolved"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 90.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "phaser",
+        "distance": 0,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 60.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 85,
+     "respect": 5,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 195,
+    "events": [
+     "Turn 3 resolved"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 90.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "phaser",
+        "distance": 0,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 45.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 85,
+     "respect": 5,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 195,
+    "events": [
+     "Turn 4 resolved"
+    ],
+    "snapshot_hash": "de090cace45944c2ea976e4f6b1533527e2ad85a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 90.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "phaser",
+        "distance": 0,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 30.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 85,
+     "respect": 5,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 195,
+    "events": [
+     "Turn 5 resolved"
+    ],
+    "snapshot_hash": "3fbe04f954142ea96390ca458cce98b6635d5625",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 90.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "phaser",
+        "distance": 0,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 15.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 6,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 24,
+     "water": 24,
+     "fear": 85,
+     "respect": 5,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 2
+    },
+    "captains": 194,
+    "events": [
+     "Turn 6 resolved"
+    ],
+    "snapshot_hash": "0b9f7ca5d039de547cb60ff2f5a05d5ec8e1c6aa",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [
+     {
+      "ship": "s-900",
+      "from": "c-900",
+      "to": "c-000"
+     }
+    ]
+   },
+   {
+    "turn_no": 7,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 23,
+     "water": 23,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 2
+    },
+    "captains": 194,
+    "events": [
+     "Turn 7 resolved"
+    ],
+    "snapshot_hash": "4aceead99edd2e471f5bddd855c6316911d48b0e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-002",
+      "sides": [
+       "c-000",
+       "c-901"
+      ],
+      "opened_turn": 7,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-901": 30.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-901",
+        "weapon": "phaser",
+        "distance": 2,
+        "hit": true,
+        "damage": 5.0,
+        "shields_after": 25.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 8,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 22,
+     "water": 22,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 2
+    },
+    "captains": 194,
+    "events": [
+     "Turn 8 resolved"
+    ],
+    "snapshot_hash": "307cbbc5816730d54c3b080a724806b802353358",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-002",
+      "sides": [
+       "c-000",
+       "c-901"
+      ],
+      "opened_turn": 7,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-901": 30.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-901",
+        "weapon": "phaser",
+        "distance": 2,
+        "hit": true,
+        "damage": 5.0,
+        "shields_after": 20.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 9,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 21,
+     "water": 21,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 2
+    },
+    "captains": 194,
+    "events": [
+     "Turn 9 resolved"
+    ],
+    "snapshot_hash": "765b5989178b933ef5914576f8837fb84a990b64",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-002",
+      "sides": [
+       "c-000",
+       "c-901"
+      ],
+      "opened_turn": 7,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-901": 30.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-901",
+        "weapon": "phaser",
+        "distance": 2,
+        "hit": true,
+        "damage": 5.0,
+        "shields_after": 15.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 10,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 20,
+     "water": 20,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 2
+    },
+    "captains": 194,
+    "events": [
+     "Turn 10 resolved"
+    ],
+    "snapshot_hash": "5d15a9198f942f6d75f08d6aeb3ebb1349bc188e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-002",
+      "sides": [
+       "c-000",
+       "c-901"
+      ],
+      "opened_turn": 7,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-901": 30.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-901",
+        "weapon": "phaser",
+        "distance": 2,
+        "hit": true,
+        "damage": 5.0,
+        "shields_after": 10.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 11,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 19,
+     "water": 19,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 2
+    },
+    "captains": 194,
+    "events": [
+     "Turn 11 resolved"
+    ],
+    "snapshot_hash": "8895991866481cb468a2f219b37d401537a1e1ab",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-002",
+      "sides": [
+       "c-000",
+       "c-901"
+      ],
+      "opened_turn": 7,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-901": 30.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-901",
+        "weapon": "phaser",
+        "distance": 2,
+        "hit": true,
+        "damage": 5.0,
+        "shields_after": 5.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 12,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 18,
+     "water": 18,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 3
+    },
+    "captains": 193,
+    "events": [
+     "Turn 12 resolved"
+    ],
+    "snapshot_hash": "de1c277524bf3609cfd96f0d25be2bffd82e9448",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [
+     {
+      "ship": "s-901",
+      "from": "c-901",
+      "to": "c-000"
+     }
+    ]
+   },
+   {
+    "turn_no": 13,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 17,
+     "water": 17,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 3
+    },
+    "captains": 193,
+    "events": [
+     "script order 'ship s-900' accepted: active ship is now Cinder Lark"
+    ],
+    "snapshot_hash": "8f2d8dcd845df4319e056fa70cacaff08d366927",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 14,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 16,
+     "water": 16,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       12
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 3
+    },
+    "captains": 193,
+    "events": [
+     "Turn 14 resolved"
+    ],
+    "snapshot_hash": "73f449404c1da66909d100839d8c56cf07a1189d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 15,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 15,
+     "water": 15,
+     "fear": 85,
+     "respect": 0,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       16
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": [
+      0,
+      2
+     ],
+     "in_battle": false,
+     "ships": 3
+    },
+    "captains": 193,
+    "events": [
+     "Turn 15 resolved"
+    ],
+    "snapshot_hash": "a18d6eb98152013b4390ccf2a1b1781d0129b7dd",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 2,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 2
+   },
+   "combat_deaths": 0,
+   "captures": 2,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 85,
+   "player_respect": 0,
+   "roams": 0
+  },
+  "spawned": [
+   {
+    "ship": "s-900",
+    "captain": "c-900",
+    "class": "bastion",
+    "cell": [
+     12,
+     11
+    ]
+   },
+   {
+    "ship": "s-901",
+    "captain": "c-901",
+    "class": "corsair",
+    "cell": [
+     14,
+     11
+    ]
+   }
+  ]
+ },
+ "snapshot": {
+  "turn_no": 15,
+  "seed": 1234,
+  "version": "0.1.0",
+  "sizes": {
+   "universe": [
+    8,
+    8
+   ],
+   "galaxy": [
+    16,
+    16
+   ],
+   "sector": [
+    24,
+    24
+   ]
+  },
+  "player_id": "c-000",
+  "captains": {
+   "c-000": {
+    "name": "Harrow Vey",
+    "is_player": true,
+    "gold": 5,
+    "silver": 50,
+    "fear": 85,
+    "respect": 0,
+    "food": 29,
+    "water": 29,
+    "ships": [
+     "s-194",
+     "s-900",
+     "s-901"
+    ],
+    "active_ship": "s-194",
+    "items": [],
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false
+   }
+  },
+  "ships": {
+   "s-194": {
+    "name": "Lantern",
+    "class": "kestrel",
+    "captain": "c-000",
+    "torpedoes": 6,
+    "phasers": 3.0,
+    "shield_max": 60.0,
+    "shield_current": 60.0,
+    "engine": 4.0,
+    "warp": 3.0,
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      12,
+      16
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [
+     {
+      "command": "move",
+      "args": [
+       "+0",
+       "+2"
+      ],
+      "persisting": true
+     }
+    ],
+    "hazard": null,
+    "move_remaining": [
+     0,
+     2
+    ],
+    "in_battle": null,
+    "target": null
+   },
+   "s-900": {
+    "name": "Cinder Lark",
+    "class": "bastion",
+    "captain": "c-000",
+    "torpedoes": 0,
+    "phasers": 0.0,
+    "shield_max": 100.0,
+    "shield_current": 20.0,
+    "engine": 4.0,
+    "warp": 4.0,
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      12,
+      11
+     ]
+    ],
+    "orders_queued": 1,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   },
+   "s-901": {
+    "name": "Tallow Wren",
+    "class": "corsair",
+    "captain": "c-000",
+    "torpedoes": 0,
+    "phasers": 0.0,
+    "shield_max": 80.0,
+    "shield_current": 20.0,
+    "engine": 4.0,
+    "warp": 5.0,
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      14,
+      11
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   }
+  },
+  "universe": {
+   "galaxies": [
+    [
+     3,
+     4
+    ]
+   ]
+  },
+  "galaxies": {
+   "3,4": {
+    "sectors": [
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      9,
+      9
+     ],
+     [
+      10,
+      9
+     ],
+     [
+      7,
+      10
+     ]
+    ],
+    "visited": [
+     [
+      7,
+      9
+     ]
+    ],
+    "hazards": []
+   }
+  },
+  "sectors": {
+   "3,4/7,9": {
+    "terrain": [
+     {
+      "kind": "star",
+      "cell": [
+       5,
+       5
+      ],
+      "colour": "yellow",
+      "bucket": "medium"
+     },
+     {
+      "kind": "planet",
+      "cell": [
+       6,
+       5
+      ],
+      "name": "Oreth"
+     }
+    ],
+    "items": []
+   }
+  },
+  "fog_of_war": true,
+  "view": {
+   "level": "follow"
+  },
+  "game_over": false,
+  "battles": []
+ }
+}

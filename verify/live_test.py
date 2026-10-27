@@ -3,8 +3,9 @@
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py .            milestone gate (≤ 3 min)
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py --selftest   stub launcher; opens no window
 
-Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2 and live/08 per specs/M2.md § 3 against
-docs/CONTRACTS.md (C1 command lines, C3 bus, C5 heartbeats, C6 save, C9 M2 additions).
+Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2, live/08 per specs/M2.md § 3 and live/09 per
+specs/M3.md § 4 against docs/CONTRACTS.md (C1 command lines, C3 bus, C5 heartbeats, C6 save,
+C9 M2 additions, C10 M3 additions).
 Windows open and close on the desktop.  Not run by the hook.  Any existing saves\\game.json
 is moved aside first and restored afterwards; the gate's own save is deleted.  On any exit
 every process the gate started is killed.  Exit 0 pass, 1 fail, 3 HARNESS ERROR.
@@ -25,10 +26,12 @@ import textwrap
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import _checks as C  # noqa: E402
+import _combat as CB  # noqa: E402
 
 BUDGET_S = 180.0
 LAUNCH_WAIT_S = 15.0
@@ -419,6 +422,90 @@ def l08(ctx: Ctx) -> list[str]:
     return problems
 
 
+def status_in_battle(hb_dir: Path) -> Any:
+    """The status window's heartbeat `in_battle` field (C10 / live/09, [ASSUMED] C5 addition), '<missing>' when absent."""
+    doc, _ = C.load_json(hb_dir / "status.json")
+    return doc.get("in_battle", "<missing>") if isinstance(doc, dict) else "<no heartbeat>"
+
+
+def l09(ctx: Ctx) -> list[str]:
+    """live/09 — (M3) end-to-end combat: launch with --spawn and --ai passive, push `fire phaser <id>`, two turns →
+    combat events, every window at the current turn, T4's heartbeat says in_battle, closing T1 leaves nothing
+    (CM-01, OUT-04, BUS-06, C10)."""
+    if ctx.pkg_missing:
+        raise C.Blocked(ctx.pkg_missing)
+    if C.role_processes(ctx.root):
+        stop_everything(ctx)
+    cp = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=None)
+    cp.read(ctx.root / "controls_config.ini", encoding="utf-8")
+    sw, sh = (int(v) for v in cp.get("world", "sector_size").lower().split("x"))
+    report, save_dir = ctx.art / f"world_{LIVE_SEED}.json", ctx.art / f"saves_world_{LIVE_SEED}"
+    if save_dir.exists():
+        shutil.rmtree(save_dir, ignore_errors=True)
+    what = f"sim --seed {LIVE_SEED} --turns 1 --ai-player --world-index"
+    res = C.run_cmd([ctx.py, "-m", "starbour", "sim", "--seed", str(LIVE_SEED), "--turns", "1", "--ai-player", "--world-index",
+                     "--report", str(report), "--save-dir", str(save_dir)], ctx.root, 40.0)
+    if res.timed_out or res.returncode != 0:
+        return [f"{what} exited {res.returncode}: {res.tail(8)} — live/09 needs world_index to pick the spawn cell (C9, D-104)"]
+    doc, err = C.load_json(report)
+    index = doc.get("world_index") if isinstance(doc, dict) else None
+    errs = C.world_index_shape_errors(index)
+    if errs:
+        return [f"{what}: " + "; ".join(errs[:4])]
+    (gx, gy), (sx, sy), (cx, cy) = index["player_start"]
+    blocked = C.terrain_cells(index, (gx, gy), (sx, sy))
+    cell = next(((cx + dx, cy + dy) for dx, dy in C.NEIGHBOURS if C.in_sector((cx + dx, cy + dy), (sw, sh)) and (cx + dx, cy + dy) not in blocked), None)
+    if cell is None:
+        return [f"no free cell next to the player's start {cx},{cy} for seed {LIVE_SEED} (world_index; gate logic)"]
+    spawn = CB.spawn_arg("kestrel", (gx, gy), (sx, sy), cell, 0, 10)
+    save = ctx.root / "saves" / "game.json"
+    if save.exists():
+        shutil.copy2(save, ctx.art / "game.json.before-live09")
+        save.unlink()
+    problems = launch(ctx, [ctx.py, "-m", "starbour", "--seed", str(LIVE_SEED), "--spawn", spawn, "--ai", "passive"], "combat")
+    if problems:
+        problems.append("the launcher must accept --spawn and --ai passive and pass them to the engine role, as it does --seed and --teleport (C10 C1 additions, D-125, D-126)")
+        stop_everything(ctx)
+        return problems
+    view_pids = {r: ctx.pids[r] for r in C.VIEW_ROLES if r in ctx.pids}
+
+    def after_first(obs: dict) -> dict:
+        n = obs["resolved"][-1]["turn_no"]
+        seen = windows_at_turn(ctx.hb_dir, n, view_pids)
+        C.wait_until(lambda: status_in_battle(ctx.hb_dir) is True, HB_WAIT_S, 0.1)
+        seen["in_battle"] = status_in_battle(ctx.hb_dir)
+        return seen
+    obs = CB.drive_combat(ctx.pub_port, ctx.pull_port, spawn_cell=cell, turns=2, hello_timeout=15.0, turn_timeout=10.0, after_first=after_first)
+    problems = CB.check_combat_bus(obs, turns=2)
+    seen = obs.get("after_first") or {}
+    if seen:
+        hb = list(seen.get("problems") or [])
+        if hb:
+            hb[-1] += f" — waited {seen.get('waited_s', 0.0):.1f} s of {seen.get('wait_s', HB_WAIT_S):.0f} s after the first turn.resolved (BUS-05, C5)"
+        problems += hb
+        if seen.get("in_battle") is not True:
+            problems.append(f"T4's heartbeat in_battle = {seen.get('in_battle')!r}, expected true while the player's ship is in a battle "
+                            f"(status.json carries in_battle; [ASSUMED] C5 addition, M3 § 4 live/09)")
+    kill_role(ctx, "command")
+    waited = C.wait_until(lambda: ctx.launcher.poll() is not None and not C.role_processes(ctx.root), SHUTDOWN_WAIT_S, 0.2)
+    if ctx.launcher.poll() is None:
+        problems.append(f"the launcher is still running {SHUTDOWN_WAIT_S:.0f} s after T1 was killed during a battle — closing T1 must end the game (TL, BUS-06)")
+    problems += C.check_all_gone([(pid, role) for pid, role, _ in C.role_processes(ctx.root)],
+                                 f"{SHUTDOWN_WAIT_S:.0f} s after T1 was killed during a battle (orphans; BUS-06, D-59)")
+    if problems:
+        killed = stop_everything(ctx)
+        if killed:
+            problems.append("the gate had to kill: " + ", ".join(killed))
+        tail = launcher_log_tail(ctx)
+        if tail.strip():
+            problems.append("launcher log tail:\n" + textwrap.indent(tail, " " * 10))
+    else:
+        first = obs["resolved"][0]
+        print(f"         spawn {obs.get('target')} at {list(cell)} next to {cx},{cy}; fire accepted; turn {first['turn_no']} events {first['types']}; "
+              f"windows at turn {first['turn_no']} after {seen.get('waited_s')} s, T4 in_battle true; everything gone {waited:.1f} s after killing T1")
+    return problems
+
+
 CHECKS = [
     C.Check("live/01", "ports free before start", "BUS-06", l01),
     C.Check("live/02", "launcher spawns engine + four terminals", "TL, BR-15, C1", l02),
@@ -427,6 +514,7 @@ CHECKS = [
     C.Check("live/05", "closing T1 ends the game: autosave, no orphans", "BUS-06, OV-12", l05),
     C.Check("live/06", "terminating the launcher leaves no children", "BUS-06, D-59", l06),
     C.Check("live/08", "end-to-end game over: teleport into a star, game.over, save deleted, new", "OV-09b, MSG-09, OUT-16, C9", l08, since="M2"),
+    C.Check("live/09", "end-to-end combat: spawn, fire, combat events, T4 in_battle, close T1", "CM-01, OUT-04, BUS-06, C10", l09, since="M3"),
     C.Check("live/07", "starbour.exe launches and stays up", "BR-14, BR-15", l07, since="M5"),
 ]
 
@@ -637,6 +725,50 @@ def selftest(root: Path) -> int:
       (gate_status("live/08", "M1"), gate_status("live/08", "M2")))
     t("gating: live/07 still SKIPs until M5", gate_status("live/07", "M2") == C.SKIP and gate_status("live/07", "M5") == C.FAIL)
     t("teleport_arg formats C9's six integers", C.teleport_arg([3, 4], [7, 9], [5, 5]) == "3 4 7 9 5 5")
+
+    # ---------------------------------------------------------------- M3: live/09 (specs/M3.md § 4)
+    print("-- M3 --")
+    from stub_engine import SPAWN_SHIP, default_snapshot  # noqa: E402
+    spawn_cell = default_snapshot(spawn=True)["ships"][SPAWN_SHIP]["position"][2]
+    with tempfile.TemporaryDirectory() as td:
+        hb_dir = Path(td) / "hb"
+        hb_dir.mkdir()
+        my_pids = {r: os.getpid() for r in C.VIEW_ROLES}
+        for mode, expect in (("battle", None), ("battle_leaky", ("combat", "in_battle", "battles"))):
+            eng = StubEngine(mode)
+            eng.start()
+            eng.ready.wait(5)
+            win = StubWindows(eng.pub_port, hb_dir)
+            win.start()
+            win.ready.wait(5)
+            seen_hook: list[dict] = []
+
+            def read_windows(obs: dict) -> dict:
+                n = obs["resolved"][-1]["turn_no"]
+                seen = windows_at_turn(hb_dir, n, my_pids, wait_s=3.0)
+                C.wait_until(lambda: status_in_battle(hb_dir) is True, 2.0, 0.05)
+                seen["in_battle"] = status_in_battle(hb_dir)
+                seen_hook.append(seen)
+                return seen
+            try:
+                obs = CB.drive_combat(eng.pub_port, eng.pull_port, spawn_cell=spawn_cell, turns=2, hello_timeout=10.0, reply_timeout=2.0, turn_timeout=2.0,
+                                      after_first=read_windows)
+            finally:
+                win.stop()
+                eng.stop()
+            problems = CB.check_combat_bus(obs, turns=2)
+            seen = obs.get("after_first") or {}
+            problems += list(seen.get("problems") or [])
+            if seen.get("in_battle") is not True:
+                problems.append(f"T4's heartbeat in_battle = {seen.get('in_battle')!r}, expected true")
+            if expect is None:
+                t(f"live/09 driver: stub engine 'battle' passes (fire accepted, turn {(obs.get('resolved') or [{}])[0].get('turn_no')} combat events "
+                  f"{(obs.get('resolved') or [{}])[0].get('combat_texts', [''])[:1]}, windows at the turn, T4 in_battle true)", not problems, problems)
+            else:
+                t(f"live/09 driver: stub engine 'battle_leaky' fails naming {expect}", all(any(w in m for m in problems) for w in expect), problems)
+    t("gating: live/09 SKIPs at MILESTONE M2 and runs (here FAILs) at M3", gate_status("live/09", "M2") == C.SKIP and gate_status("live/09", "M3") == C.FAIL,
+      (gate_status("live/09", "M2"), gate_status("live/09", "M3")))
+    t("spawn_arg formats C10's --spawn string", CB.spawn_arg("kestrel", [3, 4], [7, 9], [13, 11], 0, 10) == "kestrel 3 4 7 9 13 11 0 10")
 
     bad = [n for ok, n in results if not ok]
     print(f"== live selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")

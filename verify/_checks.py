@@ -92,69 +92,195 @@ class Check:
     fn: Callable[[Any], list[str]]
     since: str = "M1"
     until: str | None = None      # last milestone the check applies to (D-106 scopes smoke/05 to ≤ M3)
+    needs: tuple[str, ...] = ()   # codes that must have finished first (their verdict is theirs; a failed one BLOCKs via ctx)
+    exclusive: bool = False       # runs alone — bus rows: a --bus engine on random ports must not share the box (D-128)
+
+
+class _ThreadStdout:
+    """sys.stdout proxy for the concurrent scheduler: a worker thread's prints go to its own
+    buffer (replayed under the check's line, as the serial run prints them); the main thread's
+    go straight through.  Checks never print concurrently to the real console."""
+
+    def __init__(self, real: Any) -> None:
+        self.real = real
+        self.local = threading.local()
+
+    def write(self, s: str) -> int:
+        buf = getattr(self.local, "buf", None)
+        if buf is not None:
+            buf.write(s)
+            return len(s)
+        return self.real.write(s)
+
+    def flush(self) -> None:
+        buf = getattr(self.local, "buf", None)
+        if buf is None:
+            self.real.flush()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.real, name)
+
+
+def _run_one(chk: Check, ctx: Any, milestone: Callable[[], str]) -> tuple[Outcome, list[str], bool]:
+    """Run one check; return (outcome, extra detail lines, harness_error)."""
+    t0 = time.perf_counter()
+    details: list[str] = []
+    harness = False
+    try:
+        if milestone_index(milestone()) < milestone_index(chk.since):
+            raise Skip(f"needs {chk.since}; specs/MILESTONE is {milestone()}")
+        if chk.until is not None and milestone_index(milestone()) > milestone_index(chk.until):
+            raise Skip(f"applies only while specs/MILESTONE ≤ {chk.until} (D-106); it is {milestone()}")
+        problems = chk.fn(ctx)
+        details = list(problems)
+        o = Outcome(chk.code, chk.title, PASS if not details else FAIL, "", chk.ids)
+    except Skip as e:
+        o = Outcome(chk.code, chk.title, SKIP, str(e), chk.ids)
+    except Blocked as e:
+        o = Outcome(chk.code, chk.title, BLOCKED, str(e), chk.ids)
+    except HarnessError as e:
+        o = Outcome(chk.code, chk.title, "HARNESS", str(e), chk.ids)
+        harness = True
+    except Exception:
+        o = Outcome(chk.code, chk.title, FAIL, "", chk.ids)
+        details = ["unexpected exception inside the gate — if the deliverable's output is malformed, fix that; "
+                   "if the gate itself is wrong, say so in the report (never edit verify/): "
+                   + traceback.format_exc(limit=4).strip().replace("\n", "\n" + " " * 10)]
+    o.seconds = time.perf_counter() - t0
+    if details:
+        o.detail = details[0]
+    return o, details, harness
+
+
+def _print_outcome(o: Outcome, details: list[str], notes: str = "") -> None:
+    if notes:
+        sys.stdout.write(notes if notes.endswith("\n") else notes + "\n")
+    if o.status == "HARNESS":
+        print(f"HARNESS ERROR {o.code} {o.title}: {o.detail}  ({o.seconds:.1f} s)")
+        print("The environment is wrong, not the code. Fix it and re-run; do not change the game for this.")
+        return
+    print(o.line())
+    for extra in details[1:]:
+        print(f"{'':8}+ {extra}")
 
 
 def run_checks(checks: list[Check], ctx: Any, *, milestone: Callable[[], str], select: set[str] | None,
-               budget_s: float, label: str, result_path: Path) -> int:
-    """Run checks in order; print one line per check plus timings; return the exit code
-    (0 pass, 1 any FAIL, 3 at the first HARNESS ERROR — which stops the run)."""
-    outcomes: list[Outcome] = []
+               budget_s: float, label: str, result_path: Path, workers: int = 1) -> int:
+    """Run the checks; print one line per check plus timings; return the exit code
+    (0 pass, 1 any FAIL, 3 at the first HARNESS ERROR — which stops the run).
+
+    `workers` > 1 runs independent checks concurrently (D-128): a check starts once every code in
+    its `needs` has finished; `exclusive` checks (bus rows) run strictly alone, after the
+    concurrent ones have drained, in list order.  Lines print in completion order; the timings
+    table and the result file keep the list order.  Per-check seconds are wall time."""
+    selected = [c for c in checks if select is None or c.code in select]
+    outcomes: dict[str, Outcome] = {}
     t_all = time.perf_counter()
     print(f"== {label} ==")
     rc = 0
-    for chk in checks:
-        if select is not None and chk.code not in select:
-            continue
-        t0 = time.perf_counter()
-        details: list[str] = []
-        try:
-            if milestone_index(milestone()) < milestone_index(chk.since):
-                raise Skip(f"needs {chk.since}; specs/MILESTONE is {milestone()}")
-            if chk.until is not None and milestone_index(milestone()) > milestone_index(chk.until):
-                raise Skip(f"applies only while specs/MILESTONE ≤ {chk.until} (D-106); it is {milestone()}")
-            problems = chk.fn(ctx)
-            details = list(problems)
-            o = Outcome(chk.code, chk.title, PASS if not details else FAIL, "", chk.ids)
-        except Skip as e:
-            o = Outcome(chk.code, chk.title, SKIP, str(e), chk.ids)
-        except Blocked as e:
-            o = Outcome(chk.code, chk.title, BLOCKED, str(e), chk.ids)
-        except HarnessError as e:
-            o = Outcome(chk.code, chk.title, "HARNESS", str(e), chk.ids, time.perf_counter() - t0)
-            outcomes.append(o)
-            print(f"HARNESS ERROR {chk.code} {chk.title}: {e}  ({o.seconds:.1f} s)")
-            print("The environment is wrong, not the code. Fix it and re-run; do not change the game for this.")
-            rc = 3
-            break
-        except Exception:
-            o = Outcome(chk.code, chk.title, FAIL, "", chk.ids)
-            details = ["unexpected exception inside the gate — if the deliverable's output is malformed, fix that; "
-                       "if the gate itself is wrong, say so in the report (never edit verify/): "
-                       + traceback.format_exc(limit=4).strip().replace("\n", "\n" + " " * 10)]
-        o.seconds = time.perf_counter() - t0
-        if details:
-            o.detail = details[0]
-        outcomes.append(o)
-        print(o.line())
-        for extra in details[1:]:
-            print(f"{'':8}+ {extra}")
+    if workers <= 1 or len(selected) <= 1:
+        for chk in selected:
+            o, details, harness = _run_one(chk, ctx, milestone)
+            outcomes[chk.code] = o
+            _print_outcome(o, details)
+            if harness:
+                rc = 3
+                break
+    else:
+        rc = _run_concurrently(selected, ctx, milestone, outcomes, workers)
+    ordered = [outcomes[c.code] for c in selected if c.code in outcomes]
     total = time.perf_counter() - t_all
-    counts = Counter(o.status for o in outcomes)
+    counts = Counter(o.status for o in ordered)
     if rc != 3 and counts.get(FAIL, 0):
         rc = 1
     print("-- timings --")
-    for o in outcomes:
+    for o in ordered:
         print(f"  {o.seconds:6.1f} s  {o.code}  {o.status}")
+    busy = sum(o.seconds for o in ordered)
+    mode = f"; {workers} workers, {busy:.1f} s of check time" if workers > 1 and len(selected) > 1 else ""
     print(f"== {label}: {counts.get(PASS, 0)} pass, {counts.get(FAIL, 0)} fail, {counts.get(SKIP, 0)} skip, "
-          f"{counts.get(BLOCKED, 0)} blocked — {total:.1f} s (budget {budget_s:.0f} s) — exit {rc} ==")
+          f"{counts.get(BLOCKED, 0)} blocked — {total:.1f} s (budget {budget_s:.0f} s{mode}) — exit {rc} ==")
     if total > budget_s:
         print(f"WARN tier budget exceeded: {total:.1f} s > {budget_s:.0f} s (BOOTSTRAP § gates) — not a failure; report it")
     try:
         result_path.parent.mkdir(parents=True, exist_ok=True)
-        result_path.write_text(json.dumps({"label": label, "exit": rc, "total_s": round(total, 2),
-                                           "outcomes": [o.as_dict() for o in outcomes]}, indent=1), encoding="utf-8")
+        result_path.write_text(json.dumps({"label": label, "exit": rc, "total_s": round(total, 2), "workers": workers,
+                                           "outcomes": [o.as_dict() for o in ordered]}, indent=1), encoding="utf-8")
     except OSError:
         pass
+    return rc
+
+
+def _run_concurrently(selected: list[Check], ctx: Any, milestone: Callable[[], str], outcomes: dict[str, Outcome],
+                      workers: int) -> int:
+    """The scheduler behind run_checks(workers > 1).  Non-exclusive checks run in a pool as soon as
+    their `needs` are done; exclusive ones run alone once nothing else is ready or running.  A
+    HARNESS ERROR stops new starts, waits for the running checks and returns 3."""
+    from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+
+    proxy = _ThreadStdout(sys.stdout)
+    real_stdout = sys.stdout
+    sys.stdout = proxy
+    rc = 0
+    pending = list(selected)
+    running: dict[Future, Check] = {}
+    harness_seen = False
+
+    def task(chk: Check) -> tuple[Outcome, list[str], bool, str]:
+        import io as _io
+        proxy.local.buf = _io.StringIO()
+        try:
+            o, details, harness = _run_one(chk, ctx, milestone)
+        finally:
+            notes = proxy.local.buf.getvalue()
+            proxy.local.buf = None
+        return o, details, harness, notes
+
+    def ready(chk: Check) -> bool:
+        return all(n in outcomes for n in chk.needs if any(c.code == n for c in selected))
+
+    try:
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="gate") as pool:
+            while pending or running:
+                if not harness_seen:
+                    ready_now = [c for c in pending if ready(c)]
+                    plain = [c for c in ready_now if not c.exclusive]
+                    excl = [c for c in ready_now if c.exclusive]
+                    started = False
+                    if not running and not plain and excl:
+                        chk = excl[0]                                    # alone: nothing runs, nothing plain is ready
+                        pending.remove(chk)
+                        running[pool.submit(task, chk)] = chk
+                        started = True
+                    elif plain and not any(c.exclusive for c in running.values()):
+                        for chk in plain[: max(0, workers - len(running))]:
+                            pending.remove(chk)
+                            running[pool.submit(task, chk)] = chk
+                            started = True
+                    if started and (len(running) < workers and any(not c.exclusive for c in running.values())):
+                        continue
+                if not running:
+                    if harness_seen:
+                        break
+                    stuck = [c.code for c in pending]
+                    for chk in pending:                                  # unsatisfiable needs (a code not selected and not run)
+                        o = Outcome(chk.code, chk.title, BLOCKED, f"its prerequisites {list(chk.needs)} never ran (gate wiring; {stuck})", chk.ids)
+                        outcomes[chk.code] = o
+                        _print_outcome(o, [])
+                    pending.clear()
+                    break
+                done, _ = wait(list(running), return_when=FIRST_COMPLETED)
+                for fut in done:
+                    chk = running.pop(fut)
+                    o, details, harness, notes = fut.result()
+                    outcomes[chk.code] = o
+                    _print_outcome(o, details, notes)
+                    if harness:
+                        harness_seen = True
+                        rc = 3
+                        pending.clear()
+    finally:
+        sys.stdout = real_stdout
     return rc
 
 
@@ -443,8 +569,13 @@ def check_mutiny(report: dict, food_start: int, water_start: int, mutiny_turns_a
         errs.append(f"turn {T}: player food/water = {pl.get('food')}/{pl.get('water')}, expected {mutiny_supplies}/{mutiny_supplies} "
                     f"([supplies] mutiny_supplies; SUP-04b, D-72)")
     c0, c1 = by_turn[T - 1].get("captains"), at_T.get("captains")
-    if not (isinstance(c0, int) and isinstance(c1, int) and c1 == c0 + 1):
-        errs.append(f"captains count {c0} → {c1} across turn {T}, expected +1 (the mutineers become an AI captain; SUP-04c)")
+    gone = len(at_T.get("destroyed") or []) + len(at_T.get("captures") or [])     # AI captains may leave the same turn (D-105, M3 § 4)
+    if not (isinstance(c0, int) and isinstance(c1, int) and c0 + 1 - gone <= c1 <= c0 + 1):
+        errs.append(f"captains count {c0} → {c1} across turn {T}, expected +1 (the mutineers become an AI captain; SUP-04c) less at most the "
+                    f"{gone} ship(s) destroyed or captured that turn (an AI captain removed the same turn, D-105; the mutiny itself is judged from final.mutinies)")
+    mut_rows = [m for m in (_get(report, "final", "mutinies", default=[]) or []) if isinstance(m, dict) and m.get("turn_no") == T]
+    if mut_rows and not any(str(m.get("result", "")).lower().startswith("demot") for m in mut_rows):
+        errs.append(f"final.mutinies at turn {T} = {mut_rows[:2]}, expected result 'demoted' (SUP-04b, C2)")
     f0, f1 = prev.get("fear"), pl.get("fear")
     if not (isinstance(f0, int) and isinstance(f1, int) and f1 == max(0, f0 - mutiny_fear_delta)):
         errs.append(f"fear {f0} → {f1} across turn {T}, expected max(0, {f0} − {mutiny_fear_delta}) "
@@ -489,10 +620,16 @@ def check_config_honoured(report: dict, expected_food_turn1: int, food_start_in_
     return errs
 
 
+LONG_RUN_M3_COUNTS = ("battles", "combat_deaths", "captures", "ai_vs_ai_battles", "roams", "player_fear", "player_respect")
+BATTLE_OUTCOMES = ("destroyed", "peace", "escape", "open")
+
+
 def check_long_run(report: dict | None, exit_code: int, elapsed: float, limit_s: float, stderr_tail: str,
-                   turns: int, expect_hazard_deaths: bool = False) -> list[str]:
+                   turns: int, expect_hazard_deaths: bool = False, expect_battles: bool = False) -> list[str]:
     """smoke/12 — robustness over a long AI-only run (D-69).  From M2 `final.hazard_deaths`
-    must be reported as a count ≥ 0 (C9)."""
+    must be reported as a count ≥ 0 (C9).  From M3 (`expect_battles`) the universe must be alive:
+    `final.battles ≥ 1`, `final.ai_vs_ai_battles ≥ 1`, `battles_by_outcome` the four C10 buckets,
+    and the other C10 final counts integers (specs/M3.md § 4 smoke/12, D-69, D-105)."""
     errs: list[str] = []
     if exit_code != 0:
         errs.append(f"sim exited {exit_code}" + (f"; stderr tail: {stderr_tail.strip()[-400:]}" if stderr_tail.strip() else ""))
@@ -513,6 +650,28 @@ def check_long_run(report: dict | None, exit_code: int, elapsed: float, limit_s:
         hd = _get(report, "final", "hazard_deaths")
         if not isinstance(hd, int) or isinstance(hd, bool) or hd < 0:
             errs.append(f"final.hazard_deaths = {hd!r}, expected an integer ≥ 0 (C9 final additions; D-69)")
+    if expect_battles:
+        final = report.get("final") or {}
+        for k in LONG_RUN_M3_COUNTS:
+            v = final.get(k)
+            if not isinstance(v, int) or isinstance(v, bool) or v < 0:
+                errs.append(f"final.{k} = {v!r}, expected an integer ≥ 0 (C10 final additions)")
+        bo = final.get("battles_by_outcome")
+        if not isinstance(bo, dict) or any(not isinstance(bo.get(k), int) for k in BATTLE_OUTCOMES):
+            errs.append(f"final.battles_by_outcome = {_short(bo)}, expected {{destroyed, peace, escape, open}} counts (C10)")
+        elif isinstance(final.get("battles"), int) and sum(bo.get(k, 0) for k in BATTLE_OUTCOMES) != final["battles"]:
+            errs.append(f"final.battles_by_outcome sums to {sum(bo.get(k, 0) for k in BATTLE_OUTCOMES)} but final.battles = {final['battles']} (C10)")
+        nb = final.get("battles")
+        if isinstance(nb, int) and nb < 1:
+            errs.append(f"final.battles = {nb} over {turns} AI-only turns — nobody ever fights; the AI opens battles when the ratio and fear "
+                        f"rules allow (CM-10, EF-01, D-125; M3 § 4 smoke/12)")
+        na = final.get("ai_vs_ai_battles")
+        if isinstance(na, int) and na < 1:
+            errs.append(f"final.ai_vs_ai_battles = {na} over {turns} turns — AI captains must fight each other under the same rules (D-125)")
+        for k in ("player_fear", "player_respect"):
+            v = final.get(k)
+            if isinstance(v, int) and not isinstance(v, bool) and not 0 <= v <= 100:
+                errs.append(f"final.{k} = {v}, outside 0–100 (LV-01, LV-05)")
     return errs
 
 

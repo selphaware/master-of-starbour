@@ -552,7 +552,16 @@ def main() -> int:
     go_good, go_bad = game_over_obs()
     write(HERE / "sim_m2_game_over.json", go_good)
     write(HERE / "sim_game_over_accepts_orders.json", go_bad)
-    print(f"wrote fixtures to {HERE} (final hash {good['per_turn'][-1]['snapshot_hash'][:8]}…; {len(scen)} M2 scenarios)")
+    # M3 (specs/M3.md § 4, C10)
+    import make_fixtures_m3 as M3  # noqa: E402
+    m3_good = M3.good_m3()
+    write(HERE / "sim_m3_scenarios.json", m3_good)
+    for name, doc in M3.broken_m3(m3_good).items():
+        write(HERE / f"{name}.json", doc)
+    lr = M3.long_run()
+    write(HERE / "sim_m3_long_run.json", lr)
+    write(HERE / "sim_long_run_no_battles.json", M3.long_run_broken(lr))
+    print(f"wrote fixtures to {HERE} (final hash {good['per_turn'][-1]['snapshot_hash'][:8]}…; {len(scen)} M2 scenarios; {len(m3_good)} M3 scenarios)")
     return 0
 
 

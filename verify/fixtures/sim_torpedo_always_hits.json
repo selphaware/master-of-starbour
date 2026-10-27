@@ -1,0 +1,6139 @@
+{
+ "check": "torpedo_rate",
+ "args": [
+  "report"
+ ],
+ "kwargs": {
+  "p_expected": 0.39999999999999997,
+  "bound": 0.45,
+  "at_most": true,
+  "engine": 10.0,
+  "shots_min": 300,
+  "what": "fixture hit rate engine 10"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 10,
+  "turns_completed": 10,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 1 resolved"
+    ],
+    "snapshot_hash": "cf067c8578dbdef8808e3b430130964f150fab53",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 99.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 98.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.6
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 2 resolved"
+    ],
+    "snapshot_hash": "51d7cb809c979d909b8c2319a4fe22621548cea4",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 97.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 96.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.2
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 3 resolved"
+    ],
+    "snapshot_hash": "9788df0c245eeff9af397f57b428d02ab35e0466",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 95.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 94.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 93.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.8
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 4 resolved"
+    ],
+    "snapshot_hash": "df5d21da618fd7ff3d1e197ec272ee37b395d84c",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 92.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 91.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.4
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 5 resolved"
+    ],
+    "snapshot_hash": "a21151fcbdee650eed77995b83c1580e3f293e4e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 90.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 89.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 88.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 6,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 24,
+     "water": 24,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 6 resolved"
+    ],
+    "snapshot_hash": "0e88d80ec166ea6ae38d18b46e83d77d0aab8f02",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 87.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 86.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.6
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 7,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 23,
+     "water": 23,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 7 resolved"
+    ],
+    "snapshot_hash": "f9c315f449537fa2ec7eb49f837a55663d40e94b",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 85.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 84.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.2
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 8,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 22,
+     "water": 22,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 8 resolved"
+    ],
+    "snapshot_hash": "76c2763aa2b6997b35d9d6170978bd699f422fa8",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 83.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 82.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 81.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.8
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 9,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 21,
+     "water": 21,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 9 resolved"
+    ],
+    "snapshot_hash": "de6e9137bba0991be0ec03fddc332703ec8522fe",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 80.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 79.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.4
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 10,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 20,
+     "water": 20,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 10 resolved"
+    ],
+    "snapshot_hash": "859d1e39cf5eb29bd0deb4f28c2b49e1d0964d53",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-001",
+      "sides": [
+       "c-000",
+       "c-900"
+      ],
+      "opened_turn": 1,
+      "opened_by": "c-000",
+      "strength_at_open": {
+       "c-000": 255.0,
+       "c-900": 100.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 78.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 77.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.9
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.8
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.7
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.6
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.5
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.4
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.3
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.2
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.1
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-900",
+        "weapon": "torpedo",
+        "distance": 3,
+        "hit": true,
+        "damage": 0.1,
+        "shields_after": 76.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": []
+   }
+  ],
+  "final": {
+   "captains": 194,
+   "ships": 194,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 1,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 1
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 10,
+   "player_respect": 10,
+   "roams": 0
+  },
+  "spawned": [
+   {
+    "ship": "s-900",
+    "captain": "c-900",
+    "class": "bastion",
+    "cell": [
+     15,
+     11
+    ]
+   }
+  ]
+ }
+}

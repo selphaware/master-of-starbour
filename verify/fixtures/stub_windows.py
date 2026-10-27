@@ -31,9 +31,12 @@ class StubWindows(threading.Thread):
         self._halt.set()
         self.join(5)
 
-    def _write(self, role: str, turn_no: int) -> None:
-        """C5 record, written atomically; retried when the gate holds the file open (Windows os.replace)."""
+    def _write(self, role: str, turn_no: int, in_battle: bool | None = None) -> None:
+        """C5 record, written atomically; retried when the gate holds the file open (Windows os.replace).
+        The status window adds `in_battle` (C10 / live/09, [ASSUMED] C5 addition)."""
         doc = {"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": 1}
+        if role == "status" and in_battle is not None:
+            doc["in_battle"] = in_battle
         tmp = self.hb_dir / f"{role}.json.tmp"
         tmp.write_text(json.dumps(doc), encoding="utf-8")
         for attempt in range(5):
@@ -43,10 +46,18 @@ class StubWindows(threading.Thread):
             except PermissionError:
                 time.sleep(0.01 * (attempt + 1))
 
-    def _draw(self, topic: str, turn_no: int) -> None:
+    def _draw(self, topic: str, turn_no: int, snapshot: dict | None = None) -> None:
         t0 = time.perf_counter()
+        in_battle: bool | None = None
+        if isinstance(snapshot, dict):
+            try:
+                cap = snapshot["captains"][snapshot["player_id"]]
+                ship = snapshot["ships"][cap["active_ship"]]
+                in_battle = bool(ship.get("in_battle"))
+            except (KeyError, TypeError):
+                in_battle = None
         for r in self.roles:
-            self._write(r, turn_no)
+            self._write(r, turn_no, in_battle)
         self.drawn.append((t0, topic, turn_no))
 
     def run(self) -> None:
@@ -72,7 +83,7 @@ class StubWindows(threading.Thread):
                 except ValueError:
                     continue
                 if topic in REDRAW_TOPICS and isinstance(payload, dict) and isinstance(payload.get("turn_no"), int):
-                    self._draw(topic, payload["turn_no"])
+                    self._draw(topic, payload["turn_no"], payload.get("snapshot"))
         finally:
             sub.close(0)
             ctx.term()

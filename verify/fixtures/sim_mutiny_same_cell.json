@@ -1,0 +1,507 @@
+{
+ "check": "mutiny_placement",
+ "args": [
+  "report",
+  "snapshot"
+ ],
+ "kwargs": {
+  "mutiny_turn": 4,
+  "hazard": {
+   "galaxy": [
+    3,
+    4
+   ],
+   "sector": [
+    8,
+    9
+   ],
+   "cell": [
+    6,
+    6
+   ]
+  },
+  "kind": "black_hole",
+  "engine": 4.0,
+  "what": "fixture mutiny placement (hole)"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 5,
+  "turns_completed": 5,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       8,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 6,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 1 resolved"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       8,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 5,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 2 resolved"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       8,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 4,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 3 resolved"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 10,
+     "water": 10,
+     "fear": 0,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       8,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 11,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Mutiny: the crew seize the Lantern; you are demoted to a Kestrel placed at the nearest cell where it can move (D-129)"
+    ],
+    "snapshot_hash": "de090cace45944c2ea976e4f6b1533527e2ad85a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 9,
+     "water": 9,
+     "fear": 0,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       8,
+       9
+      ],
+      [
+       8,
+       6
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       6,
+       6
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 10,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 194,
+    "events": [
+     "Turn 5 resolved"
+    ],
+    "snapshot_hash": "3fbe04f954142ea96390ca458cce98b6635d5625",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   }
+  ],
+  "final": {
+   "captains": 194,
+   "ships": 194,
+   "mutinies": [
+    {
+     "turn_no": 4,
+     "captain": "player",
+     "result": "demoted"
+    }
+   ],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 0,
+   "player_respect": 10,
+   "roams": 0
+  },
+  "spawned": []
+ },
+ "snapshot": {
+  "turn_no": 5,
+  "seed": 1234,
+  "version": "0.1.0",
+  "sizes": {
+   "universe": [
+    8,
+    8
+   ],
+   "galaxy": [
+    16,
+    16
+   ],
+   "sector": [
+    24,
+    24
+   ]
+  },
+  "player_id": "c-000",
+  "captains": {
+   "c-000": {
+    "name": "Harrow Vey",
+    "is_player": true,
+    "gold": 5,
+    "silver": 50,
+    "fear": 10,
+    "respect": 10,
+    "food": 29,
+    "water": 29,
+    "ships": [
+     "s-194"
+    ],
+    "active_ship": "s-194",
+    "items": [],
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false
+   }
+  },
+  "ships": {
+   "s-194": {
+    "name": "Lantern",
+    "class": "kestrel",
+    "captain": "c-000",
+    "torpedoes": 6,
+    "phasers": 3.0,
+    "shield_max": 60.0,
+    "shield_current": 60.0,
+    "engine": 4.0,
+    "warp": 3.0,
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      6
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   }
+  },
+  "universe": {
+   "galaxies": [
+    [
+     3,
+     4
+    ]
+   ]
+  },
+  "galaxies": {
+   "3,4": {
+    "sectors": [
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      9,
+      9
+     ],
+     [
+      10,
+      9
+     ],
+     [
+      7,
+      10
+     ]
+    ],
+    "visited": [
+     [
+      7,
+      9
+     ]
+    ],
+    "hazards": []
+   }
+  },
+  "sectors": {
+   "3,4/7,9": {
+    "terrain": [
+     {
+      "kind": "star",
+      "cell": [
+       5,
+       5
+      ],
+      "colour": "yellow",
+      "bucket": "medium"
+     },
+     {
+      "kind": "planet",
+      "cell": [
+       6,
+       5
+      ],
+      "name": "Oreth"
+     }
+    ],
+    "items": []
+   }
+  },
+  "fog_of_war": true,
+  "view": {
+   "level": "follow"
+  },
+  "game_over": false,
+  "battles": []
+ }
+}

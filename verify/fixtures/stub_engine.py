@@ -16,6 +16,12 @@ Modes:
                    citing CMD-19, 'new' → fresh hello at turn 0 with a new seed (M2 § 3 smoke/21)
   game_over_leaky  dies at `die_at` but keeps accepting orders, keeps the save and never flags
                    game_over (the broken counterpart)
+  battle           as good, plus a spawned AI Kestrel one cell from the player (C10 --spawn); an
+                   accepted `fire phaser|torpedo <id>` opens a battle: snapshot ships[*].in_battle /
+                   target and battles[] are set, the next turn.resolved carries type 'combat'
+                   events (OUT-04) and the player's shields drop (M3 § 4 live/09)
+  battle_leaky     accepts `fire` but opens nothing: no combat event, in_battle stays null, no
+                   battles[] (the broken counterpart)
 
 Runs as a thread (StubEngine) or as a script (prints the bound ports as JSON on stdout).
 Opens no window.
@@ -35,19 +41,36 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 from _checks import chebyshev, flat_sector, signed, warp_reach  # noqa: E402
 
-MODES = ("good", "stuck_turn", "same_snapshot", "reject_no_id", "no_reply", "no_hello", "game_over", "game_over_leaky")
+MODES = ("good", "stuck_turn", "same_snapshot", "reject_no_id", "no_reply", "no_hello", "game_over", "game_over_leaky", "battle", "battle_leaky")
+BATTLE_MODES = ("battle", "battle_leaky")
 ENGINE, WARP, GALAXY_SIZE, UNIVERSE_SIZE = 4, 3.0, (16, 16), (8, 8)
 HOME = ((3, 4), (7, 9))
+SPAWN_SHIP, SPAWN_CAPTAIN = "s-900", "c-900"
 
 
-def default_snapshot() -> dict:
+def default_snapshot(spawn: bool = False) -> dict:
     doc = json.loads((HERE / "snapshot_good.json").read_text(encoding="utf-8"))
     doc["turn_no"] = 0
     doc["game_over"] = False
+    doc["battles"] = []
     for ship in doc["ships"].values():
         ship.setdefault("move_remaining", None)
         ship.setdefault("hazard", None)
         ship.setdefault("orders", [])
+        ship.setdefault("in_battle", None)
+        ship.setdefault("target", None)
+    for cap in doc["captains"].values():
+        cap.setdefault("visible_reputation", False)
+    if spawn:                                      # C10 --spawn "kestrel … <cell 1 away> 0 10": an AI Kestrel beside the player
+        pid = doc["player_id"]
+        sid = doc["captains"][pid]["active_ship"]
+        (gx, gy), (sx, sy), (cx, cy) = doc["ships"][sid]["position"]
+        doc["captains"][SPAWN_CAPTAIN] = {"name": "Oriel Vance", "is_player": False, "gold": 2, "silver": 15, "fear": 0, "respect": 10, "food": 30, "water": 30,
+                                          "ships": [SPAWN_SHIP], "active_ship": SPAWN_SHIP, "items": [], "is_master": False, "mutiny_countdown": None,
+                                          "visible_reputation": False}
+        doc["ships"][SPAWN_SHIP] = {"name": "Cinder Lark", "class": "kestrel", "captain": SPAWN_CAPTAIN, "torpedoes": 6, "phasers": 3.0, "shield_max": 60.0,
+                                    "shield_current": 60.0, "engine": 4.0, "warp": 3.0, "position": [[gx, gy], [sx, sy], [cx + 1, cy]], "orders_queued": 0,
+                                    "orders": [], "hazard": None, "move_remaining": None, "in_battle": None, "target": None}
     return doc
 
 
@@ -63,7 +86,8 @@ class StubEngine(threading.Thread):
             raise ValueError(f"mode must be one of {MODES}")
         self.mode = mode
         self.hello_interval = hello_interval
-        self.snapshot = copy.deepcopy(snapshot) if snapshot else default_snapshot()
+        self.snapshot = copy.deepcopy(snapshot) if snapshot else default_snapshot(spawn=mode in BATTLE_MODES)
+        self.battle: dict | None = None          # the open battle record (battle mode)
         self.turn_no = int(self.snapshot.get("turn_no", 0))
         self.seed = int(self.snapshot.get("seed", 1234))
         self.save_path = Path(save_path) if save_path else None
@@ -147,6 +171,13 @@ class StubEngine(threading.Thread):
             for other_sid, other in self.snapshot["ships"].items():
                 if other_sid != sid:
                     self.queued.pop(other_sid, None)
+            if self.mode == "battle" and self.battle is not None:        # TP-04: one phaser exchange each way at distance 1 (CM-04: 3 × 5 × 2/3 = 10)
+                enemy = self.snapshot["ships"][SPAWN_SHIP]
+                for attacker, defender in ((ship, enemy), (enemy, ship)):
+                    defender["shield_current"] = max(0.0, float(defender["shield_current"]) - 10.0)
+                    events.append({"phase": "TP-04", "type": "combat", "severity": "alert", "ids": ["OUT-04"],
+                                   "text": f"{attacker['name']} → {defender['name']}: phaser hit, 10.0 damage, shields left {defender['shield_current']:g}"})
+                self.snapshot["battles"] = [dict(self.battle)]
             if self.mode in ("game_over", "game_over_leaky") and self.turn_no == self.die_at and not self.game_over:
                 self.game_over = True
                 cell = ship["position"][2]
@@ -169,9 +200,23 @@ class StubEngine(threading.Thread):
         sid, ship = self._player()
         if self.game_over and self.mode == "game_over" and command not in ("new", "quit"):
             return "order.rejected", {"order": order, "reason": "game over — type new to start again (CMD-19)"}
+        if command == "fire":
+            weapon = args[0] if args else ""
+            target = args[1] if len(args) > 1 else ""
+            if weapon not in ("phaser", "torpedo") or target not in self.snapshot["ships"]:
+                return "order.rejected", {"order": order, "reason": f"fire needs torpedo|phaser <target> (CMD-08); {target!r} is not a ship"}
+            if self.mode == "battle":
+                pid = self.snapshot["player_id"]
+                enemy_cid = self.snapshot["ships"][target]["captain"]
+                self.battle = {"id": "b-001", "sides": [pid, enemy_cid], "opened_turn": self.turn_no + 1, "opened_by": pid,
+                               "strength_at_open": {pid: 255.0, enemy_cid: 255.0}, "ended": None, "victor": None, "transfer": None}
+                ship["in_battle"], ship["target"] = "b-001", target
+                self.snapshot["ships"][target]["in_battle"], self.snapshot["ships"][target]["target"] = "b-001", sid
+                self.snapshot["battles"] = [dict(self.battle)]
+            return "order.accepted", {"order": order, "queue_position": 1, "queued": 1, "text": f"fire {weapon} at {target} queued"}
         if command == "new":
             self.seed += 1
-            self.snapshot = default_snapshot()
+            self.snapshot = default_snapshot(spawn=self.mode in BATTLE_MODES)
             self.snapshot["seed"] = self.seed
             self.turn_no = 0
             self.game_over = False

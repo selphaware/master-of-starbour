@@ -1,0 +1,6138 @@
+{
+ "check": "roaming",
+ "args": [
+  "report",
+  "report2",
+  "index"
+ ],
+ "kwargs": {
+  "player_ship": "s-194",
+  "every": 10,
+  "what": "fixture roaming"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 60,
+  "turns_completed": 60,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 1 resolved"
+    ],
+    "snapshot_hash": "b71d2eca9f85d9823814950025418eb1beac8808",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 2 resolved"
+    ],
+    "snapshot_hash": "992782e082d33c2e843b79ba53d9e5b61181125f",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 3 resolved"
+    ],
+    "snapshot_hash": "9e138a5210a6ca09ebc9fc39e65dbc556da579e5",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 4 resolved"
+    ],
+    "snapshot_hash": "07613441add48935fc2582989715e5b8f5c79e0a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 5 resolved"
+    ],
+    "snapshot_hash": "9a14ad3ceb9a8eac5557868d1133c8a7c19070e4",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 6,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 24,
+     "water": 24,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 6 resolved"
+    ],
+    "snapshot_hash": "13242fbab4462016cc7b6e6519ee067be8b23a59",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 7,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 23,
+     "water": 23,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 7 resolved"
+    ],
+    "snapshot_hash": "870725474b400155129df7552313ff0650d0ad49",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 8,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 22,
+     "water": 22,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 8 resolved"
+    ],
+    "snapshot_hash": "4ba29a1f28bf003ed2cf40034cedd0465b51fd78",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 9,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 21,
+     "water": 21,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 9 resolved"
+    ],
+    "snapshot_hash": "7127a70e76adff33176d7d7dd5f2398d2232e6b1",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 10,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 20,
+     "water": 20,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 10 resolved"
+    ],
+    "snapshot_hash": "ba91f739bfd06b8f40596efe1658ed13b7c8e003",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 11,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 19,
+     "water": 19,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 11 resolved"
+    ],
+    "snapshot_hash": "e45c7ba1a4062a775a4587a855ef498faf4cd6ab",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 12,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 18,
+     "water": 18,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 12 resolved"
+    ],
+    "snapshot_hash": "fdabc66de0bddeb30d323c31cec9b425aaa958ca",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 13,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 17,
+     "water": 17,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 13 resolved"
+    ],
+    "snapshot_hash": "a7e582da166922a8a05b709fc0100c274a5f775a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 14,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 16,
+     "water": 16,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 14 resolved"
+    ],
+    "snapshot_hash": "7ecee754c4bfbe9a95c08f45f20ba73faf7357fe",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 15,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 15,
+     "water": 15,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 15 resolved"
+    ],
+    "snapshot_hash": "c41d74ba12d40c952a293e01873647c83b880532",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 16,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 14,
+     "water": 14,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 16 resolved"
+    ],
+    "snapshot_hash": "31b0a36be785ee8484462ef09f01a5cd0e2ff585",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 17,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 13,
+     "water": 13,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 17 resolved"
+    ],
+    "snapshot_hash": "ba9aeb3bfd72d713c3ec8dd02b9077ed41a2a3b9",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 18,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 12,
+     "water": 12,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 18 resolved"
+    ],
+    "snapshot_hash": "d3929024941cc7e4a5b8e17711da6e87b82ec2fd",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 19,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 11,
+     "water": 11,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 19 resolved"
+    ],
+    "snapshot_hash": "31b5c85824c0f8648990521714623433f01ba246",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 20,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 10,
+     "water": 10,
+     "fear": 12,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 20 resolved"
+    ],
+    "snapshot_hash": "7ca153d2edb517995ca01802efca0f762a2d8173",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 21,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 9,
+     "water": 9,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 21 resolved"
+    ],
+    "snapshot_hash": "7bd36f24e4bee06f45a741e116ef13c4c398a65a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 22,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 8,
+     "water": 8,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 22 resolved"
+    ],
+    "snapshot_hash": "5d8441c1e2f3dc9b6f53ce6a5d44ea4856858899",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 23,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 7,
+     "water": 7,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 23 resolved"
+    ],
+    "snapshot_hash": "088a864015e85dac86707b6547eccd4733461c25",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 24,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 6,
+     "water": 6,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 24 resolved"
+    ],
+    "snapshot_hash": "bfb12d7ee2908085b3ee5f45188cb57ed5104a4e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 25,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 5,
+     "water": 5,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 25 resolved"
+    ],
+    "snapshot_hash": "b61b2702c98cb1e09fe5a140ca3716317674a9e7",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 26,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 4,
+     "water": 4,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 26 resolved"
+    ],
+    "snapshot_hash": "eff0dc524e07a17b5846f8a5e8080540559845ea",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 27,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 3,
+     "water": 3,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 27 resolved"
+    ],
+    "snapshot_hash": "dcd8b54b6a810a1a486627c3f6f66b029ff8cf98",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 28,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 2,
+     "water": 2,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 28 resolved"
+    ],
+    "snapshot_hash": "a48af1509911c8d85c165fdb72e15d34293e6449",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 29,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 1,
+     "water": 1,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 29 resolved"
+    ],
+    "snapshot_hash": "cf946fc20424d14217db2a45878319647eca9b26",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 30,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 30 resolved"
+    ],
+    "snapshot_hash": "57b926df71bb95301ce2eff38e2f45c11dc4374c",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 31,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 31 resolved"
+    ],
+    "snapshot_hash": "5209bdd0229061a7e7dbcc37158dfe99d50dbe99",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 32,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 32 resolved"
+    ],
+    "snapshot_hash": "aaf269cd70144672a76ea454e32fd02fd6fc7855",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 33,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 33 resolved"
+    ],
+    "snapshot_hash": "15e6b4d2143ffbbc1a5ef6590d95dd52f7c659a7",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 34,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 34 resolved"
+    ],
+    "snapshot_hash": "a289c7396ef1149310e1e31d694b79f4df1b73f8",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 35,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 35 resolved"
+    ],
+    "snapshot_hash": "fb561e065c7ff4ccce347b49e00a4fe07f34c9ad",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 36,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 36 resolved"
+    ],
+    "snapshot_hash": "8fecda1850ff9ddadf5c578804ea8a62ded6c49b",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 37,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 37 resolved"
+    ],
+    "snapshot_hash": "49abd8e90c053297b917a61b99ee6b8c79dca8f5",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 38,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 38 resolved"
+    ],
+    "snapshot_hash": "27f56b19f2efb5b9aa90c588594891e6b8ecc1c5",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 39,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 39 resolved"
+    ],
+    "snapshot_hash": "b963e78bc5ead95f10491d96ce28d17382f89f94",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 40,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 40 resolved"
+    ],
+    "snapshot_hash": "1e0c048c2eda31d1c6459fecb6ac482381acba6b",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 41,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 41 resolved"
+    ],
+    "snapshot_hash": "d3d74289aee61c87271093ae1a1fbf187c3defab",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 42,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 42 resolved"
+    ],
+    "snapshot_hash": "72e9e8d816620eab91f8947339cf7b59258eadad",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 43,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 43 resolved"
+    ],
+    "snapshot_hash": "1c7c2565e38fd220ddb700a309924f2616741ec2",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 44,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 44 resolved"
+    ],
+    "snapshot_hash": "ae3e9e561316942f2d5f40d22e333d3e2f935e3a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 45,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 45 resolved"
+    ],
+    "snapshot_hash": "c8ad5d55a9f91ab7fe67e0a8bf9e13aaff2ba1fd",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 46,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 46 resolved"
+    ],
+    "snapshot_hash": "1fd41d8ee66e992c85fdd91c6dc034730ccd70b4",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 47,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 47 resolved"
+    ],
+    "snapshot_hash": "ee1bb252efa2f978a9f402d48c872efc7456df58",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 48,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 48 resolved"
+    ],
+    "snapshot_hash": "92000abf66edbfa23b41b7ff3168c2a75d4f13ad",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 49,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 49 resolved"
+    ],
+    "snapshot_hash": "51be4871927fedc0fc1ab06e20e347096a49f733",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 50,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 50 resolved"
+    ],
+    "snapshot_hash": "6e9011bbf92e57eae5453d57f255dfdd3b2756a0",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 51,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 51 resolved"
+    ],
+    "snapshot_hash": "48fa77fd9eb8841364a9e9bc8729dbe92ef94c90",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 52,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 52 resolved"
+    ],
+    "snapshot_hash": "563ab631ce7c712a47f5f94a18aeb419903ba08d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 53,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 53 resolved"
+    ],
+    "snapshot_hash": "a94680c7a1dd1581db40b592c81a013e1da8fc4b",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 54,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 54 resolved"
+    ],
+    "snapshot_hash": "dba7ade935f1de181aaf6a3948088887be572354",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 55,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 55 resolved"
+    ],
+    "snapshot_hash": "237f5e778b28b98324c82dcdad57cde61b9110de",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 56,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 56 resolved"
+    ],
+    "snapshot_hash": "bf70dff907eb0f08224c438fce796e2a7eca7081",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 57,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 57 resolved"
+    ],
+    "snapshot_hash": "f12b3534ca5e8c4364e499a89cd8f4925b9f1023",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 58,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 58 resolved"
+    ],
+    "snapshot_hash": "4744581da2b5d7944556c776d1ea18b0343d9e78",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 59,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 59 resolved"
+    ],
+    "snapshot_hash": "39c371c4eae772f5b1dd53505747067c96f27064",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 60,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 7,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 60 resolved"
+    ],
+    "snapshot_hash": "e6175a53615ae27161e52e298673d69435edba93",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 18,
+   "player_respect": 7,
+   "roams": 0
+  },
+  "spawned": []
+ },
+ "report2": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 60,
+  "turns_completed": 60,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 1 resolved"
+    ],
+    "snapshot_hash": "9726e428f3fc941fd5b3f89ab8cd7b90157fb66c",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 2 resolved"
+    ],
+    "snapshot_hash": "9c1f976e84e7ccb83f6bcdd4045791769fa037ab",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 3 resolved"
+    ],
+    "snapshot_hash": "743c4dfe9424ef7ec03ff395f7e08c2d85b7c7cf",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 4 resolved"
+    ],
+    "snapshot_hash": "23164ca41e73c4e2bb2fc0e7c84715e9c1e078c8",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 5 resolved"
+    ],
+    "snapshot_hash": "aeb961ae157e4f723152d48f02cc028c3a72769d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 6,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 24,
+     "water": 24,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 6 resolved"
+    ],
+    "snapshot_hash": "693dc76dc8809701137e30c635be0298d19e2896",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 7,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 23,
+     "water": 23,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 7 resolved"
+    ],
+    "snapshot_hash": "395b7b940267d2829e289928b04032a392e9757b",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 8,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 22,
+     "water": 22,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 8 resolved"
+    ],
+    "snapshot_hash": "985b1d3461a333c8504a659e96485fe4b24576cc",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 9,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 21,
+     "water": 21,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 9 resolved"
+    ],
+    "snapshot_hash": "d96262cfe90ce76d2efdc67d6486ce736c88a0fb",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 10,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 20,
+     "water": 20,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 10 resolved"
+    ],
+    "snapshot_hash": "aca5d73ff11103d37763b22b5026145807110316",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 11,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 19,
+     "water": 19,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 11 resolved"
+    ],
+    "snapshot_hash": "8c4d94a4dbaa766dd19017e178db4a013c4c141e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 12,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 18,
+     "water": 18,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 12 resolved"
+    ],
+    "snapshot_hash": "74fd7af2ae8187210b96a91e76928338e1014b0d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 13,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 17,
+     "water": 17,
+     "fear": 11,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 13 resolved"
+    ],
+    "snapshot_hash": "4dea4de01af2644ac47d5d07b850950e448acdeb",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 14,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 16,
+     "water": 16,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 14 resolved"
+    ],
+    "snapshot_hash": "1a59271da935bcd2d33b417479f1060d39f2629f",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 15,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 15,
+     "water": 15,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 15 resolved"
+    ],
+    "snapshot_hash": "62e907f355a4fd19c79fc66eadff21da0ef58010",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 16,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 14,
+     "water": 14,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 16 resolved"
+    ],
+    "snapshot_hash": "bca18c0e05bd34f0fa35d5c3cacc6251b3e76264",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 17,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 13,
+     "water": 13,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 17 resolved"
+    ],
+    "snapshot_hash": "07dc5f0ab5e2b4c40635ed401fad2a67fa630bad",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 18,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 12,
+     "water": 12,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 18 resolved"
+    ],
+    "snapshot_hash": "84895f2f34a7368a2703d959db45b697d4e55622",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 19,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 11,
+     "water": 11,
+     "fear": 12,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 19 resolved"
+    ],
+    "snapshot_hash": "2903351fb6d888f5d279553fe489ff12f074d86d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 20,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 10,
+     "water": 10,
+     "fear": 12,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 20 resolved"
+    ],
+    "snapshot_hash": "9f926e4dff6637a09bd563eccb9c4f04d999e4b7",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 21,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 9,
+     "water": 9,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 21 resolved"
+    ],
+    "snapshot_hash": "aa8053c3fd0b7e99497d7f9caf6471bf521d0bb5",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 22,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 8,
+     "water": 8,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 22 resolved"
+    ],
+    "snapshot_hash": "25c34c822a055110bd1e91f8a43e551b236c45e1",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 23,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 7,
+     "water": 7,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 23 resolved"
+    ],
+    "snapshot_hash": "9177663759f335240166807bb1e1ff83a49aabe0",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 24,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 6,
+     "water": 6,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 24 resolved"
+    ],
+    "snapshot_hash": "094cfbb1a1884f93e358f6b7041734f25e73d3a0",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 25,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 5,
+     "water": 5,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 25 resolved"
+    ],
+    "snapshot_hash": "cf890b0eef7c7f9da94614457821e4232b9b2bae",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 26,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 4,
+     "water": 4,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 26 resolved"
+    ],
+    "snapshot_hash": "be2ba05633d92fa21519fb3932f6e13802d75d67",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 27,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 3,
+     "water": 3,
+     "fear": 13,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 27 resolved"
+    ],
+    "snapshot_hash": "a138b423a8035f0dc6a6b2e072dd9e43ce6fb584",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 28,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 2,
+     "water": 2,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 28 resolved"
+    ],
+    "snapshot_hash": "7c67197ebbefc6bd53b9a590c2f0f21da9fc6f62",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 29,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 1,
+     "water": 1,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 29 resolved"
+    ],
+    "snapshot_hash": "99e0d8599fac2df022cc954a1eb8fd187f874a79",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 30,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 30 resolved"
+    ],
+    "snapshot_hash": "e34d221d33664650f459f60c4cdad7dfeabc8e36",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 31,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 31 resolved"
+    ],
+    "snapshot_hash": "b921f0c8ab102ce14196ee6e1b4849871f0c4c0d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 32,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 32 resolved"
+    ],
+    "snapshot_hash": "76f7056c45f35b98161671655dfaf1e0a0a5a6c5",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 33,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 33 resolved"
+    ],
+    "snapshot_hash": "bfe9840048425334070a5a6904be5be46a89ffd3",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 34,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 14,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 34 resolved"
+    ],
+    "snapshot_hash": "7b108d2582bf16b27fe98c580dbd9e009105a1ab",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 35,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 35 resolved"
+    ],
+    "snapshot_hash": "5a6b82278f1187b7ae23c1d180e523ccde07b3dc",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 36,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 36 resolved"
+    ],
+    "snapshot_hash": "6d311aaf0d4a1332df5751af95a79821fde40bed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 37,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 37 resolved"
+    ],
+    "snapshot_hash": "e2706cad3c57ade61a4d2c69a1eb61399ec82aa9",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 38,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 38 resolved"
+    ],
+    "snapshot_hash": "6c2cce612b32520cef0f83c778d66b1b3d24870c",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 39,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 9,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 39 resolved"
+    ],
+    "snapshot_hash": "49ba125f4340742443cdc05aed2dd5fb7b2b3c6f",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 40,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 40 resolved"
+    ],
+    "snapshot_hash": "ee2fc9d925ec477cd7d33401111bd61acaa45e72",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 41,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 15,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 41 resolved"
+    ],
+    "snapshot_hash": "f3e67d1e1eec607542325bc2e220d684672fc4e6",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 42,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 42 resolved"
+    ],
+    "snapshot_hash": "cc961df75ce4cfcf4a3a569c5b0ee4a2205f24da",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 43,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 43 resolved"
+    ],
+    "snapshot_hash": "34ea3079f338445b8bb937ba9611643092a78989",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 44,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 44 resolved"
+    ],
+    "snapshot_hash": "5b1f09683a9739dfea6a56ff0c55921c801c17b2",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 45,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 45 resolved"
+    ],
+    "snapshot_hash": "baff9ea82c7e2ec0fefbb1fbb1de9d70db731e9a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 46,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 46 resolved"
+    ],
+    "snapshot_hash": "97db99898890dda06735146cda1c4819473191c1",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 47,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 47 resolved"
+    ],
+    "snapshot_hash": "89cfa12403f18b397035402eb9e8f0652b2e272b",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 48,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 16,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 48 resolved"
+    ],
+    "snapshot_hash": "ed9900137f4040b51c8536fec8579a0c606538be",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 49,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 49 resolved"
+    ],
+    "snapshot_hash": "65c244e73632ac4c36b327400924c412ab47780f",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 50,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 50 resolved"
+    ],
+    "snapshot_hash": "c28e63e719663727f20bb1e908329ecdb5ad0e7d",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 51,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 51 resolved"
+    ],
+    "snapshot_hash": "ebb0583b63a0631dcb6deb6190d39ca3797eae30",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 52,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 52 resolved"
+    ],
+    "snapshot_hash": "44a0aa36f85eddfe3ecf2c517e56da64cbb56352",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 53,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 53 resolved"
+    ],
+    "snapshot_hash": "15f4104e6809579ea8e406991d770bd01875dec7",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 54,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 54 resolved"
+    ],
+    "snapshot_hash": "b5b986ef13db776cfbe59e20799b6c507fb574eb",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 55,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 17,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 55 resolved"
+    ],
+    "snapshot_hash": "fb882c9dcb67773d8225713a1b62b302a8954795",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 56,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 56 resolved"
+    ],
+    "snapshot_hash": "ff3d1d399e648ecf2390283794b348a29740d2fd",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 57,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 57 resolved"
+    ],
+    "snapshot_hash": "442274e03e70e82fcca2b6c99a2c9c9c06436886",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 58,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 58 resolved"
+    ],
+    "snapshot_hash": "493f9b7d7943139e7f4704f9b3791c4e8c30261a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 59,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 8,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 59 resolved"
+    ],
+    "snapshot_hash": "978bd2eb5dcf5f1bfe8c1171d85af8c4a1ebd755",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 60,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 0,
+     "water": 0,
+     "fear": 18,
+     "respect": 7,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 60 resolved"
+    ],
+    "snapshot_hash": "199fd7f0b1ec8c78163464a19f257e748cce5ad2",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 18,
+   "player_respect": 7,
+   "roams": 0
+  },
+  "spawned": []
+ },
+ "index": {
+  "player_start": [
+   [
+    3,
+    4
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    12,
+    11
+   ]
+  ],
+  "stars": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     9
+    ],
+    "cell": [
+     5,
+     5
+    ],
+    "bucket": "medium",
+    "mass": 1.0,
+    "colour": "yellow"
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     10
+    ],
+    "cell": [
+     20,
+     3
+    ],
+    "bucket": "medium",
+    "mass": 0.83,
+    "colour": "orange"
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     8,
+     10
+    ],
+    "cell": [
+     2,
+     21
+    ],
+    "bucket": "high",
+    "mass": 20.1,
+    "colour": "blue-white"
+   }
+  ],
+  "black_holes": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     8,
+     9
+    ],
+    "cell": [
+     6,
+     6
+    ],
+    "wormhole_to": null
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     9,
+     9
+    ],
+    "cell": [
+     7,
+     7
+    ],
+    "wormhole_to": {
+     "galaxy": [
+      3,
+      4
+     ],
+     "sector": [
+      10,
+      9
+     ],
+     "cell": [
+      8,
+      8
+     ]
+    }
+   },
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     10,
+     9
+    ],
+    "cell": [
+     8,
+     8
+    ],
+    "wormhole_to": {
+     "galaxy": [
+      3,
+      4
+     ],
+     "sector": [
+      9,
+      9
+     ],
+     "cell": [
+      7,
+      7
+     ]
+    }
+   }
+  ],
+  "neutron_stars": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     10
+    ],
+    "cell": [
+     12,
+     12
+    ]
+   }
+  ],
+  "planets": [
+   {
+    "galaxy": [
+     3,
+     4
+    ],
+    "sector": [
+     7,
+     9
+    ],
+    "cell": [
+     6,
+     5
+    ],
+    "name": "Oreth"
+   }
+  ]
+ }
+}

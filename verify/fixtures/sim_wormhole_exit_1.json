@@ -1,0 +1,316 @@
+{
+ "check": "wormhole_exit",
+ "args": [
+  "report"
+ ],
+ "kwargs": {
+  "partner": {
+   "galaxy": [
+    3,
+    4
+   ],
+   "sector": [
+    10,
+    9
+   ],
+   "cell": [
+    8,
+    8
+   ]
+  },
+  "origin": {
+   "galaxy": [
+    3,
+    4
+   ],
+   "sector": [
+    9,
+    9
+   ],
+   "cell": [
+    7,
+    7
+   ]
+  },
+  "exit_distance": 2,
+  "cls": "kestrel",
+  "held": true,
+  "away_cells": [
+   4,
+   8
+  ],
+  "what": "fixture wormhole exit kestrel"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 4,
+  "turns_completed": 4,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       10,
+       9
+      ],
+      [
+       9,
+       8
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       8,
+       8
+      ],
+      "distance": 1,
+      "pull": 3.849,
+      "turns_left": 1,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Lantern pulled into the wormhole — emerges 2 cells from its partner"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       10,
+       9
+      ],
+      [
+       10,
+       8
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       8,
+       8
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 0,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "script order 'move +1 +0' accepted",
+     "Lantern is held by gravity (pull 3.85 against engine 4)"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       9,
+       9
+      ],
+      [
+       9,
+       7
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       7,
+       7
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 1,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Lantern pulled into the wormhole — emerges 2 cells from its partner"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       9,
+       9
+      ],
+      [
+       9,
+       7
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": {
+      "kind": "black_hole",
+      "cell": [
+       7,
+       7
+      ],
+      "distance": 2,
+      "pull": 3.849,
+      "turns_left": 0,
+      "drain": 0
+     },
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1
+    },
+    "captains": 193,
+    "events": [
+     "Turn 4 resolved"
+    ],
+    "snapshot_hash": "de090cace45944c2ea976e4f6b1533527e2ad85a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": []
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 10,
+   "player_respect": 10,
+   "roams": 0
+  },
+  "spawned": []
+ }
+}
