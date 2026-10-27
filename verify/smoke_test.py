@@ -1009,8 +1009,8 @@ def c17(ctx: Ctx) -> list[str]:
         # (b) escape from distance 4 moving directly away at full engine power
         d0, steps = 4, 3
         path = tuple(C.escape_path(d0, steps, engine=engine, mass=bh, k_g=k, falloff=f))
-        w2, (hole2, cell2, sign2) = find_world(ctx, f"a black hole with a free diagonal escape path from distance {d0} ({path})",
-                                               hole_pick(ctx, wormhole=None, distance=d0, path=path, diagonal_first=True))
+        w2, (hole2, cell2, sign2) = find_world(ctx, f"a plain black hole with a free diagonal escape path from distance {d0} ({path})",
+                                               hole_pick(ctx, wormhole=False, distance=d0, path=path, diagonal_first=True))
         scn2 = C.plan_hole_escape(hole2, cell2, sign2, kind="black_hole", mass=bh, k_g=k, falloff=f, scale=scale, engine=engine, steps=steps)
         report2, _ = run_scenario(ctx, "hole_escape", scn2, seed=w2.seed)
         problems += C.check_scenario(report2, scn2["plan"])
