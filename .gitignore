@@ -231,3 +231,4 @@ verify/artifacts/
 .claude/settings.local.json
 # the GitHub template ignores *.spec; the PyInstaller spec must be versioned (M5)
 !starbour.spec
+/fight*.txt
