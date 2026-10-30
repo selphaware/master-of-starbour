@@ -40,7 +40,7 @@ def test_ai_fires_back_in_battle_and_yields_by_the_ef02_rules(small_state: GameS
     small_state.turn_no = 1
     bt = small_state.battles["b-001"]
     assert orders_for(small_state, small_cfg, cap, passive=True) == [("fire", ("phaser", ship.id))], "in battle: fires back, holds its cell"
-    # weaker (100 + 15 = 115 vs 255): below the fear-scaled threshold it offers peace and keeps firing
+    # weaker (Bastion at 0 torpedoes and 1 phaser: 100 + 15 = 115, under the Kestrel's strength): below the fear-scaled threshold it offers peace and keeps firing
     foe.shield_current = 30.0
     thr = C.ai_peace_threshold(small_state.player.fear, small_cfg)
     assert 30.0 < thr / 100 * foe.shield_max

@@ -65,6 +65,12 @@ def submit(state: GameState, cfg: GameConfig, text: str) -> O.Accepted:
     return res
 
 
+def class_strength(cfg: GameConfig, name: str) -> float:
+    """CM-08 from the ini: shield_max + torpedoes x torpedo_damage + phasers x phaser_damage_per_unit x 3 (never a literal)."""
+    spec = cfg.ships[name]
+    return spec.shield_max + spec.torpedoes * cfg.torpedo_damage + spec.phasers * cfg.phaser_damage_per_unit * 3.0
+
+
 # --------------------------------------------------------------------------- formulas (M3 section 5)
 
 def test_section_5_vectors(cfg: GameConfig) -> None:
@@ -72,9 +78,9 @@ def test_section_5_vectors(cfg: GameConfig) -> None:
     assert [round(C.torpedo_hit_p(e, cfg), 2) for e in (4, 6, 10, 0)] == [0.58, 0.52, 0.40, 0.70]
     k, c, b = (cfg.ships[n] for n in ("kestrel", "corsair", "bastion"))
     strengths = [C.ship_strength(Ship.of_class("s", "x", spec, "c", ((0, 0), (0, 0), (0, 0))), cfg) for spec in (k, c, b)]
-    assert strengths == [255.0, 455.0, 720.0]
-    assert round(strengths[1] / strengths[0], 2) == 1.78 >= cfg.attack_ratio_min
-    assert round(strengths[2] / strengths[0], 2) == 2.82
+    assert strengths == [class_strength(cfg, n) for n in ("kestrel", "corsair", "bastion")]
+    assert round(strengths[1] / strengths[0], 2) >= cfg.attack_ratio_min, "a Corsair may open on a Kestrel (EF-01)"
+    assert strengths[2] > strengths[1] > strengths[0]
     assert C.peace_pct(40, 10, cfg) == 37 and C.peace_pct(10, 40, cfg) == 0 and C.peace_pct(0, 0, cfg) == 0
     assert C.ai_peace_threshold(0, cfg) == 30 and C.ai_peace_threshold(100, cfg) == 60 and C.ai_peace_threshold(10, cfg) == pytest.approx(33.0)
     assert C.weapon_range(Ship.of_class("s", "x", k, "c", ((0, 0), (0, 0), (0, 0))), cfg) == cfg.torpedo_range
@@ -92,7 +98,8 @@ def test_fire_opens_the_battle_at_acceptance_and_the_exchange_lands(small_state:
     assert "battle b-001" in res.text and "FR-06" in res.text
     bt = small_state.battles["b-001"]
     assert bt.open and bt.opened_by == small_state.player_id and set(bt.sides) == {small_state.player_id, cap.id}
-    assert bt.strength_at_open == {small_state.player_id: 255.0, cap.id: 255.0}
+    kestrel = class_strength(small_cfg, "kestrel")
+    assert bt.strength_at_open == {small_state.player_id: kestrel, cap.id: kestrel}
     assert small_state.pending_reputation == [{"captain": small_state.player_id, "rule": "FR-06", "fear": 0, "respect": -5, "scale": 1.0}]
     snap = small_state.snapshot()
     assert snap["ships"][ship.id]["in_battle"] == "b-001" and snap["ships"][ship.id]["target"] == foe.id and snap["battles"][0]["id"] == "b-001"
@@ -133,7 +140,7 @@ def test_torpedo_volley_is_seeded_and_spends_ammo(small_state: GameState, small_
     state, _ = run(small_state, small_cfg)
     rows = [r for r in state.last_stats["battles"][0]["exchanges"] if r["attacker"] == ship.id]
     assert len(rows) == 3 and ship.torpedoes == 3
-    assert all(r["damage"] == (25.0 if r["hit"] else 0.0) for r in rows)
+    assert all(r["damage"] == (small_cfg.torpedo_damage if r["hit"] else 0.0) for r in rows)
     # same seed, same orders -> the same hits (D-67)
     again = new_game(small_state.seed, small_cfg)
     arena(again)
@@ -163,9 +170,9 @@ def test_destruction_loots_the_victim_and_removes_the_captain(small_state: GameS
     assert (ship.torpedoes, ship.phasers, ship.engine, ship.warp, ship.shield_max) == (6, 5.0, 4.0, 5.0, 60.0), "max(own, victim) capped (CB-01)"
     assert ship.shield_current == 60.0 - 25.0, "the Corsair's phaser landed; loot never restores shields and no recharge on a battle turn"
     rows = {r["rule"] for r in state.last_stats["reputation"] if r["captain"] == state.player_id}
-    assert rows == {"FR-06", "FR-01", "FR-04", "FR-05"}, ("at the open the Corsair had 0 shields and no torpedoes (strength 75 vs 255): weaker, "
+    assert rows == {"FR-06", "FR-01", "FR-04", "FR-05"}, ("at the open the Corsair had 0 shields and no torpedoes (strength 75 vs the Kestrel's): weaker, "
                                                            "it offered peace (immobile, EF-02) and the player started it - FR-04 and FR-05 stack (FR-09)")
-    assert state.last_stats["battles"][0]["strength_at_open"] == {state.player_id: 255.0, cap.id: 75.0}
+    assert state.last_stats["battles"][0]["strength_at_open"] == {state.player_id: class_strength(small_cfg, "kestrel"), cap.id: 75.0}
     assert not state.battles and not state.game_over
     assert any("Loot from" in t for t in texts(events, "TP-04"))
 

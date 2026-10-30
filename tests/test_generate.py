@@ -129,3 +129,11 @@ def test_populate_is_deterministic(small_cfg: GameConfig) -> None:
     assert [c.name for c in p1.captains.values()] == [c.name for c in p2.captains.values()]
     assert [s.position for s in p1.ships.values()] == [s.position for s in p2.ships.values()]
     assert p1.player_id == "c-000" and p1.captains[p1.player_id].is_player
+
+
+def test_ai_class_mix_comes_from_the_ini(small_cfg: GameConfig) -> None:
+    """CFG-75, D-131: [world] ai_class_mix drives which classes AI captains get; one class means only that class."""
+    only = dataclasses.replace(small_cfg, ai_class_mix=(("bastion", 1),), ai_captains_per_galaxy=3)
+    state = new_game(7, only)
+    ai_ships = [s for s in state.ships.values() if s.captain_id != state.player_id]
+    assert ai_ships and {s.cls for s in ai_ships} == {"bastion"}

@@ -25,10 +25,6 @@ FullCell = tuple[Coord, Coord, Coord]   # (galaxy, sector, cell)
 PLAYER_ID = "c-000"
 PLAYER_SHIP_ID = "s-000"
 
-# D-131 [ASSUMED]: AI captains start in a mix of classes (CLS-02 is their *usual* ship) so strength ratios
-# differ and AI-vs-AI battles happen (CM-10, D-125).  Weights by class name; a class missing from [ships] is skipped.
-AI_CLASS_WEIGHTS: tuple[tuple[str, int], ...] = (("corsair", 60), ("kestrel", 25), ("bastion", 15))
-
 
 @dataclass(slots=True)
 class Sector:
@@ -262,12 +258,9 @@ def ai_ship_class(cfg: GameConfig) -> ShipClass:
 
 
 def ai_ship_classes(cfg: GameConfig) -> tuple[list[ShipClass], list[int]]:
-    """D-131: the class mix AI captains are drawn from (classes present in [ships], with their weights)."""
-    classes = [cfg.ships[n] for n, _ in AI_CLASS_WEIGHTS if n in cfg.ships]
-    weights = [w for n, w in AI_CLASS_WEIGHTS if n in cfg.ships]
-    if not classes:
-        return [ai_ship_class(cfg)], [1]
-    return classes, weights
+    """CFG-75, D-131: the class mix AI captains are drawn from - [world] ai_class_mix, so strength ratios differ
+    and AI-vs-AI battles happen (CM-10, D-125)."""
+    return [cfg.ships[n] for n, _ in cfg.ai_class_mix], [w for _, w in cfg.ai_class_mix]
 
 
 def populate(world: World, cfg: GameConfig, rng: random.Random) -> Population:

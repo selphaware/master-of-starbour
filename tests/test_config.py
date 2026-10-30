@@ -32,7 +32,7 @@ def test_every_blueprint_key_has_a_typed_field(cfg: GameConfig) -> None:
     # CFG-70: [ships] class rows are data (D-53) - names are placeholders, so they key cfg.ships, not fields
     data_sections = {"upgrades": cfg.upgrades, "prices": cfg.prices,
                      "ships": {**cfg.ships, "starting_class": cfg.starting_class}}
-    prefixed = {"fear": "fear_", "respect": "respect_"}
+    prefixed = {"fear": "fear_", "respect": "respect_", "planets": "planet_"}
     for row in rows:
         sec = row["section"]
         if sec == "elements":
@@ -146,6 +146,57 @@ def test_cfg_61_to_73_invalid_values_rejected(tmp_path: Path, section: str, key:
     ("ai", "peace_shield_pct_at_fear100"), ("ai", "surrender_shield_pct"), ("ai", "roam_every_turns"),
 ])
 def test_cfg_61_to_73_missing_key_names_it(tmp_path: Path, section: str, key: str) -> None:
+    path = ini_copy(tmp_path, lambda cp: cp.remove_option(section, key))
+    with pytest.raises(ConfigError, match=rf"\[{section}\] {key}"):
+        load_config(path)
+
+
+def test_cfg_74_to_82_fields_typed(cfg: GameConfig) -> None:
+    """Workbook v2.5 rows CFG-74...82 load with the types tab 15 gives (M4 step 0)."""
+    assert cfg.ai_trace == "sector"                                                         # CFG-74
+    assert cfg.ai_class_mix == (("corsair", 60), ("kestrel", 25), ("bastion", 15))          # CFG-75
+    assert cfg.phaser_max == 10.0 and cfg.shield_cap == 100.0                               # CFG-76, 82
+    assert (cfg.planet_shield_max, cfg.planet_torpedoes, cfg.planet_phasers) == (80.0, 10, 4.0)   # CFG-77
+    assert (cfg.food_stock_start, cfg.water_stock_start, cfg.stock_regen, cfg.stock_cap) == (100, 100, 5, 200)   # CFG-78
+    assert (cfg.element_stacks_min, cfg.element_stacks_max, cfg.stack_units_min, cfg.stack_units_max) == (2, 4, 1, 5)   # CFG-79
+    assert (cfg.item_units_min, cfg.item_units_max) == (1, 3)                               # CFG-80
+    assert (cfg.buy_supplies_below, cfg.docking_income_silver) == (10, 10)                  # CFG-81
+    assert cfg.torpedo_damage == 15.0                                                       # CFG-25 retuned in v2.5
+    for name in ("planet_torpedoes", "stock_cap", "item_units_max", "buy_supplies_below", "docking_income_silver"):
+        assert type(getattr(cfg, name)) is int, name
+    for name in ("planet_shield_max", "planet_phasers", "shield_cap"):
+        assert type(getattr(cfg, name)) is float, name
+
+
+@pytest.mark.parametrize("section, key, value", [
+    ("logging", "ai_trace", "everything"),
+    ("world", "ai_class_mix", "corsair:60, dreadnought:40"),
+    ("world", "ai_class_mix", "corsair=60"),
+    ("world", "ai_class_mix", "corsair:0, kestrel:0"),
+    ("world", "item_units_min", "0"),
+    ("world", "item_units_min", "4"),               # above item_units_max = 3
+    ("battle", "shield_cap", "-1"),
+    ("ai", "buy_supplies_below", "-1"),
+    ("ai", "docking_income_silver", "lots"),
+    ("planets", "shield_max", "-5"),
+    ("planets", "torpedoes", "ten"),
+    ("planets", "stock_regen", "-1"),
+    ("planets", "element_stacks_min", "5"),         # above element_stacks_max = 4
+    ("planets", "stack_units_min", "0"),
+    ("planets", "stack_units_min", "6"),            # above stack_units_max = 5
+])
+def test_cfg_74_to_82_invalid_values_rejected(tmp_path: Path, section: str, key: str, value: str) -> None:
+    path = ini_copy(tmp_path, lambda cp: cp.set(section, key, value))
+    with pytest.raises(ConfigError, match=key):
+        load_config(path)
+
+
+@pytest.mark.parametrize("section, key", [
+    ("logging", "ai_trace"), ("world", "ai_class_mix"), ("world", "item_units_max"), ("battle", "shield_cap"),
+    ("ai", "buy_supplies_below"), ("ai", "docking_income_silver"), ("planets", "shield_max"),
+    ("planets", "stock_cap"), ("planets", "stack_units_max"),
+])
+def test_cfg_74_to_82_missing_key_names_it(tmp_path: Path, section: str, key: str) -> None:
     path = ini_copy(tmp_path, lambda cp: cp.remove_option(section, key))
     with pytest.raises(ConfigError, match=rf"\[{section}\] {key}"):
         load_config(path)

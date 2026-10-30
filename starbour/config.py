@@ -1,4 +1,4 @@
-"""Typed configuration read from controls_config.ini - CFG-01...73, D-49, D-53, D-71.
+"""Typed configuration read from controls_config.ini - CFG-01...82, D-49, D-53, D-71.
 
 Every tunable number the game uses is a field here and nowhere else.  A missing or
 unparsable key raises :class:`ConfigError`, which ``python -m starbour`` turns into
@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 GLYPH_SETS = ("unicode", "ascii")
+AI_TRACE_MODES = ("sector", "battle", "all", "off")   # CFG-74
 
 
 class ConfigError(Exception):
@@ -41,7 +42,7 @@ class ElementSpec:
 
 @dataclass(frozen=True, slots=True)
 class GameConfig:
-    """Every key on tab 15 (CFG-01...73), typed as the tab says."""
+    """Every key on tab 15 (CFG-01...82), typed as the tab says."""
 
     path: Path
     # [world]
@@ -63,12 +64,17 @@ class GameConfig:
     hole_pct: int
     neutron_pct: int
     wormhole_pct: int
+    ai_class_mix: tuple[tuple[str, int], ...]
+    item_units_min: int
+    item_units_max: int
     # [bus]
     pub_port: int
     pull_port: int
     # [ui]
     log_lines: int
     glyph_set: str
+    # [logging]
+    ai_trace: str
     # [movement]
     impulse_max: float
     warp_max: float
@@ -104,6 +110,7 @@ class GameConfig:
     shield_recharge: int
     peace_loot_max: int
     phaser_max: float
+    shield_cap: float
     # [ai]
     attack_ratio_min: float
     attack_fear_max: float
@@ -114,6 +121,8 @@ class GameConfig:
     peace_shield_pct_at_fear100: int
     surrender_shield_pct: int
     roam_every_turns: int
+    buy_supplies_below: int
+    docking_income_silver: int
     # [fear]
     fear_battle_won_delta: int
     fear_battle_lost_delta: int
@@ -148,6 +157,18 @@ class GameConfig:
     wealth_min_silver: int
     required_special_categories: int
     guard_ships: int
+    # [planets] - CFG-77...79
+    planet_shield_max: float
+    planet_torpedoes: int
+    planet_phasers: float
+    food_stock_start: int
+    water_stock_start: int
+    stock_regen: int
+    stock_cap: int
+    element_stacks_min: int
+    element_stacks_max: int
+    stack_units_min: int
+    stack_units_max: int
     # data sections (D-53)
     upgrades: dict[str, dict[str, float]]
     prices: dict[str, int]
@@ -294,6 +315,22 @@ def _parse_ships(r: _Reader) -> tuple[dict[str, ShipClass], str]:
     return ships, starting
 
 
+def _parse_class_mix(r: _Reader, ships: dict[str, ShipClass]) -> tuple[tuple[str, int], ...]:
+    """CFG-75, D-131: 'corsair:60, kestrel:25' -> (('corsair', 60), ('kestrel', 25)); classes must exist in [ships]."""
+    mix: list[tuple[str, int]] = []
+    for pair in r.raw("world", "ai_class_mix").split(","):
+        name, sep, weight = pair.strip().partition(":")
+        name = name.strip().lower()
+        if sep != ":" or not weight.strip().isdigit():
+            raise ConfigError(f"[world] ai_class_mix: {pair.strip()!r} must be class:weight with a whole-number weight (CFG-75)")
+        if name not in ships:
+            raise ConfigError(f"[world] ai_class_mix names unknown ship class {name!r}; known: {sorted(ships)} (CFG-75)")
+        mix.append((name, int(weight)))
+    if sum(w for _, w in mix) <= 0:
+        raise ConfigError("[world] ai_class_mix weights must add up to more than 0 (CFG-75)")
+    return tuple(mix)
+
+
 def _parse_elements(r: _Reader) -> dict[str, ElementSpec]:
     out: dict[str, ElementSpec] = {}
     for name, value in r.section_items("elements"):
@@ -381,6 +418,22 @@ def load_config(path: Path | str) -> GameConfig:
         if r.number("battle", key) < 0:
             raise ConfigError(f"[battle] {key} = {r.raw('battle', key)} must not be negative (CFG-24...26, D-130)")
 
+    item_min, item_max = r.at_least("world", "item_units_min", 1), r.integer("world", "item_units_max")
+    if item_min > item_max:
+        raise ConfigError("[world] item_units_min must be <= item_units_max (CFG-80, SP-03)")
+    ai_trace = r.text("logging", "ai_trace").lower()
+    if ai_trace not in AI_TRACE_MODES:
+        raise ConfigError(f"[logging] ai_trace = {ai_trace!r} must be one of {AI_TRACE_MODES} (CFG-74, D-139)")
+    stacks_min, stacks_max = r.at_least("planets", "element_stacks_min", 0), r.integer("planets", "element_stacks_max")
+    if stacks_min > stacks_max:
+        raise ConfigError("[planets] element_stacks_min must be <= element_stacks_max (CFG-79, PL-03)")
+    units_min, units_max = r.at_least("planets", "stack_units_min", 1), r.integer("planets", "stack_units_max")
+    if units_min > units_max:
+        raise ConfigError("[planets] stack_units_min must be <= stack_units_max (CFG-79, PL-03)")
+    for section, key in (("battle", "shield_cap"), ("planets", "shield_max"), ("planets", "phasers")):
+        if r.number(section, key) < 0:
+            raise ConfigError(f"[{section}] {key} = {r.raw(section, key)} must not be negative (CFG-77, CFG-82)")
+
     return GameConfig(
         path=path.resolve(),
         seed=_parse_seed(r.text("world", "seed")),
@@ -401,10 +454,14 @@ def load_config(path: Path | str) -> GameConfig:
         hole_pct=r.pct("world", "hole_pct"),
         neutron_pct=r.pct("world", "neutron_pct"),
         wormhole_pct=r.pct("world", "wormhole_pct"),
+        ai_class_mix=_parse_class_mix(r, ships),
+        item_units_min=item_min,
+        item_units_max=item_max,
         pub_port=r.integer("bus", "pub_port"),
         pull_port=r.integer("bus", "pull_port"),
         log_lines=r.integer("ui", "log_lines"),
         glyph_set=glyph_set,
+        ai_trace=ai_trace,
         impulse_max=r.number("movement", "impulse_max"),
         warp_max=r.number("movement", "warp_max"),
         warp_curve_base=r.number("movement", "warp_curve_base"),
@@ -436,6 +493,7 @@ def load_config(path: Path | str) -> GameConfig:
         shield_recharge=r.integer("battle", "shield_recharge"),
         peace_loot_max=r.pct("battle", "peace_loot_max"),
         phaser_max=r.number("battle", "phaser_max"),
+        shield_cap=r.number("battle", "shield_cap"),
         attack_ratio_min=r.number("ai", "attack_ratio_min"),
         attack_fear_max=r.number("ai", "attack_fear_max"),
         peace_shield_pct=r.integer("ai", "peace_shield_pct"),
@@ -445,6 +503,8 @@ def load_config(path: Path | str) -> GameConfig:
         peace_shield_pct_at_fear100=r.pct("ai", "peace_shield_pct_at_fear100"),
         surrender_shield_pct=r.pct("ai", "surrender_shield_pct"),
         roam_every_turns=r.at_least("ai", "roam_every_turns", 0),
+        buy_supplies_below=r.at_least("ai", "buy_supplies_below", 0),
+        docking_income_silver=r.at_least("ai", "docking_income_silver", 0),
         fear_battle_won_delta=r.integer("fear", "battle_won_delta"),
         fear_battle_lost_delta=r.integer("fear", "battle_lost_delta"),
         fear_start=r.integer("fear", "start"),
@@ -473,6 +533,17 @@ def load_config(path: Path | str) -> GameConfig:
         wealth_min_silver=r.integer("endgame", "wealth_min_silver"),
         required_special_categories=r.integer("endgame", "required_special_categories"),
         guard_ships=r.integer("endgame", "guard_ships"),
+        planet_shield_max=r.number("planets", "shield_max"),
+        planet_torpedoes=r.at_least("planets", "torpedoes", 0),
+        planet_phasers=r.number("planets", "phasers"),
+        food_stock_start=r.at_least("planets", "food_stock_start", 0),
+        water_stock_start=r.at_least("planets", "water_stock_start", 0),
+        stock_regen=r.at_least("planets", "stock_regen", 0),
+        stock_cap=r.at_least("planets", "stock_cap", 0),
+        element_stacks_min=stacks_min,
+        element_stacks_max=stacks_max,
+        stack_units_min=units_min,
+        stack_units_max=units_max,
         upgrades=_parse_upgrades(r, elements),
         prices=_parse_prices(r),
         elements=elements,
