@@ -17,10 +17,15 @@ engine's game RNG (D-67) and never from the global ``random``.  Per ship, in thi
 ``--ai passive`` (D-125, D-132) removes every initiative - no opening, no roaming, no wandering -
 so a spawned opponent stays where the gate put it; it still fires back, offers peace, escapes,
 surrenders and flees a hole.
+
+Every choice can be traced: pass a list as ``trace`` and ``decide`` appends one ``Decision`` per ship
+with the reason and the rule IDs (the engine's gameplay log writes them, M3 step 2).  Tracing reads
+nothing new and draws no random number, so it never changes what the AI does (D-67).
 """
 from __future__ import annotations
 
 import random
+from dataclasses import dataclass
 
 from starbour.commands.parse import QUEUED, Order
 from starbour.config import GameConfig
@@ -36,6 +41,35 @@ from starbour.world.grid import Coord, chebyshev
 from starbour.world.stellar import HOLE_KINDS
 
 TRIES = 8
+
+
+@dataclass(slots=True)
+class Decision:
+    """One AI ship's choice this turn, with the reason and the rule IDs behind it (gameplay log, M3 step 2)."""
+
+    captain_id: str
+    captain_name: str
+    ship_id: str
+    text: str
+    ids: tuple[str, ...]
+
+    def to_dict(self) -> dict:
+        return {"captain": self.captain_id, "name": self.captain_name, "ship": self.ship_id, "text": self.text, "ids": list(self.ids)}
+
+
+def note(trace: list[Decision] | None, captain: Captain, ship: Ship, text: str, *ids: str) -> None:
+    if trace is not None:
+        trace.append(Decision(captain.id, captain.name, ship.id, text, ids))
+
+
+def fire_text(orders: list[Order]) -> str:
+    """'fires torpedo+phaser at s-000' for the fire orders of one ship."""
+    weapons = "+".join(str(o.args[0]) for o in orders)
+    return f"fires {weapons} at {orders[0].args[1]}"
+
+
+def at(cell: Coord) -> str:
+    return f"{cell[0]},{cell[1]}"
 
 
 def away_target(cell: Coord, hole: Coord, cells: int, size: Coord, blocked: set[Coord]) -> Coord | None:
@@ -120,37 +154,54 @@ def fire_orders(ship: Ship, target: Ship, cfg: GameConfig) -> list[Order]:
 
 
 def battle_orders(captain: Captain, ship: Ship, battle: Battle, here: list[Ship], state: GameState, cfg: GameConfig,
-                  cells: int, blocked: set[Coord]) -> list[Order]:
+                  cells: int, blocked: set[Coord], trace: list[Decision] | None = None) -> list[Order]:
     """EF-02 / CM-10 / D-125 / D-128: an AI ship in battle holds its cell and fires; when weaker it yields in the order
     surrender > escape > accept a standing offer > offer peace."""
     enemy_id = battle.other(captain.id)
     enemy = state.captains.get(enemy_id)
     enemies = sorted((s for s in here if s.captain_id == enemy_id), key=lambda s: (chebyshev(s.cell, ship.cell), s.id))
     if enemy is None or not enemies:
+        note(trace, captain, ship, f"in battle {battle.id}, enemy {enemy_id} is not in this sector -> no orders; the battle ends by escape at TP-04", "D-119")
         return []          # the battle ends by escape at TP-04 (D-119)
     nearest = enemies[0]
     own = C.strength([s for s in here if s.captain_id == captain.id], cfg)
     theirs = C.strength(enemies, cfg)
     weaker = own < theirs
     pct = ship.shield_pct
+    where = f"in battle {battle.id}, {'weaker' if weaker else 'not weaker'} (strength {own:.0f} v {theirs:.0f}, shields {pct:.0f}%)"
     out: list[Order] = []
     if weaker:
         if enemy.is_player and enemy.fear >= cfg.yield_fear_min and pct < cfg.surrender_shield_pct:
+            note(trace, captain, ship, f"{where}, {enemy_id} fear {enemy.fear} >= {cfg.yield_fear_min} and shields < {cfg.surrender_shield_pct:g}% -> surrenders to {enemy_id}",
+                 "EF-02", "D-128")
             return [Order(C.SURRENDER, (enemy_id,), ship.id, QUEUED)]
         if pct < cfg.escape_shield_pct and cells > 0:
             target = away_target(ship.cell, nearest.cell, cells, cfg.sector_size, blocked)
             if target is not None:
+                note(trace, captain, ship, f"{where}, shields < {cfg.escape_shield_pct:g}% -> escapes: moves from {nearest.id} at {at(nearest.cell)} to {at(target)}",
+                     "EF-02", "D-128")
                 return [Order("move", (str(target[0]), str(target[1]), f"{ship.engine:g}"), ship.id, QUEUED)]
         # a ship that cannot flee (held, immobile or boxed in) falls through to peace (D-128: surrender > escape > peace)
         if battle.offer_stands(enemy_id, state.turn_no):
+            note(trace, captain, ship, f"{where}, {enemy_id} has a peace offer standing -> accepts it", "EF-02", "D-128")
             return [Order("peace", ("accept", enemy_id), ship.id, QUEUED)]
         if pct < C.ai_peace_threshold(enemy.fear, cfg) and not battle.offer_stands(captain.id, state.turn_no):
             out.append(Order("peace", ("offer", enemy_id), ship.id, QUEUED))
-    out += fire_orders(ship, nearest, cfg)
+    shots = fire_orders(ship, nearest, cfg)
+    out += shots
+    if not weaker:
+        stance = "no peace"
+    elif out and out[0].command == "peace":
+        stance = f"shields {pct:.0f}% < {C.ai_peace_threshold(enemy.fear, cfg):.0f}% (enemy fear {enemy.fear}) -> offers peace"
+    else:
+        stance = "no peace (shields above the peace threshold or an offer of its own already stands)"
+    act = fire_text(shots) if shots else f"cannot fire at {nearest.id} (distance {chebyshev(ship.cell, nearest.cell)}, no weapon in range)"
+    note(trace, captain, ship, f"{where} -> {stance}; {act}", *(("EF-02", "CM-10", "D-125", "D-128") if weaker else ("CM-10", "D-125")))
     return out
 
 
-def attack_orders(captain: Captain, ship: Ship, here: list[Ship], state: GameState, cfg: GameConfig) -> list[Order]:
+def attack_orders(captain: Captain, ship: Ship, here: list[Ship], state: GameState, cfg: GameConfig,
+                  trace: list[Decision] | None = None) -> list[Order]:
     """CM-10 / EF-01: open fire on the nearest enemy in weapon range whose captain's fear is below attack_fear_max and
     against whom the strength ratio (fleet in sector) is at least attack_ratio_min."""
     reach = C.weapon_range(ship, cfg)
@@ -171,18 +222,23 @@ def attack_orders(captain: Captain, ship: Ship, here: list[Ship], state: GameSta
         ratio = own / theirs if theirs > 0 else float("inf")
         if ratio < cfg.attack_ratio_min:
             continue
-        key = (d, s.id, s)
+        key = (d, s.id, s, tcap, ratio)
         if best is None or key[:2] < best[:2]:
             best = key
     if best is None:
         return []
-    return fire_orders(ship, best[2], cfg)
+    shots = fire_orders(ship, best[2], cfg)
+    if shots:
+        note(trace, captain, ship, f"{best[2].id} of {best[3].name} ({best[3].id}) is {best[0]} cell(s) away (weapon reach {reach}), fear {best[3].fear} < {cfg.attack_fear_max:g}, "
+             f"strength ratio {best[4]:.2f} >= {cfg.attack_ratio_min:g} -> opens a battle; {fire_text(shots)}", "CM-10", "EF-01")
+    return shots
 
 
 def decide(captain: Captain, state: GameState, rng: random.Random, cfg: GameConfig, *, passive: bool = False,
-           index: dict[tuple[Coord, Coord], list[Ship]] | None = None) -> list[Order]:
+           index: dict[tuple[Coord, Coord], list[Ship]] | None = None, trace: list[Decision] | None = None) -> list[Order]:
     """The captain's orders for this turn (see the module docstring).  ``index`` is ``state.ships_by_sector()``,
-    built once per turn by the caller; ``passive`` is the ``--ai passive`` debug mode (never opens a battle)."""
+    built once per turn by the caller; ``passive`` is the ``--ai passive`` debug mode (never opens a battle);
+    ``trace`` collects a ``Decision`` per ship (reason + rule IDs) for the gameplay log."""
     if index is None:
         index = state.ships_by_sector()
     orders: list[Order] = []
@@ -199,10 +255,10 @@ def decide(captain: Captain, state: GameState, rng: random.Random, cfg: GameConf
         here = index.get((ship.galaxy, ship.sector), [])
         battle = state.battle_of_ship(ship)
         if battle is not None:
-            orders += battle_orders(captain, ship, battle, here, state, cfg, cells, blocked)
+            orders += battle_orders(captain, ship, battle, here, state, cfg, cells, blocked, trace)
             continue
         if not passive:
-            attack = attack_orders(captain, ship, here, state, cfg)
+            attack = attack_orders(captain, ship, here, state, cfg, trace)
             if attack:
                 orders += attack
                 continue
@@ -211,16 +267,26 @@ def decide(captain: Captain, state: GameState, rng: random.Random, cfg: GameConf
                 if dest is not None:
                     (gx, gy), (sx, sy) = dest
                     orders.append(Order("warp", (str(gx), str(gy), str(sx), str(sy)), sid, QUEUED))
+                    note(trace, captain, ship, f"no battle, roam due (every {cfg.roam_every_turns} turns) -> warps to galaxy {gx},{gy} sector {sx},{sy}",
+                         "CFG-73", "D-125", "D-132")
                     continue
         if cells <= 0:
+            note(trace, captain, ship, f"impulse gives {cells} cell(s) here (engine {ship.engine:g}, pull {pull:g}) -> holds", "MV-01", "OV-10")
             continue
         if hz is not None and hz.kind in HOLE_KINDS:
             target = away_target(ship.cell, hz.cell, cells, size, blocked)
+            why = f"inside the pull of the {hz.kind.replace('_', ' ')} at {at(hz.cell)} -> moves away"
+            ids = ("OV-10", "D-103")
         elif passive:
+            note(trace, captain, ship, "--ai passive: no initiative -> holds", "D-125")
             continue       # --ai passive (D-125): no initiative at all - no opening, no roaming, no wandering; it still defends and flees a hole
         else:
             target = random_target(ship.cell, cells, size, blocked, rng)
+            why = "no enemy to fight, no roam due -> random walk"
+            ids = ("OV-10",)
         if target is None:
+            note(trace, captain, ship, f"{why}, but no free cell within {cells} -> holds", *ids)
             continue
         orders.append(Order("move", (str(target[0]), str(target[1]), f"{ship.engine:g}"), sid, QUEUED))
+        note(trace, captain, ship, f"{why} {at(ship.cell)} -> {at(target)} (up to {cells} cell(s))", *ids)
     return orders

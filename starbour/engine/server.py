@@ -29,6 +29,7 @@ from starbour.commands.parse import IMMEDIATE, CommandError, Order, parse_new, p
 from starbour.config import GameConfig
 from starbour.engine import orders as O
 from starbour.engine import save as S
+from starbour.engine.gamelog import GameLogs
 from starbour.engine.phases import resolve_turn
 from starbour.engine.state import GameState, canonical_json, hash_snapshot, new_game
 from starbour.entities.ship import Position
@@ -86,9 +87,12 @@ class Engine:
     def __init__(self, cfg: GameConfig, *, seed: int | None = None, save_path: Path | None = None, pub_port: int = 0,
                  pull_port: int = 0, bus: bool = True, ai_player: bool = False, max_turns: int | None = None,
                  recorder: Any = None, resume: bool = True, launcher_pid: int | None = None,
-                 teleport: Position | None = None, spawns: list[str] | None = None, ai_passive: bool = False) -> None:
+                 teleport: Position | None = None, spawns: list[str] | None = None, ai_passive: bool = False,
+                 log_dir: Path | None = None) -> None:
         self.cfg = cfg
         self.save_path = Path(save_path) if save_path else None
+        self.log_dir = Path(log_dir) if log_dir else None     # gameplay logs (gamelog.py); None = write none
+        self.gamelog: GameLogs | None = None
         self.want_pub, self.want_pull = pub_port, pull_port
         self.bus = bus
         self.ai_player = ai_player
@@ -111,6 +115,7 @@ class Engine:
                 self.state, self.rng = S.load_full(self.save_path, cfg)
                 self.resumed = True
                 log.info("resumed %s at turn %d (seed %d)", self.save_path, self.state.turn_no, self.state.seed)
+                self._open_logs(fresh=False)
             except (OSError, ValueError, KeyError) as e:
                 log.error("save %s unreadable (%s) - starting a new game", self.save_path, e)
                 self._new_game(pick_seed(cfg, seed))
@@ -131,6 +136,11 @@ class Engine:
         self._hello_bytes = None
         log.info("new game: seed %d, %d captains, %d sectors, generated in %.2f s", seed, len(self.state.captains),
                  len(self.state.world.sectors), time.perf_counter() - t0)
+        self._open_logs(fresh=True)
+
+    def _open_logs(self, *, fresh: bool) -> None:
+        """Gameplay logs for this seed: started afresh for a new game, appended to for a resumed one (D-135)."""
+        self.gamelog = GameLogs(self.log_dir, self.state.seed, fresh=fresh) if self.log_dir is not None else None
 
     def apply_teleport(self, position: Position) -> None:
         """D-104 / D-110 debug affordance: the active ship is placed before turn 1; ignored on a resumed game."""
@@ -250,6 +260,8 @@ class Engine:
         stats.update({"snapshot_hash": snap_hash, "snapshot_bytes": snap_bytes, "resolve_ms": resolve_ms})
         log.info("turn %d resolved in %.1f ms: %s; snapshot %d bytes", self.state.turn_no, resolve_ms,
                  stats.get("orders_executed"), snap_bytes)
+        if self.gamelog is not None:
+            self.gamelog.append_turn(self.state, events, stats)
         if self.recorder is not None:
             self.recorder.record_turn(self.state, events, stats)
         if self.state.game_over or self.state.mastery_turn is not None:
@@ -407,12 +419,14 @@ def _pid_exists(pid: int) -> bool:
 
 def run_engine_process(cfg: GameConfig, *, seed: int | None, pub_port: int, pull_port: int, save_path: Path,
                        resume: bool = True, teleport: Position | None = None, spawns: list[str] | None = None,
-                       ai_passive: bool = False) -> int:
-    """``python -m starbour --role engine`` (C1); ``--teleport`` / ``--spawn`` / ``--ai`` are the debug affordances (D-110, D-125, D-126)."""
-    from starbour import runtime
+                       ai_passive: bool = False, log_dir: Path | None = None) -> int:
+    """``python -m starbour --role engine`` (C1); ``--teleport`` / ``--spawn`` / ``--ai`` are the debug affordances (D-110, D-125, D-126).
+    The gameplay logs go to ``logs/`` next to the exe / repo root unless ``log_dir`` says otherwise (D-61, D-135)."""
+    from starbour import paths, runtime
     try:
         engine = Engine(cfg, seed=seed, save_path=save_path, pub_port=pub_port, pull_port=pull_port, resume=resume,
-                        launcher_pid=runtime.launcher_pid(), teleport=teleport, spawns=spawns, ai_passive=ai_passive)
+                        launcher_pid=runtime.launcher_pid(), teleport=teleport, spawns=spawns, ai_passive=ai_passive,
+                        log_dir=log_dir if log_dir is not None else paths.logs_dir())
         engine.start()
     except Exception as e:   # noqa: BLE001 - a port in use or a bad debug flag is the usual cause
         log.error("engine could not start: %s", e)

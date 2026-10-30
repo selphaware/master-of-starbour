@@ -68,8 +68,9 @@ def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: 
     by_ship: dict[str, list[Order]] = take_all(state)
     player_count = sum(len(q) for q in by_ship.values())
     index = state.ships_by_sector()
+    trace: list[ai.Decision] = stats.setdefault("ai_decisions", [])   # the gameplay log reads these (M3 step 2)
     if ai_player and not state.game_over:
-        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index):
+        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index, trace=trace):
             if order.ship_id not in by_ship:
                 by_ship[order.ship_id] = [order]
                 player_count += 1
@@ -82,7 +83,7 @@ def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: 
         cap = state.captains[cid]
         if cap.is_player:
             continue
-        for order in ai.decide(cap, state, rng, cfg, passive=ai_passive, index=index):
+        for order in ai.decide(cap, state, rng, cfg, passive=ai_passive, index=index, trace=trace):
             by_ship.setdefault(order.ship_id, []).append(order)
             ai_count += 1
             if order.command == "fire":

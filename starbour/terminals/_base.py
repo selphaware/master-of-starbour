@@ -30,6 +30,18 @@ def make_console() -> Console:
     return Console(force_terminal=True, legacy_windows=False, highlight=False, markup=False, emoji=False)
 
 
+SCROLLBACK_CLEAR = "\x1b[3J"   # ED 3: erase the saved lines too, so copying a window copies one frame
+
+
+def clear_screen(console: Console) -> None:
+    """Clear the viewport and the scrollback (M3 step 2).  ``Console.clear`` only does the viewport; ESC[3J follows it.
+    Nothing is written when the console is not a terminal, so piped output stays free of control codes."""
+    console.clear()
+    if console.is_terminal:
+        console.file.write(SCROLLBACK_CLEAR)
+        console.file.flush()
+
+
 class ViewTerminal:
     """T2 / T4 base (T3 subclasses it with a scrollback)."""
 
@@ -58,7 +70,7 @@ class ViewTerminal:
         """GRD-06: full redraw; log render_ms; heartbeat (C5)."""
         t0 = time.perf_counter()
         renderable = self.renderable()
-        self.console.clear()
+        clear_screen(self.console)
         self.console.print(renderable)
         ms = (time.perf_counter() - t0) * 1000.0
         self.draws += 1
@@ -113,7 +125,7 @@ class ViewTerminal:
         log.info("%s: console %dx%d, terminal=%s, colour=%s", self.role, self.console.width, self.console.height,
                  self.console.is_terminal, self.console.color_system)
         self.console.set_window_title(f"{self.title} - {TITLE}")
-        self.console.clear()
+        clear_screen(self.console)
         self.console.print(f"{self.title}: waiting for the engine on tcp://127.0.0.1:{self.pub_port} ...", style="grey70")
         sub = Subscriber(self.pub_port)
         runtime.start_parent_watchdog(on_exit=lambda: sub.close(0))

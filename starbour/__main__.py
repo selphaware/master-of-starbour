@@ -107,7 +107,8 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         return run_sim(cfg, seed=pick_seed(cfg, args.seed), turns=args.turns, ai_player=args.ai_player, report_path=args.report,
                        save_dir=save_dir, bus=args.bus, pub_port=args.pub_port, pull_port=args.pull_port, teleport=teleport,
-                       script_path=args.player_script, with_world_index=args.world_index, spawns=spawns, ai_passive=ai_passive)
+                       script_path=args.player_script, with_world_index=args.world_index, spawns=spawns, ai_passive=ai_passive,
+                       log_dir=paths.logs_dir() if args.save_dir is None else args.save_dir / "logs")   # a gate's --save-dir keeps its logs with it
     pub_port = args.pub_port if args.pub_port is not None else cfg.pub_port
     pull_port = args.pull_port if args.pull_port is not None else cfg.pull_port
     role = args.role

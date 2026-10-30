@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from starbour.config import GameConfig
+from starbour.engine.gamelog import turn_row
 from starbour.engine.server import Engine
 from starbour.engine.state import GameState
 from starbour.entities.planet import PLANET
@@ -59,8 +60,6 @@ class Recorder:
         self.notes.append(text)
 
     def record_turn(self, state: GameState, events: list[dict], stats: dict) -> None:
-        cap = state.player
-        ship = state.active_ship()
         self.mutinies.extend(stats.get("mutinies") or [])
         destroyed = list(stats.get("destroyed") or [])
         warps = list(stats.get("warps") or [])
@@ -76,34 +75,7 @@ class Recorder:
         over = stats.get("game_over")
         if over:
             self.game_over_cause = str(over.get("cause"))
-        if ship is not None:
-            player = {"ship_class": ship.cls,
-                      "position": [[ship.galaxy[0], ship.galaxy[1]], [ship.sector[0], ship.sector[1]], [ship.cell[0], ship.cell[1]]],
-                      "shield_current": ship.shield_current, "shield_max": ship.shield_max,
-                      "hazard": state.hazard_dict(ship), "move_remaining": state.move_remaining(ship.id)}
-        else:
-            lost = stats.get("player_lost") or {}
-            player = {"ship_class": lost.get("ship_class"), "position": lost.get("position"),
-                      "shield_current": lost.get("shield_current"), "shield_max": lost.get("shield_max"),
-                      "hazard": lost.get("hazard"), "move_remaining": None}
-        player.update({"food": cap.food, "water": cap.water, "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver,
-                       "in_battle": state.player_in_battle(), "ships": len([s for s in cap.ships if s in state.ships])})
-        self.per_turn.append({
-            "turn_no": state.turn_no,
-            "orders_executed": dict(stats.get("orders_executed") or {"player": 0, "ai": 0}),
-            "ai_ships_moved": int(stats.get("ai_ships_moved") or 0),
-            "player": player,
-            "captains": len(state.captains),
-            "events": self.notes + [str(e.get("text", "")) for e in events],
-            "snapshot_hash": stats.get("snapshot_hash"),
-            "snapshot_bytes": int(stats.get("snapshot_bytes") or 0),
-            "resolve_ms": round(float(stats.get("resolve_ms") or 0.0), 1),
-            "warps": warps,
-            "destroyed": destroyed,
-            "battles": battles,
-            "reputation": list(stats.get("reputation") or []),
-            "captures": captures,
-        })
+        self.per_turn.append(turn_row(state, events, stats, self.notes))   # the row is shared with turns-<seed>.jsonl (gamelog)
         self.notes = []
 
     def report(self, state: GameState, outcome: str) -> dict:
@@ -214,8 +186,9 @@ def world_index(state: GameState, cfg: GameConfig) -> dict:
 def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool, report_path: Path | None,
             save_dir: Path, bus: bool = False, pub_port: int = 0, pull_port: int = 0, teleport: Position | None = None,
             script_path: Path | None = None, with_world_index: bool = False, spawns: list[str] | None = None,
-            ai_passive: bool = False) -> int:
-    """C2 / C9 / C10.  Always a new game (never resumes) so the gates compare like with like."""
+            ai_passive: bool = False, log_dir: Path | None = None) -> int:
+    """C2 / C9 / C10.  Always a new game (never resumes) so the gates compare like with like.
+    ``log_dir`` receives the gameplay logs (gamelog.py); None writes none."""
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     recorder = Recorder(seed, str(cfg.path), turns)
@@ -228,7 +201,7 @@ def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool, report_p
     try:
         engine = Engine(cfg, seed=seed, save_path=save_dir / "game.json", pub_port=pub_port, pull_port=pull_port, bus=bus,
                         ai_player=ai_player, max_turns=turns, recorder=recorder, resume=False, teleport=teleport,
-                        spawns=spawns, ai_passive=ai_passive)
+                        spawns=spawns, ai_passive=ai_passive, log_dir=log_dir)
         recorder.spawned = [dict(s) for s in engine.state.spawned]
         if with_world_index:
             recorder.world_index = world_index(engine.state, cfg)
