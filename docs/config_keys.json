@@ -328,7 +328,7 @@
         "torpedo_damage"
       ],
       "type": "float",
-      "default": "0.7, 0.03, 25",
+      "default": "0.7, 0.03, 15",
       "unit": "",
       "meaning": "Torpedo hit chance and damage.",
       "used_by": "CM-03",
@@ -987,6 +987,133 @@
       "unit": "turns",
       "meaning": "An AI captain warps to a random reachable sector this often; 0 = never.",
       "used_by": "OV-10, D-103",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-74",
+      "section": "logging",
+      "keys": [
+        "ai_trace"
+      ],
+      "type": "str",
+      "default": "sector",
+      "unit": "sector | battle | all | off",
+      "meaning": "Which AI decision lines go to logs/game-<seed>.log.",
+      "used_by": "OB-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-75",
+      "section": "world",
+      "keys": [
+        "ai_class_mix"
+      ],
+      "type": "list",
+      "default": "corsair:60, kestrel:25, bastion:15",
+      "unit": "% weights",
+      "meaning": "Class mix of generated AI captains; with one class no AI ever opens on another (ratios 1.0).",
+      "used_by": "SP-06, CLS-01…03, D-131",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-76",
+      "section": "battle",
+      "keys": [
+        "phaser_max"
+      ],
+      "type": "float",
+      "default": "10",
+      "unit": "",
+      "meaning": "Cap on phaser power (upgrades and loot).",
+      "used_by": "SH-02, UP-02, CB-01, D-130",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-77",
+      "section": "planets",
+      "keys": [
+        "shield_max",
+        "torpedoes",
+        "phasers"
+      ],
+      "type": "mixed",
+      "default": "80, 10, 4",
+      "unit": "",
+      "meaning": "Every planet's defence (PL-04: planets fight with the ship rules; cannot move or escape).",
+      "used_by": "PL-04, CM-11, PR-02",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-78",
+      "section": "planets",
+      "keys": [
+        "food_stock_start",
+        "water_stock_start",
+        "stock_regen",
+        "stock_cap"
+      ],
+      "type": "int",
+      "default": "100, 100, 5, 200",
+      "unit": "units",
+      "meaning": "Planet supplies stock, regeneration per turn and cap.",
+      "used_by": "PL-02, PR-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-79",
+      "section": "planets",
+      "keys": [
+        "element_stacks_min",
+        "element_stacks_max",
+        "stack_units_min",
+        "stack_units_max"
+      ],
+      "type": "int",
+      "default": "2, 4, 1, 5",
+      "unit": "",
+      "meaning": "How many element stacks a planet holds for sale at generation and how many units each; no regeneration.",
+      "used_by": "PL-03, PR-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-80",
+      "section": "world",
+      "keys": [
+        "item_units_min",
+        "item_units_max"
+      ],
+      "type": "int",
+      "default": "1, 3",
+      "unit": "units",
+      "meaning": "Units in an element stack lying in space (SP-03 items).",
+      "used_by": "SP-03, IT-03, IT-05",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-81",
+      "section": "ai",
+      "keys": [
+        "buy_supplies_below",
+        "docking_income_silver"
+      ],
+      "type": "int",
+      "default": "10, 10",
+      "unit": "units, silver/turn",
+      "meaning": "An AI captain heads for a planet and restocks when food or water falls below the first; the second is a placeholder income while docked at a planet that will trade with it, so the AI economy neither starves nor explodes — tune by the population gate.",
+      "used_by": "OV-10, D-60, SUP-03, D-144",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-82",
+      "section": "battle",
+      "keys": [
+        "shield_cap"
+      ],
+      "type": "float",
+      "default": "100",
+      "unit": "",
+      "meaning": "Cap on shield_max from upgrades and loot (SH-03, UP-03).",
+      "used_by": "SH-03, UP-03",
       "status": "Proposed"
     }
   ]

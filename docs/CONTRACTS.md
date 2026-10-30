@@ -224,3 +224,19 @@ Added for `specs/M3.md`; everything is additive to C1–C9.
 **Save (C6).** Open battles and per-ship order queues survive save/load.
 
 **C10 conventions settled during the M3-gates build (D-128, D-129).** Full text in `docs/DECISIONS.md` and `specs/M3.md` § 4a: `spawned` at the report's top level; rejected script orders as events containing `rejected`; AI holds its cell in battle unless escaping; surrender > escape > peace; `warps[]` includes AI roams; status heartbeat carries `in_battle`; launcher forwards `--spawn`/`--ai`; config accepts degenerate class values for test inis; mutiny placement in hole sectors per D-129.
+
+## C11 — M4 additions (planets, trade, items, upgrades, AI supplies)
+
+Additive to C1–C10; `specs/M4.md` builds to it.
+
+**C1 additions.** `sim` and the engine accept `--give "<element>:<units>[,<element>:<units>]"` and `--coins <gold> <silver>` (debug: set the player's items and wealth before turn 1), and `--respect N` / `--fear N` (debug: starting levels). `--player-script` lines gain `scan`, `pickup <element>`, `buy <food|water|torpedo|element> <n>`, `sell <item> <n>`, `buy ship <class>`, `trade <counterparty> give <item>:<n>[,…] for <item>:<n>[,…]` (coins as `gold:<n>` / `silver:<n>`), `upgrade <component> with <element>`. `--world-index` gains `items` (element, units, rarity, cell — all items, fog ignored; debug) and planets gain `stock` (food, water, elements) and `defence`.
+
+**C2 report additions.** Per turn: `player.items` = `{"iridium": 2, …}`, `player.respect`/`fear` (exist), `trades` = list of `{"with": "p-012" | "c-004", "kind": "buy|sell|barter|ship", "gave": {...}, "received": {...}, "accepted": true, "reason": null | "respect 12 < planet_refuse_respect 20 (EF-04)", "price_factor": 0.98}`, `pickups` = list of `{"element": "orichalcum", "units": 1, "rarity": "special"}`, `upgrades` = list of `{"component": "shields", "element": "rhodium", "before": 60, "after": 65, "capped": false}`, `planet_events` = list of `{"planet": "p-012", "event": "attacked|destroyed|peace|refused_trade|opened_fire", "by": "c-000"}`, `ai_economy` = `{"purchases": 3, "sales": 1, "restock_trips": 2, "docked": 17}`; `captains` count exists. `final` additions: `trades`, `pickups`, `upgrades`, `planets_destroyed`, `ai_purchases`, `ai_mutinies`, `population_min`, `population_max`, `captains_start`.
+
+**C3 additions.** Event types `trade` (OUT-07), `upgrade` (OUT-08), `pickup` and `scan` (OUT-10), `planet` (PR-02 events). `order.rejected` reasons for trade name the rule (`"Oreth refuses to trade: respect 12 < 20 (EF-04)"`, `"not enough silver: 40 needed, 12 held"`). Snapshot additions: `captains[*].items` (dict element → units), `sectors[*].items[*]` gain `element` and `units` once `revealed`, `planets` = `{"p-012": {"name": "Oreth", "president": "…", "cell": [6,5], "sector": "3,4/7,9", "shields": 80.0, "shield_max": 80.0, "torpedoes": 10, "phasers": 4.0, "stock": {"food": 100, "water": 100, "elements": {"iridium": 3}}, "disposition_to_player": -80, "trades_with_player": false, "in_battle": null, "destroyed": false}}`.
+
+**C4 additions.** T4 PNL-04 Cargo lists each element stack with units and list value; T4 shows the planet in the player's cell (name, president, disposition, whether it trades, buy/sell prices for food, water, torpedoes); T2 marks a planet that refuses trade in a distinct colour and removes destroyed planets; T3 renders OUT-07, OUT-08, OUT-10 and planet events; `help fire` prints the live numbers (UX-09); T1 `end` in battle with no fire order on the active ship asks `No fire order for <ship> this turn — end anyway? [y/N]`.
+
+**C5.** Status heartbeat gains `items` (count of stacks) and `docked` (planet id or null).
+
+**Save (C6).** Planet stock, disposition inputs, destroyed planets and revealed items survive save/load.

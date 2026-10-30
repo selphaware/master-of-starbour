@@ -2,7 +2,7 @@
 
 **Generated from `docs/master_of_starbour_blueprint.xlsx` by `tools/blueprint_to_design.py`. Do not edit by hand — edit the workbook and regenerate.**
 
-Workbook version: v2.4 · 2026-10-26 · your blueprint + chat facts (A1–A28) + your answers to Q-01…Q-37 (tab 16) + M1/M2 playtest changes (CMD-06/21, PNL-07, SP-04, HZ-05, SUP-04b, CFG-61…73, D-98/99, D-114…117). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
+Workbook version: v2.5 · 2026-10-30 · your blueprint + chat facts (A1–A32) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M3 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…82, D-136…139). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
 
 How to read this file:
 
@@ -38,9 +38,9 @@ Contents:
 
 ## 0 Index
 
-**Master of Starbour — Design Blueprint (structured v2.4)**
+**Master of Starbour — Design Blueprint (structured v2.5)**
 
-*v2.4 · 2026-10-26 · your blueprint + chat facts (A1–A28) + your answers to Q-01…Q-37 (tab 16) + M1/M2 playtest changes (CMD-06/21, PNL-07, SP-04, HZ-05, SUP-04b, CFG-61…73, D-98/99, D-114…117). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
+*v2.5 · 2026-10-30 · your blueprint + chat facts (A1–A32) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M3 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…82, D-136…139). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
 
 ### Project
 
@@ -59,27 +59,27 @@ Live counts from each tab's Status column. Proposed = Claude's proposal awaiting
 
 | Tab | Group | What it holds | Agreed | Proposed | Draft | Needs detail | Not started | Rows | % Agreed | Open · no Q |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | 16 | 4 | 4 | 0 | 0 | 24 | 0.6667 | 0 |
-| 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | 12 | 10 | 0 | 0 | 0 | 22 | 0.5455 | 0 |
-| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | 15 | 8 | 6 | 0 | 0 | 29 | 0.5172 | 0 |
-| 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | 4 | 21 | 0 | 0 | 0 | 25 | 0.16 | 0 |
-| 5 T3 Output | Terminals | Message types, log behaviour | 5 | 5 | 12 | 0 | 0 | 22 | 0.2273 | 0 |
-| 5b T4 Status | Terminals | Permanent status panels | 2 | 5 | 0 | 0 | 0 | 7 | 0.2857 | 0 |
-| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | 7 | 5 | 0 | 0 | 0 | 12 | 0.5833 | 0 |
-| 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | 5 | 7 | 0 | 0 | 0 | 12 | 0.4167 | 0 |
-| 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | 5 | 5 | 0 | 0 | 0 | 10 | 0.5 | 0 |
-| 9 Ships | Entities | Ship attributes, movement, warp curve, classes | 7 | 11 | 0 | 1 | 0 | 19 | 0.3684 | 1 |
-| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | 14 | 9 | 0 | 0 | 0 | 23 | 0.6087 | 0 |
-| 11 Items & Planets | Entities | Items, element catalogue, planets | 14 | 21 | 0 | 0 | 0 | 35 | 0.4 | 0 |
-| 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | 17 | 3 | 0 | 0 | 0 | 20 | 0.85 | 0 |
-| 13 Combat | Rules | Combat model recommendation, outcomes, loot | 8 | 9 | 0 | 0 | 0 | 17 | 0.4706 | 0 |
-| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | 9 | 13 | 0 | 0 | 0 | 22 | 0.4091 | 0 |
-| 15 Config Keys | Config | Config keys for controls_config.ini | 19 | 54 | 0 | 0 | 0 | 73 | 0.2603 | 0 |
-| 16 Open Questions | Questions | Open design questions, answers, resolution | 37 | 0 | 0 | 0 | 0 | 37 | 1 | — |
-| 17 Decisions | Decisions | Decision log | 59 | 0 | 0 | 0 | 0 | 59 | 1 | — |
-| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | 25 | 8 | 0 | 0 | 0 | 33 | 0.7576 | 0 |
+| 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 5 T3 Output | Terminals | Message types, log behaviour | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 5b T4 Status | Terminals | Permanent status panels | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 9 Ships | Entities | Ship attributes, movement, warp curve, classes | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 11 Items & Planets | Entities | Items, element catalogue, planets | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 13 Combat | Rules | Combat model recommendation, outcomes, loot | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 15 Config Keys | Config | Config keys for controls_config.ini | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 16 Open Questions | Questions | Open design questions, answers, resolution | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | — |
+| 17 Decisions | Decisions | Decision log | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | — |
+| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
 | Source v1 | Source | Original blueprint, verbatim, plus chat addendum | — | — | — | — | — | — | — | — |
-| Total |  |  | 280 | 198 | 22 | 1 | 0 | 501 | 0.5589 | 1 |
+| Total |  |  | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
 
 ### Legend
 
@@ -219,7 +219,7 @@ Immediate = acts at once. Queued = waits for 'end'. Rename freely.
 | CMD-05 | view | view universe \| galaxy \| sector \| follow | Changes the Grid terminal level; 'follow' returns to auto-follow. | Immediate |  | Q-17 | BP r18; Ans Q-17 | Agreed |
 | CMD-06 | move | move <dx dy \| x y> [speed] | Impulse move within the sector. speed ≤ engine_power; cells moved per turn = floor(speed − gravity pull). A target beyond this turn's reach is not clipped: the order persists and the ship continues next turn until it arrives, a new move replaces it, or 'stop' cancels it. | Queued | Reject if speed > engine_power or target outside the sector | Q-02 | Ans Q-02; Chat A22 | Agreed |
 | CMD-07 | warp | warp <gx gy> <sx sy> [factor] | Warp to a sector (in any galaxy). factor ≤ warpcore_power; reach from the warp curve (9 Ships). | Queued | Reject if destination beyond reach for the factor | Q-02 | Ans Q-02 | Agreed |
-| CMD-08 | fire | fire torpedo \| phaser <target> | Attacks a ship or planet in range. Starting a fight costs respect; asks for confirmation. | Queued; target in range | Confirm (Q-34) | Q-12 | Implied r75, r100; Ans Q-34 | Agreed |
+| CMD-08 | fire | fire <target> \| fire torpedo <target> [n] \| fire phaser <target> | Attacks a ship or planet in range. 'fire <target>' fires one torpedo and the phasers; the long forms fire one weapon (n torpedoes, default 1). One torpedo order and one phaser order per ship per turn; no standing orders — a fire order lasts one turn and must be given again each turn (the AI fires every turn by itself). Starting a fight costs respect; asks for confirmation. | Queued; target in range | Confirm (Q-34) | Q-12 | Implied r75, r100; Ans Q-34; Chat A30–A31 | Agreed |
 | CMD-09 | shields | shields status | Shows current / max shields. Shield power is not adjustable — it drains and recharges. | Immediate |  | Q-12 | Claude | Proposed |
 | CMD-10 | peace | peace offer \| accept \| reject <captain \| planet> | Offers, accepts or rejects peace during a battle. | Queued; during a battle |  | Q-12 | Implied r99, r108 | Draft |
 | CMD-11 | escape | escape <dx dy> | Moves out of all enemies' weapon range; succeeds if the move completes (no dice). | Queued; during a battle |  | Q-12 | Claude | Proposed |
@@ -241,11 +241,12 @@ Immediate = acts at once. Queued = waits for 'end'. Rename freely.
 | UX-01 | Prompt format | Turn number, active ship, queued-order count. | [T12 · Kestrel · 2 orders] > |  |  |  | Claude | Proposed |
 | UX-02 | Many orders per turn | Orders are queued, then 'end' executes them all. |  | Same-kind order for the same ship replaces the earlier one (OV-02b). |  | Q-01 | BP r4; Ans Q-01 | Agreed |
 | UX-03 | Error display | Rejected orders and invalid commands show inline on T1 and are echoed to the T3 log. |  |  |  | Q-34 | Ans Q-34 | Agreed |
-| UX-04 | Confirmations | Confirm before: starting a fight, quit, new game, ending a turn inside a hazard with no move queued. |  |  |  | Q-34 | Ans Q-34 | Agreed |
+| UX-04 | Confirmations | Confirm before: starting a fight, quit, new game, ending a turn inside a hazard with no move queued, and ending a turn in a battle with no fire order queued for the active ship (Proposed — a reminder, since fire orders are per turn). |  |  |  | Q-34 | Ans Q-34; Claude (battle reminder) | Agreed |
 | UX-05 | History / autocomplete | Arrow-key history; tab completion of commands, ship, captain and planet names. |  |  |  |  | Claude | Proposed |
 | UX-06 | Waiting for resolution | Prompt locks after 'end' and shows a spinner until turn.resolved. |  |  |  |  | Claude | Proposed |
 | UX-07 | Orders per ship | Each owned ship has its own order queue; 'ship' switches which queue you are filling. |  |  |  | Q-13 | Claude | Proposed |
 | UX-08 | Colour | Commands, errors, warnings and confirmations each have their own colour; same palette as T2 / T3 / T4. |  |  |  |  | Chat A8 | Agreed |
+| UX-09 | Numbers in-game | help fire lists the live numbers from the ini (torpedo damage and hit chance against the target's engine, phaser damage at distance 0 / 1 / 2); the T4 battle panel shows each enemy's shields % and, once scanned, the shield % at which it will sue for peace (EF-02). | help fire → 'torpedo 25 at 58 % vs engine 4; phasers 15 / 10 / 5' |  | Read from config, never literals (D-49). | Q-12 | Chat A31 | Agreed |
 
 ---
 
@@ -355,6 +356,7 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | OB-02 | History | 500 lines; grouped by phase within a turn. |  |  |  | Q-31 | Claude | Proposed |
 | OB-03 | Styling | Colour per severity; same palette as T2 / T4. |  |  |  |  | Chat A8 | Agreed |
 | OB-04 | Order within a turn | Grouped by phase (movement → hazards → combat → trade → upkeep → reputation). |  |  |  | Q-01 | Ans Q-01 | Proposed |
+| OB-05 | Game log files | The engine writes logs/game-<seed>.log (every event, untruncated, plus one line per AI decision with its reason and rule ID) and logs/turns-<seed>.jsonl (one JSON line per resolved turn in the sim-report shape). [logging] ai_trace = sector \| battle \| all \| off limits the AI lines (default sector: AI in the player's sector, plus every battle and roam). Never read by the game. | T3 c-163 Elin Kestle: in battle b-001, weaker (strength 220 v 245) -> no peace; fires torpedo+phaser at s-000 (CM-10, D-125) | Unbounded files; one per seed. | Built as M3 step 2 (D-135); filter key arrives with M4. |  | Chat A29 | Agreed |
 
 ---
 
@@ -465,10 +467,10 @@ Inputs are placeholders; tune in playtest.
 - **10000** — blue-white
 - **30000** — blue
 - **Example star** — radius · base_energy · volume · energy · bucket · temperature K · colour
-- **dying star** — 0.3 · 2 · 0.1131 · 0.2262 · low · 1862 · red
-- **Sun-like** — 1 · 5 · 4.189 · 20.94 · medium · 5776 · yellow
-- **giant** — 3 · 8 · 113.1 · 904.8 · high · 1.481e+04 · blue-white
-- **your own** — 1.5 · 6 · 14.14 · 84.82 · medium · 8194 · white
+- **dying star** — 0.3 · 2 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **Sun-like** — 1 · 5 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **giant** — 3 · 8 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **your own** — 1.5 · 6 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
 
 ---
 
@@ -504,20 +506,20 @@ All inputs are placeholders — the 7-turn Sun-like star is only the blueprint's
 - **sun_mass** — 1 · a Sun-like star's mass
 - **pull_turns_scale** — 7 · [hazards] pull_turns_scale
 - **distance** — black hole pull · min engine to move · turns to pulled in · neutron pull · min engine to move · turns to pulled in
-- **0** — 20 · impossible · 1 · 8 · 8.1 · 1
-- **1** — 7.071 · 7.1 · 1 · 2.828 · 2.9 · 3
-- **2** — 3.849 · 3.9 · 2 · 1.54 · 1.6 · 5
-- **3** — 2.5 · 2.6 · 3 · 1 · 1.1 · 7
-- **4** — 1.789 · 1.8 · 4 · 0.7155 · 0.8 · 10
-- **5** — 1.361 · 1.4 · 6 · 0.5443 · 0.6 · 13
-- **6** — 1.08 · 1.1 · 7 · 0.432 · 0.5 · 17
-- **7** — 0.8839 · 0.9 · 8 · 0.3536 · 0.4 · 20
-- **8** — 0.7407 · 0.8 · 10 · 0.2963 · 0.4 · 24
-- **9** — 0.6325 · 0.7 · 12 · 0.253 · 0.3 · 28
-- **10** — 0.5482 · 0.6 · 13 · 0.2193 · 0.3 · 32
-- **11** — 0.4811 · 0.5 · 15 · 0.1925 · 0.3 · 37
-- **12** — 0.4267 · 0.5 · 17 · 0.1707 · 0.2 · 42
-- **Sun-like star, same cell:** — 1 · 7 · ← pull, turns until pulled in (should read 7 with the defaults)
+- **0** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **1** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **2** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **3** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **4** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **5** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **6** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **7** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **8** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **9** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **10** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **11** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **12** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **Sun-like star, same cell:** — (recalc) · (recalc) · ← pull, turns until pulled in (should read 7 with the defaults)
 
 ---
 
@@ -531,7 +533,7 @@ Ship class — Ships = {torpedos, phasers, shield_power, engine_power, warpcore_
 
 | ID | Attribute | Type | Range / meaning | Notes | Open Q | Origin | Status |
 |---|---|---|---|---|---|---|---|
-| SH-01 | torpedos | int (ammo count) | 0 … ∞; each hit does torpedo_damage (25) | Bought from planets or looted. | Q-12 | BP r75; Claude | Proposed |
+| SH-01 | torpedos | int (ammo count) | 0 … ∞; each hit does torpedo_damage (15; was 25) | Bought from planets or looted. | Q-12 | BP r75; Claude | Proposed |
 | SH-02 | phasers | float 0–10 | Damage per exchange = phasers × phaser_damage_per_unit (5), falling with distance | Never runs out. | Q-12 | BP r75; Claude | Proposed |
 | SH-03 | shield_max / shield_current | float 0–100 | Current absorbs all damage; at 0 the next hit destroys the ship. Recharges shield_recharge (5) per turn outside hazards and battle. | shield_max is what upgrades raise; not looted (CB-01). | Q-03, Q-12 | BP r75, r68, r106; Ans Q-03; Claude | Proposed |
 | SH-04 | engine_power | float 0–10 | Max impulse speed; cells per turn = floor(speed − pull). |  | Q-02 | BP r76; Ans Q-02 | Agreed |
@@ -560,19 +562,19 @@ B and p are placeholders; tune in playtest.
 - **B** — 16 · [movement] warp_curve_base
 - **p** — 4 · [movement] warp_curve_exponent
 - **warp factor** — reach (sectors) · note
-- **1** — 1
-- **2** — 2.009
-- **3** — 3.068
-- **4** — 4.294
-- **5** — 5.946
-- **6** — 8.594
-- **7** — 13.62
-- **8** — 24.91
-- **9** — 55.5
-- **9.5** — 90.88
-- **9.9** — 142
-- **10** — 160 · universe diameter ≈ 181 sectors at 8 × 16
-- **10** — anywhere
+- **1** — (recalc)
+- **2** — (recalc)
+- **3** — (recalc)
+- **4** — (recalc)
+- **5** — (recalc)
+- **6** — (recalc)
+- **7** — (recalc)
+- **8** — (recalc)
+- **9** — (recalc)
+- **9.5** — (recalc)
+- **9.9** — (recalc)
+- **10** — (recalc) · universe diameter ≈ 181 sectors at 8 × 16
+- **10** — (recalc)
 
 ### Ship classes
 
@@ -774,12 +776,12 @@ One exchange per turn; battle = being in weapon range. Alternatives and failure 
 |---|---|---|---|---|---|---|---|---|
 | CM-01 | Starting a fight | Any 'fire' order on a target not already in battle with you starts one; costs respect; asks for confirmation. |  |  | [respect] start_fight_delta | Q-23 | BP r100; Ans Q-34 | Agreed |
 | CM-02 | Range | Phasers 2 cells, torpedoes 5 cells (Chebyshev). Being inside any enemy's range = in battle. | Gives escape a meaning without dice. | [ALTERNATIVE] same-cell only — too binary with 24 × 24 sectors. | [battle] phaser_range = 2, torpedo_range = 5 | Q-12 | Claude | Proposed |
-| CM-03 | Torpedoes | Ammo; each fired torpedo hits with p = 0.7 − 0.03 × target engine; damage 25. | Fast ships dodge. | [RISK] randomness in a deterministic game — keep the seed in the RNG so replays match. | [battle] torpedo_hit_base = 0.7, torpedo_evade_per_engine = 0.03, torpedo_damage = 25 | Q-12 | Claude; Chat A26 | Agreed |
+| CM-03 | Torpedoes | Ammo; each fired torpedo hits with p = 0.7 − 0.03 × target engine; damage torpedo_damage (15 after the M3 playtest; was 25). | Fast ships dodge. | [RISK] randomness in a deterministic game — keep the seed in the RNG so replays match. | [battle] torpedo_hit_base = 0.7, torpedo_evade_per_engine = 0.03, torpedo_damage = 25 | Q-12 | Claude; Chat A26, A32 | Agreed |
 | CM-04 | Phasers | Always hit; damage = phasers × 5 × (1 − distance / 3). | Reliable close-range weapon. |  | [battle] phaser_damage_per_unit = 5 | Q-12 | Claude | Proposed |
 | CM-05 | Shields | Absorb all damage; at 0 the next hit destroys (Q-03). Recharge 5 / turn outside battle and hazards. | Recharge happens anywhere outside hazards and battle (no repair yards exist); the rate is config. |  | [battle] shield_recharge = 5 | Q-03 | Ans Q-03; Claude; Chat A23, A26 | Agreed |
 | CM-06 | Exchange order | Per turn: all torpedoes resolve, then phasers, simultaneously for both sides; destruction checked after. | Both sides can die in the same exchange — rare, dramatic, fair. |  |  | Q-01 | Claude | Proposed |
 | CM-07 | Rounds per turn | One exchange per turn; a battle spans several turns. | Gives time to escape or sue for peace — matches 'battle every 5–7 turns' pacing. | [ALTERNATIVE] resolve to the end in one turn — no decisions mid-battle. |  | Q-12 | Claude | Proposed |
-| CM-08 | Opponent strength | strength = Σ over the fleet of (shield_current + torpedoes × 25 + phasers × 5 × 3). Stronger = strength ratio > 1.0. | Shields and weapons, fleet included (your Q-22). |  |  | Q-22 | Ans Q-22; Claude | Proposed |
+| CM-08 | Opponent strength | strength = Σ over the fleet of (shield_current + torpedoes × torpedo_damage + phasers × phaser_damage_per_unit × 3). Stronger = strength ratio > 1.0. | Shields and weapons, fleet included (your Q-22). |  |  | Q-22 | Ans Q-22; Claude | Proposed |
 | CM-09 | Peace offers | Either side may offer each turn; the other side's next order accepts or rejects; rejecting costs nothing. |  |  |  | Q-12 | Claude | Proposed |
 | CM-10 | AI behaviour | Attack if strength ratio ≥ 1.3 and the target's fear < 50; offer peace when own shields < 30% and weaker; try to escape when shields < 15%. |  | [VERIFY] in playtest — this sets how often battles happen. | [ai] * | Q-13, Q-24 | Claude | Proposed |
 | CM-11 | Planets in combat | Same rules; a planet cannot move or escape; destroyed planet is looted and removed. |  |  |  | Q-21 | Ans Q-21 | Agreed |
@@ -873,7 +875,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-22 | [movement] | impulse_max, warp_max | float | 10 |  | Upper bound for engine and warp core. | SH-04, SH-05 | Q-02 | Ans Q-02 | Agreed |
 | CFG-23 | [movement] | warp_curve_base, warp_curve_exponent | float | 16, 4 |  | reach = w × base^((w/10)^exponent); w = 10 → anywhere. | MV-02 | Q-02 | Claude | Proposed |
 | CFG-24 | [battle] | phaser_range, torpedo_range | int | 2, 5 | cells | Weapon ranges. | CM-02 | Q-12 | Claude | Proposed |
-| CFG-25 | [battle] | torpedo_hit_base, torpedo_evade_per_engine, torpedo_damage | float | 0.7, 0.03, 25 |  | Torpedo hit chance and damage. | CM-03 | Q-12 | Claude | Proposed |
+| CFG-25 | [battle] | torpedo_hit_base, torpedo_evade_per_engine, torpedo_damage | float | 0.7, 0.03, 15 |  | Torpedo hit chance and damage. | CM-03 | Q-12 | Claude; damage 25 → 15 after the M3 playtest (Chat A32) | Proposed |
 | CFG-26 | [battle] | phaser_damage_per_unit | float | 5 |  | Phaser damage per power unit at distance 0. | CM-04 | Q-12 | Claude | Proposed |
 | CFG-27 | [battle] | shield_recharge | int | 5 | / turn | Recharge outside battle and hazards. | CM-05 | Q-03 | Claude | Proposed |
 | CFG-28 | [battle] | peace_loot_max | int | 50 | % | Max share transferred on peace. | CB-03 | Q-12 | Claude | Proposed |
@@ -922,6 +924,15 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-71 | [captain] | gold_start, silver_start | int | 5, 50 | coins | Starting wealth. | CP-02, CP-03 | Q-14 | Claude (D-71) | Proposed |
 | CFG-72 | [ai] | peace_shield_pct_at_fear100, surrender_shield_pct | int | 60, 20 | % | AI offers peace below a shield % that rises with the player's fear (CFG-30 at fear 0 → this at fear 100); at fear ≥ yield_fear_min a weaker AI surrenders its ship below surrender_shield_pct. | EF-02 | Q-24 | Claude | Proposed |
 | CFG-73 | [ai] | roam_every_turns | int | 10 | turns | An AI captain warps to a random reachable sector this often; 0 = never. | OV-10, D-103 | Q-13 | Claude | Proposed |
+| CFG-74 | [logging] | ai_trace | str | sector | sector \| battle \| all \| off | Which AI decision lines go to logs/game-<seed>.log. | OB-05 |  | Claude | Proposed |
+| CFG-75 | [world] | ai_class_mix | list | corsair:60, kestrel:25, bastion:15 | % weights | Class mix of generated AI captains; with one class no AI ever opens on another (ratios 1.0). | SP-06, CLS-01…03, D-131 | Q-13 | Claude (D-131) | Proposed |
+| CFG-76 | [battle] | phaser_max | float | 10 |  | Cap on phaser power (upgrades and loot). | SH-02, UP-02, CB-01, D-130 | Q-12 | Claude (D-130) | Proposed |
+| CFG-77 | [planets] | shield_max, torpedoes, phasers | mixed | 80, 10, 4 |  | Every planet's defence (PL-04: planets fight with the ship rules; cannot move or escape). | PL-04, CM-11, PR-02 | Q-21 | Claude (D-140) | Proposed |
+| CFG-78 | [planets] | food_stock_start, water_stock_start, stock_regen, stock_cap | int | 100, 100, 5, 200 | units | Planet supplies stock, regeneration per turn and cap. | PL-02, PR-03 | Q-21 | Claude (D-140) | Proposed |
+| CFG-79 | [planets] | element_stacks_min, element_stacks_max, stack_units_min, stack_units_max | int | 2, 4, 1, 5 |  | How many element stacks a planet holds for sale at generation and how many units each; no regeneration. | PL-03, PR-03 | Q-21 | Claude (D-140) | Proposed |
+| CFG-80 | [world] | item_units_min, item_units_max | int | 1, 3 | units | Units in an element stack lying in space (SP-03 items). | SP-03, IT-03, IT-05 | Q-07 | Claude (D-141) | Proposed |
+| CFG-81 | [ai] | buy_supplies_below, docking_income_silver | int | 10, 10 | units, silver/turn | An AI captain heads for a planet and restocks when food or water falls below the first; the second is a placeholder income while docked at a planet that will trade with it, so the AI economy neither starves nor explodes — tune by the population gate. | OV-10, D-60, SUP-03, D-144 | Q-13, Q-19 | Claude (D-144) | Proposed |
+| CFG-82 | [battle] | shield_cap | float | 100 |  | Cap on shield_max from upgrades and loot (SH-03, UP-03). | SH-03, UP-03 | Q-14 | Claude (D-143) | Proposed |
 
 ---
 
@@ -970,6 +981,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | Q-35 | Pacing | Turns to mastery? Battle frequency? |  | Battle can happen on average say 5-7 turns, can be longer or shorter. Mastery is achieved once the ultimate secret item is obtained, that could take a long time, e.g. 100 turns maybe longer, maybe a bit shorter say 70 turns | Rough feel only — no fixed turn counts (chat A15). All numbers are placeholders tuned by playtest → OV-11, LV-05. | Agreed |
 | Q-36 | Fear & respect — extra events | Mercy, escape, decay, visibility? | A) None extra, no decay, visible in sector [ASSUMED] | option A | A → FR-10, LV-04. | Agreed |
 | Q-37 | Mastery ceremony | What does it look like? What changes after? |  | something fancy with nice terminal graphics of fireworks and big smart art words. Nothing changes afterwards except respect and fear are maximum levels along with weapons, shields, etc. <br><br>Remember ships and planets will be more compliant with these levels so nothing really changes - hope that makes sense | Fireworks + ASCII title; nothing else changes → OUT-15, EG-08, EF-06. | Agreed |
+| Q-38 | Combat | Pursuit: 88 % of AI-vs-AI battles end by escape because the weaker side flees at 15 % shields and nobody follows (CM-10 has no pursuit rule). Should the stronger side pursue? | A) No pursuit — battles are skirmishes  B) Stronger side moves toward a fleeing enemy at full power while it has torpedoes [Claude's recommendation]  C) Pursue only when the fleeing captain's fear is low |  | Open after the M3 playtest (2026-10-30). | Needs detail |
 
 ---
 
@@ -1158,3 +1170,7 @@ Addendum — stated in chat on 2026-10-25, verbatim.
 - **A26** — agreed with your other clarity points
 - **A27** — on the wormhole, what do you recommend, being one cell away?
 - **A28** — go for it  [in answer to: wormhole exit distance 2 recommended; and the demoted captain's Kestrel appearing at the nearest cell outside any pull range]
+- **A29** — [after the first M3 fight, 2026-10-30] perhaps its worth adding extensive logging to view that to see what is going on exactly
+- **A30** — youre right, i didnt enter the phaser command, i just did.. end end end. so i should have fired phasers for each turn.
+- **A31** — [asked: 1 standing fire orders? 2 'fire <target>' = one torpedo + phasers? 3 show the combat numbers in-game?] 1. no, every turn the user should put in the fire commands  2. yes  3. yes
+- **A32** — [after a second Kestrel duel, played correctly and lost on torpedo rolls in three turns; offered torpedo_damage 25 → 15 or Kestrel shields 60 → 100] make the change yourself please
