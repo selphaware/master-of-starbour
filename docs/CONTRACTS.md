@@ -240,3 +240,21 @@ Additive to C1–C10; `specs/M4.md` builds to it.
 **C5.** Status heartbeat gains `items` (count of stacks) and `docked` (planet id or null).
 
 **Save (C6).** Planet stock, disposition inputs, destroyed planets and revealed items survive save/load.
+
+## C12 — M5 additions (deep space, help, log, endgame, mastery)
+
+Additive to C1–C11; `specs/M5.md` builds to it.
+
+**C1 additions.** `--ai-player [starve|trade]` — `starve` (the default, today's driver) never trades; `trade` drives the player's ship with the AI captain's decisions (restock, trade, roam) so population runs measure the AI economy and not the player's starvation (D-161). `--world-index` gains `voids`: the start galaxy's deep-space sectors as `{"sector": "3,3/2,7", "item": null | {"element": "iridium", "units": 4, "rarity": "normal", "cell": [11, 4]}}` — the deterministic would-be content, fog ignored (debug). `--player-script` lines gain `pickup lodestone` (the ultimate item by its catalogue id `lodestone`, whatever `ultimate_item_name` says). `smoke_test.py . --long` is the opt-in 2,000-turn tier (§ 4 (c)).
+
+**C2 report additions.** Per turn: `player.master` (bool), `player.infinite_wealth` (bool), `void_visits` (player entered a deep-space sector this turn, bool), `lodestone` = `null | {"sector": "5,1/9,12", "cell": [12, 11], "distance": 71, "placed_turn": 1, "guardians": ["c-171", …], "guardians_alive": 4, "picked_up_turn": null | 9}`. `final` additions: `eligible_turn`, `mastery_turn` (null until they happen), `ai_void_visits` (count of AI arrivals in deep space), `guardians_destroyed`. `population_*` and `captains` exclude guardians.
+
+**C3 additions.** New message **`command.echo` (MSG-10)**, T1 → engine PUSH: `{"line": "help fighting", "handled": "T1", "summary": "Fighting: fire, peace, escape"}` — the engine writes one gameplay-log line and changes nothing; it is never re-published. New event types `eligible` (payload names the sector and the distance; `endgame.eligible` severity Highlight) and `mastery` (`game.mastery`, MSG-09, already catalogued: payload `{"turn_no": 9, "captain": "…", "item": "Lodestone of Starbour"}`). `order.rejected` for the ultimate item while a guardian lives: `"the guardians still hold the sector (CM-13)"`. Snapshot additions: `sectors[*].kind` = `"system"` | `"void"`; `captains[*].master`, `captains[*].guardian`, `captains[*].infinite_wealth`; `lodestone` as in the report; `items[*].ultimate: true` on the placed item once `revealed`.
+
+**C4 additions.** `help` is grouped (five groups, Command · When · What), `help <group>`, `help <command>` panel; every rendered line fits the console width (min 80). T4 adds one line before placement — `Mastery: wealth ✓ · fear 72/90 · respect ✓ · specials 1/3` — and after it `Lodestone: 5,1/9,12 · guardians 4 alive`; after mastery the T4 header carries `★ MASTER OF STARBOUR ★` and coins / food / water render as `∞`. T3 on `game.mastery`: `fireworks_frames(width, height, rng, n) -> list[Text]` then `title_frame(width) -> Text` containing `MASTER OF STARBOUR`; `render()` for the event returns the first frame so the probe can see it. T4 location line reads `Deep space g,g/s,s` in a deep-space sector.
+
+**C5.** Status heartbeat gains `master` (bool) and `lodestone_guardians_alive` (int or null); the T3 heartbeat gains `ceremony` = `null | "running" | "done"`.
+
+**Save (C6).** `lodestone`, guardian flags, `master`, `infinite_wealth`, the locked levels and the removed deep-space stacks (by coordinates) survive save/load; loading never re-emits `game.mastery`.
+
+**Gameplay log (D-139, D-155).** New line form `T<n> you > <line>: <outcome>` for every player line: `queued as <order>`, `rejected: <reason>` (the text T1 showed), or the first line of the immediate reply. The header documents all three line forms.

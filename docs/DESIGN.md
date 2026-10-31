@@ -2,7 +2,7 @@
 
 **Generated from `docs/master_of_starbour_blueprint.xlsx` by `tools/blueprint_to_design.py`. Do not edit by hand — edit the workbook and regenerate.**
 
-Workbook version: v2.6 · 2026-10-31 · your blueprint + chat facts (A1–A33) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M4 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…83, D-136…139, D-152: respect start 30, planets fire below 10). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
+Workbook version: v2.7 · 2026-10-31 · your blueprint + chat facts (A1–A35) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M4 playtest changes (CMD-01, CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-51 renamed, CFG-74…89, D-136…139, D-152…155: respect start 30, deep space, structured help, full logs). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
 
 How to read this file:
 
@@ -38,9 +38,9 @@ Contents:
 
 ## 0 Index
 
-**Master of Starbour — Design Blueprint (structured v2.6)**
+**Master of Starbour — Design Blueprint (structured v2.7)**
 
-*v2.6 · 2026-10-31 · your blueprint + chat facts (A1–A33) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M4 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…83, D-136…139, D-152: respect start 30, planets fire below 10). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
+*v2.7 · 2026-10-31 · your blueprint + chat facts (A1–A35) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M4 playtest changes (CMD-01, CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-51 renamed, CFG-74…89, D-136…139, D-152…155: respect start 30, deep space, structured help, full logs). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
 
 ### Project
 
@@ -61,25 +61,25 @@ Live counts from each tab's Status column. Proposed = Claude's proposal awaiting
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | 16 | 4 | 4 | 0 | 0 | 24 | 0.6667 | 0 |
 | 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | 12 | 10 | 0 | 0 | 0 | 22 | 0.5455 | 0 |
-| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | 16 | 8 | 6 | 0 | 0 | 30 | 0.5333 | 0 |
+| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | 17 | 8 | 5 | 0 | 0 | 30 | 0.5667 | 0 |
 | 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | 4 | 21 | 0 | 0 | 0 | 25 | 0.16 | 0 |
 | 5 T3 Output | Terminals | Message types, log behaviour | 6 | 5 | 12 | 0 | 0 | 23 | 0.2609 | 0 |
-| 5b T4 Status | Terminals | Permanent status panels | 2 | 5 | 0 | 0 | 0 | 7 | 0.2857 | 0 |
+| 5b T4 Status | Terminals | Permanent status panels | 2 | 6 | 0 | 0 | 0 | 8 | 0.25 | 0 |
 | 6 World Grids | World | Grid hierarchy, cell contents, generation rules | 7 | 5 | 0 | 0 | 0 | 12 | 0.5833 | 0 |
 | 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | 5 | 7 | 0 | 0 | 0 | 12 | 0.4167 | 0 |
 | 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | 5 | 5 | 0 | 0 | 0 | 10 | 0.5 | 0 |
 | 9 Ships | Entities | Ship attributes, movement, warp curve, classes | 7 | 11 | 0 | 1 | 0 | 19 | 0.3684 | 1 |
 | 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | 14 | 9 | 0 | 0 | 0 | 23 | 0.6087 | 0 |
-| 11 Items & Planets | Entities | Items, element catalogue, planets | 14 | 21 | 0 | 0 | 0 | 35 | 0.4 | 0 |
+| 11 Items & Planets | Entities | Items, element catalogue, planets | 15 | 20 | 0 | 0 | 0 | 35 | 0.4286 | 0 |
 | 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | 17 | 3 | 0 | 0 | 0 | 20 | 0.85 | 0 |
 | 13 Combat | Rules | Combat model recommendation, outcomes, loot | 8 | 9 | 0 | 0 | 0 | 17 | 0.4706 | 0 |
 | 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | 11 | 11 | 0 | 0 | 0 | 22 | 0.5 | 0 |
-| 15 Config Keys | Config | Config keys for controls_config.ini | 21 | 62 | 0 | 0 | 0 | 83 | 0.253 | 0 |
+| 15 Config Keys | Config | Config keys for controls_config.ini | 21 | 68 | 0 | 0 | 0 | 89 | 0.236 | 0 |
 | 16 Open Questions | Questions | Open design questions, answers, resolution | 37 | 0 | 0 | 1 | 0 | 38 | 0.9737 | — |
-| 17 Decisions | Decisions | Decision log | 64 | 0 | 0 | 0 | 0 | 64 | 1 | — |
+| 17 Decisions | Decisions | Decision log | 67 | 0 | 0 | 0 | 0 | 67 | 1 | — |
 | 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | 25 | 8 | 0 | 0 | 0 | 33 | 0.7576 | 0 |
 | Source v1 | Source | Original blueprint, verbatim, plus chat addendum | — | — | — | — | — | — | — | — |
-| Total |  |  | 291 | 204 | 22 | 2 | 0 | 519 | 0.5607 | 1 |
+| Total |  |  | 296 | 210 | 21 | 2 | 0 | 529 | 0.5595 | 1 |
 
 ### Legend
 
@@ -212,13 +212,13 @@ Immediate = acts at once. Queued = waits for 'end'. Rename freely.
 
 | ID | Command | Syntax | What it does | When valid | Feedback / errors | Open Q | Origin | Status |
 |---|---|---|---|---|---|---|---|---|
-| CMD-01 | help | help [command] | Lists commands, or shows one command's syntax. | Immediate |  |  | Template | Draft |
+| CMD-01 | help | help [command \| group] | Five grouped tables (Getting about · Looking · Fighting · Trading & items · Game) with Command · When · What, fitted to the window width; help <group> shows one group; help <command> shows a panel: syntax, what it does, when it resolves, an example, live numbers where they exist (UX-09), blueprint IDs. | Immediate | Unknown command or group → 'unknown … type help'. |  | Template; Chat A34 (D-154) | Agreed |
 | CMD-02 | status | status | Shows the active ship's stats and the captain's wealth, fear, respect, food and water. | Immediate |  |  | Implied r75, r80 | Draft |
 | CMD-03 | ship | ship <name \| n> | Switches the active ship. | Immediate; captain owns more than one ship | Error if unknown | Q-13 | BP r13 | Agreed |
 | CMD-04 | fleet | fleet | Lists all owned ships, their locations and state. | Immediate |  | Q-13 | Implied r13 | Draft |
 | CMD-05 | view | view universe \| galaxy \| sector \| follow | Changes the Grid terminal level; 'follow' returns to auto-follow. | Immediate |  | Q-17 | BP r18; Ans Q-17 | Agreed |
 | CMD-06 | move | move <dx dy \| x y> [speed] | Impulse move within the sector. speed ≤ engine_power; cells moved per turn = floor(speed − gravity pull). A target beyond this turn's reach is not clipped: the order persists and the ship continues next turn until it arrives, a new move replaces it, or 'stop' cancels it. | Queued | Reject if speed > engine_power or target outside the sector | Q-02 | Ans Q-02; Chat A22 | Agreed |
-| CMD-07 | warp | warp <gx gy> <sx sy> [factor] | Warp to a sector (in any galaxy). factor ≤ warpcore_power; reach from the warp curve (9 Ships). | Queued | Reject if destination beyond reach for the factor | Q-02 | Ans Q-02 | Agreed |
+| CMD-07 | warp | warp <gx gy> <sx sy> [factor] | Warp to a sector (in any galaxy). factor ≤ warpcore_power; reach from the warp curve (9 Ships). | Queued | Reject only if beyond reach for the factor or outside the universe; a Void cell is deep space and a valid destination (D-153). | Q-02 | Ans Q-02 | Agreed |
 | CMD-08 | fire | fire <target> \| fire torpedo <target> [n] \| fire phaser <target> | Attacks a ship or planet in range. 'fire <target>' fires one torpedo and the phasers; the long forms fire one weapon (n torpedoes, default 1). One torpedo order and one phaser order per ship per turn; no standing orders — a fire order lasts one turn and must be given again each turn (the AI fires every turn by itself). Starting a fight costs respect; asks for confirmation. | Queued; target in range | Confirm (Q-34) | Q-12 | Implied r75, r100; Ans Q-34; Chat A30–A31 | Agreed |
 | CMD-09 | shields | shields status | Shows current / max shields. Shield power is not adjustable — it drains and recharges. | Immediate |  | Q-12 | Claude | Proposed |
 | CMD-10 | peace | peace offer \| accept \| reject <captain \| planet> | Offers, accepts or rejects peace during a battle. | Queued; during a battle |  | Q-12 | Implied r99, r108 | Draft |
@@ -343,7 +343,7 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | OUT-12 | Endgame eligibility | Thresholds reached | which thresholds; where the guarded sector is | TBD | Highlight | Q-15 | Ans Q-15 | Draft |
 | OUT-13 | Invalid command / rejected order | Bad input, impossible order | message, reason (echo of T1) | TBD | Error | Q-34 | Ans Q-34 | Agreed |
 | OUT-14 | System | Bus connected, saved, AI thinking, shutdown | message | TBD | Muted | Q-32 | Ans Q-32 | Draft |
-| OUT-15 | Mastery ceremony | Ultimate item obtained | fireworks animation, big ASCII-art title, stats maxed, planets open | TBD | Highlight (full colour) | Q-37 | Ans Q-37 | Agreed |
+| OUT-15 | Mastery ceremony | Ultimate item obtained | fireworks animation, big ASCII-art title, stats maxed, planets open | [fireworks for ceremony_seconds, then a block-letter MASTER OF STARBOUR; T4 header keeps the title] (D-159, CFG-89) | Highlight (full colour) | Q-37 | Ans Q-37 | Agreed |
 | OUT-16 | Game over | Player's ship destroyed | cause, turn reached, run summary, 'new' to start again | TBD | Alert | Q-29 | Ans Q-29 | Agreed |
 | OUT-17 | Supplies warning | Food or water ≤ warn_turns, or at 0 | turns left, turns until mutiny | TBD | Warning | Q-19 | Ans Q-19; Claude | Proposed |
 | OUT-18 | Mutiny | Food or water at 0 for mutiny_turns_at_zero turns | ship lost; moved to <ship> or demoted to a Kestrel; supplies given; fear change | TBD | Alert | Q-19 | Chat A11, A19 | Agreed |
@@ -356,7 +356,7 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | OB-02 | History | 500 lines; grouped by phase within a turn. |  |  |  | Q-31 | Claude | Proposed |
 | OB-03 | Styling | Colour per severity; same palette as T2 / T4. |  |  |  |  | Chat A8 | Agreed |
 | OB-04 | Order within a turn | Grouped by phase (movement → hazards → combat → trade → upkeep → reputation). |  |  |  | Q-01 | Ans Q-01 | Proposed |
-| OB-05 | Game log files | The engine writes logs/game-<seed>.log (every event, untruncated, plus one line per AI decision with its reason and rule ID) and logs/turns-<seed>.jsonl (one JSON line per resolved turn in the sim-report shape). [logging] ai_trace = sector \| battle \| all \| off limits the AI lines (default sector: AI in the player's sector, plus every battle and roam). Never read by the game. | T3 c-163 Elin Kestle: in battle b-001, weaker (strength 220 v 245) -> no peace; fires torpedo+phaser at s-000 (CM-10, D-125) | Unbounded files; one per seed. | Built as M3 step 2 (D-135); filter key arrives with M4. |  | Chat A29 | Agreed |
+| OB-05 | Game log files | The engine writes logs/game-<seed>.log (every event, untruncated, plus one line per AI decision with its reason and rule ID) and logs/turns-<seed>.jsonl (one JSON line per resolved turn in the sim-report shape). [logging] ai_trace = sector \| battle \| all \| off limits the AI lines (default sector: AI in the player's sector, plus every battle and roam). Never read by the game. | T3 c-163 Elin Kestle: in battle b-001, weaker (strength 220 v 245) -> no peace; fires torpedo+phaser at s-000 (CM-10, D-125) | Unbounded files; one per seed. | Built as M3 step 2 (D-135); filter key with M4 (CFG-74). From M5 every player command appears with its outcome — queued / rejected (reason) / immediate reply (D-155, D-160). |  | Chat A29 | Agreed |
 
 ---
 
@@ -383,6 +383,7 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | PNL-05 | Fleet | every owned ship: name, location, shields, orders queued | turn.resolved | bottom |  | Q-13 | Ans Q-13 | Proposed |
 | PNL-06 | Hazard / battle | current pull, countdown, enemies in range | turn.resolved | side | Only when relevant | Q-02, Q-12 | Claude | Proposed |
 | PNL-07 | Orders | the active ship's queued orders in order (command and arguments), including a persisting move with its remaining distance; Fleet (PNL-05) keeps the per-ship count | turn.resolved, and on every accepted or cancelled order | middle | T1's 'orders' lists the same | Q-01 | Chat A21 | Agreed |
+| PNL-08 | Mastery | before placement: 'Mastery: wealth ✓ · fear 72/90 · respect ✓ · specials 1/3'; after: 'Lodestone: 5,1/9,12 · guardians 4 alive'; after mastery the header carries ★ MASTER OF STARBOUR ★ | turn.resolved | lower, one line; header after mastery | Tells the player what the endgame wants without the docs (D-158) | Q-15, Q-37 | Claude (D-158) | Proposed |
 
 ---
 
@@ -397,8 +398,8 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | ID | Level | Is a grid of | Each cell holds | Size (M × N) | Open Q | Origin | Status |
 |---|---|---|---|---|---|---|---|
 | WG-00 | GeneralGrid | — (base class) | Sparse: a dict keyed by (x, y) → cell contents; empty = Void. Bounds M × N are properties. | n/a | Q-04 | BP r30–32; Ans Q-04 | Agreed |
-| WG-01 | Universe | Galaxies | A Galaxy or Void. | 8 × 8 (config) | Q-05 | BP r34–36; Claude | Proposed |
-| WG-02 | Galaxy | Sectors | A Sector or Void. | 16 × 16 (config) | Q-05 | BP r38–40; Claude | Proposed |
+| WG-01 | Universe | Galaxies | A Galaxy or Void. A Void cell is deep space: enterable, empty of terrain, may hold a drifting stack and roaming ships (D-153, D-156). | 8 × 8 (config) | Q-05 | BP r34–36; Claude | Proposed |
+| WG-02 | Galaxy | Sectors | A Sector or Void. A Void cell is a deep-space sector: a valid warp destination, no terrain, lazily generated content (D-153, D-156). | 16 × 16 (config) | Q-05 | BP r38–40; Claude | Proposed |
 | WG-03 | Sector | Cells | At most one terrain object (star, black hole, neutron star, planet) per cell; any number of items and ships. | 24 × 24 (config) | Q-06 | BP r42–44; Ans Q-06 | Agreed |
 
 ### Generation rules
@@ -412,7 +413,7 @@ Glyphs are proposals. Star colours follow the real stellar sequence from tempera
 | SP-05 | Starting position | Player starts in a sector with a planet and no black hole or neutron star. |  | [world] safe_start = true | Q-08 | Claude | Proposed |
 | SP-06 | AI captains | 3 AI captains per galaxy, placed in random safe sectors. |  | [world] ai_captains_per_galaxy = 3 | Q-13 | Claude | Proposed |
 | SP-07 | Sector density | Per sector: 0–3 stars, 0–1 black hole or neutron star (never with the player's start), items per SP-03. |  | [world] * |  | Claude | Proposed |
-| SP-08 | Ultimate item | Placed at eligibility time in a sector at least half the universe diameter from the captain, guarded by ships. |  | [endgame] guard_ships = 4 | Q-15 | Ans Q-15 | Agreed |
+| SP-08 | Ultimate item | Placed at eligibility time in a sector at least half the universe diameter from the captain, guarded by ships. | A real system (≥ 1 star, no hole), farthest first; announced on T3 and shown on T4 (D-158). | [endgame] guard_ships = 4, placement_distance_pct = 50 | Q-15 | Ans Q-15 | Agreed |
 
 ---
 
@@ -626,11 +627,11 @@ Captain class — Captain = {name, gold_coins, silver_coins, items, fear_level, 
 | EG-01 | Wealth | ≥ 100 gold-equivalent (gold × 20 + silver ≥ 2 000 silver) | Tuned to ~70–100 turns (Q-35). | [endgame] wealth_min_silver = 2000 | Q-15 | Ans Q-15; Claude | Proposed |
 | EG-02 | Respect | ≥ 90 |  | [endgame] respect_min = 90 | Q-15 | Ans Q-15 | Agreed |
 | EG-03 | Fear | ≥ 90 |  | [endgame] fear_min = 90 | Q-15 | Ans Q-15 | Agreed |
-| EG-04 | Required items | Hold at least one special item of each category (11 Items). |  | [endgame] required_special_categories = 3 | Q-15 | Claude | Proposed |
-| EG-05 | Ultimate item — name | Lodestone of Starbour (recommended; lodestone = the navigator's stone, fits the harbour pun). Alternatives: Crystal of Starbour, Starbour Keelstone. |  |  | Q-26 | Ans Q-26; Claude | Proposed |
-| EG-06 | Ultimate item — where | Placed when eligible, ≥ half the universe diameter away, in a sector guarded by guard_ships Bastion-class ships that must be beaten. |  | [endgame] guard_ships = 4 | Q-15 | Ans Q-15 | Agreed |
-| EG-07 | Mastery — effect | Weapons, shields, engine, warp = max; wealth infinite; fear and respect = 100; all planets willing to trade. Play continues. |  |  | Q-37 | Chat A4; Ans Q-37 | Agreed |
-| EG-08 | Mastery — ceremony | Fireworks animation and big ASCII-art title on T3 (full colour); T4 shows the title permanently. |  |  | Q-37 | Ans Q-37 | Agreed |
+| EG-04 | Required items | Hold at least required_special_distinct distinct Mythical (special) elements across the fleet (3 of the 4: Orichalcum, Adamantine, Aetherite, Star-iron). | Was 'one special item of each category' — the catalogue has one special category (D-157). | [endgame] required_special_distinct = 3 | Q-15 | Claude | Proposed |
+| EG-05 | Ultimate item — name | Lodestone of Starbour (recommended; lodestone = the navigator's stone, fits the harbour pun). Alternatives: Crystal of Starbour, Starbour Keelstone. | Name is a config string (CFG-86); the item id is 'lodestone'. | [endgame] ultimate_item_name = Lodestone of Starbour | Q-26 | Ans Q-26; Claude | Proposed |
+| EG-06 | Ultimate item — where | Placed when eligible, ≥ half the universe diameter away, in a sector guarded by guard_ships Bastion-class ships that must be beaten. | Guardians: one Bastion per AI captain, fire on any ship in the sector regardless of ratio or fear, never negotiate, never leave; pickup rejected while one lives (D-158). | [endgame] guard_ships = 4, placement_distance_pct = 50 | Q-15 | Ans Q-15 | Agreed |
+| EG-07 | Mastery — effect | Weapons, shields, engine, warp = max; wealth infinite; fear and respect = 100; all planets willing to trade. Play continues. | Caps: shield_cap, phaser_max, impulse_max, warp_max; torpedoes refilled to master_torpedoes each turn; infinite wealth = every price check passes, nothing deducted; levels locked at 100; the lose rule still applies (D-159). | [endgame] master_torpedoes = 99 | Q-37 | Chat A4; Ans Q-37 | Agreed |
+| EG-08 | Mastery — ceremony | Fireworks animation and big ASCII-art title on T3 (full colour); T4 shows the title permanently. | T3 only, on the event, never on load (D-159). | [ui] ceremony_seconds = 6 | Q-37 | Ans Q-37 | Agreed |
 
 ---
 
@@ -662,7 +663,7 @@ Your rule: at zero food or water the crew mutiny and the captain is demoted to a
 | SUP-04 | With a fleet | If the captain owns other ships, the captain moves to one of them (the nearest — Proposed detail) and carries on. |  |  | Q-19 | Chat A19; Claude (nearest) | Agreed |
 | SUP-04b | Without a fleet | If no other ship is available, the captain is demoted: a Kestrel-class ship with mutiny_supplies food and water appears at the nearest cell of the same sector that is outside every hazard's pull range (the same cell when that cell is safe); coins and items kept; fear −mutiny_fear_delta. The mutineers keep the old ship where it is. |  | [supplies] mutiny_ship_class = Kestrel, mutiny_supplies = 10, mutiny_fear_delta = 10 | Q-19 | Chat A11, A19, A28; Claude (values, placement) | Agreed |
 | SUP-04c | The mutineers | They keep the taken ship and become a new AI captain. |  |  | Q-19 | Chat A18 | Agreed |
-| SUP-05 | Mastery | A Master of Starbour has infinite wealth, so supplies never run out. |  |  | Q-37 | Claude | Proposed |
+| SUP-05 | Mastery | A Master of Starbour has infinite wealth, so supplies never run out. | Food and water never fall for a Master; T4 shows ∞ (D-159). |  | Q-37 | Claude | Proposed |
 
 Element catalogue — read from controls_config.ini [elements]
 
@@ -702,7 +703,7 @@ Planet class — Planet = {name, food, water, element_compounds, shields, torped
 | PR-02 | Attack | Planets can be attacked and can attack (e.g. a hostile president). Destroyed planet → all its resources are looted. Peace → X% to the victor (13 Combat CB-03). |  |  | Q-21 | Ans Q-21 | Agreed |
 | PR-03 | Stock regeneration | Food and water regenerate; elements do not. |  |  | Q-21 | Claude | Proposed |
 | PR-04 | Reach | The ship must be in the planet's cell to trade. |  |  | Q-14 | Claude | Proposed |
-| PR-05 | Disposition | Planets respond to respect: below 20 they refuse trade and may attack; prices improve as respect rises; after mastery every planet trades. |  |  | Q-24 | Chat A13; Claude | Proposed |
+| PR-05 | Disposition | Planets respond to respect: they refuse trade below planet_refuse_respect (20, EF-04); stronger planets open fire below planet_attack_respect_max (10, EF-05); prices improve as respect rises; after mastery every planet trades. |  |  | Q-24 | Chat A13; Claude; Chat A33 (D-152) | Agreed |
 
 ---
 
@@ -901,7 +902,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-48 | [supplies] | mutiny_ship_class, mutiny_supplies, mutiny_fear_delta | mixed | Kestrel, 10, 10 |  | What the demoted captain gets, and the fear hit. | SUP-04 | Q-19 | Claude | Proposed |
 | CFG-49 | [endgame] | respect_min, fear_min | int | 90, 90 |  | Eligibility thresholds. | EG-02, EG-03 | Q-15 | Ans Q-15 | Agreed |
 | CFG-50 | [endgame] | wealth_min_silver | int | 2000 | silver-equiv. | Eligibility wealth threshold. | EG-01 | Q-15 | Claude | Proposed |
-| CFG-51 | [endgame] | required_special_categories | int | 3 |  | Special items needed (one per category). | EG-04 | Q-15 | Claude | Proposed |
+| CFG-51 | [endgame] | required_special_distinct | int | 3 |  | Distinct Mythical (special) elements the fleet must hold (3 of the 4, EL-09…12). Renamed from required_special_categories (D-157): the catalogue has one special category. | EG-04 | Q-15 | Claude (D-157) | Proposed |
 | CFG-52 | [endgame] | guard_ships | int | 4 |  | Guardians at the ultimate item. | EG-06, CM-13 | Q-15 | Claude | Proposed |
 | CFG-53 | [world] | seed | int | random |  | World-generation seed; shown on T4 so a run can be repeated. | SP-01 | Q-08 | Claude | Proposed |
 | CFG-54 | [world] | universe_size, galaxy_size, sector_size | M×N | 8×8, 16×16, 24×24 | cells | Grid dimensions. | VW-01…03 | Q-05 | Claude | Proposed |
@@ -934,6 +935,12 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-81 | [ai] | buy_supplies_below, docking_income_silver | int | 10, 10 | units, silver/turn | An AI captain heads for a planet and restocks when food or water falls below the first; the second is a placeholder income while docked at a planet that will trade with it, so the AI economy neither starves nor explodes — tune by the population gate. | OV-10, D-60, SUP-03, D-144 | Q-13, Q-19 | Claude (D-144) | Proposed |
 | CFG-82 | [battle] | shield_cap | float | 100 |  | Cap on shield_max from upgrades and loot (SH-03, UP-03). | SH-03, UP-03 | Q-14 | Claude (D-143) | Proposed |
 | CFG-83 | [ai] | respect_start | int | 40 | 0–100 | Starting respect of AI captains: generated (SP-06), mutineers (SUP-04c) and --spawn captains without --respect. The player uses [respect] start (CFG-10). A balance knob for the AI economy loop (D-144), not a design value. | LV-02, SP-06, SUP-04c, D-144, D-149 | Q-24 | Claude (D-149) | Proposed |
+| CFG-84 | [world] | void_item_pct | int | 25 | % | Share of deep-space (Void) sectors holding one element stack, generated lazily from the seed and the coordinates; special at the SP-03 ratio; no respawn. | WG-01, WG-02, SP-03, D-153, D-156 | Q-05 | Claude (D-156) | Proposed |
+| CFG-85 | [ai] | roam_void_pct | int | 15 | % | Share of AI roaming destinations (D-125) that are deep-space sectors; AI there follow the normal rules, so ambushes emerge. | OV-10, D-125, D-156 | Q-13 | Claude (D-156) | Proposed |
+| CFG-86 | [endgame] | ultimate_item_name | str | Lodestone of Starbour |  | Display name of the ultimate item (its id is 'lodestone'). | EG-05, OV-13 | Q-26 | Claude (EG-05) | Proposed |
+| CFG-87 | [endgame] | placement_distance_pct | int | 50 | % of diameter | The ultimate item is placed at least this share of the universe diameter (universe × galaxy size, flattened Chebyshev) from the player's active ship. | SP-08, EG-06, D-158 | Q-15 | Claude (D-158) | Proposed |
+| CFG-88 | [endgame] | master_torpedoes | int | 99 |  | Torpedoes a Master is refilled to every turn (torpedoes have no other cap). | EG-07, D-159 | Q-37 | Claude (D-159) | Proposed |
+| CFG-89 | [ui] | ceremony_seconds | int | 6 | s | Length of the T3 fireworks animation on mastery. | EG-08, OUT-15, D-159 | Q-37 | Claude (D-159) | Proposed |
 
 ---
 
@@ -1176,3 +1183,5 @@ Addendum — stated in chat on 2026-10-25, verbatim.
 - **A31** — [asked: 1 standing fire orders? 2 'fire <target>' = one torpedo + phasers? 3 show the combat numbers in-game?] 1. no, every turn the user should put in the fire commands  2. yes  3. yes
 - **A32** — [after a second Kestrel duel, played correctly and lost on torpedo rolls in three turns; offered torpedo_damage 25 → 15 or Kestrel shields 60 → 100] make the change yourself please
 - **A33** — [after the M4 build, 2026-10-31; asked: A = accept respect start 30 and lower the planet-fire threshold to 10 so refusal (20) precedes fire, or B = keep 10 and lower both thresholds] option A
+- **A34** — [after the M4 playtest, 2026-10-31; asked: A void = empty sector, B passable only, C deep space with drifting items and hiding pirates; and a structured 'help' layout proposed] 1. Option C; 2. make it structured and readable
+- **A35** — just to add - the logs only cover fights, it should cover all

@@ -678,12 +678,12 @@
       "id": "CFG-51",
       "section": "endgame",
       "keys": [
-        "required_special_categories"
+        "required_special_distinct"
       ],
       "type": "int",
       "default": "3",
       "unit": "",
-      "meaning": "Special items needed (one per category).",
+      "meaning": "Distinct Mythical (special) elements the fleet must hold (3 of the 4, EL-09…12). Renamed from required_special_categories (D-157): the catalogue has one special category.",
       "used_by": "EG-04",
       "status": "Proposed"
     },
@@ -1127,6 +1127,84 @@
       "unit": "0–100",
       "meaning": "Starting respect of AI captains: generated (SP-06), mutineers (SUP-04c) and --spawn captains without --respect. The player uses [respect] start (CFG-10). A balance knob for the AI economy loop (D-144), not a design value.",
       "used_by": "LV-02, SP-06, SUP-04c, D-144, D-149",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-84",
+      "section": "world",
+      "keys": [
+        "void_item_pct"
+      ],
+      "type": "int",
+      "default": "25",
+      "unit": "%",
+      "meaning": "Share of deep-space (Void) sectors holding one element stack, generated lazily from the seed and the coordinates; special at the SP-03 ratio; no respawn.",
+      "used_by": "WG-01, WG-02, SP-03, D-153, D-156",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-85",
+      "section": "ai",
+      "keys": [
+        "roam_void_pct"
+      ],
+      "type": "int",
+      "default": "15",
+      "unit": "%",
+      "meaning": "Share of AI roaming destinations (D-125) that are deep-space sectors; AI there follow the normal rules, so ambushes emerge.",
+      "used_by": "OV-10, D-125, D-156",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-86",
+      "section": "endgame",
+      "keys": [
+        "ultimate_item_name"
+      ],
+      "type": "str",
+      "default": "Lodestone of Starbour",
+      "unit": "",
+      "meaning": "Display name of the ultimate item (its id is 'lodestone').",
+      "used_by": "EG-05, OV-13",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-87",
+      "section": "endgame",
+      "keys": [
+        "placement_distance_pct"
+      ],
+      "type": "int",
+      "default": "50",
+      "unit": "% of diameter",
+      "meaning": "The ultimate item is placed at least this share of the universe diameter (universe × galaxy size, flattened Chebyshev) from the player's active ship.",
+      "used_by": "SP-08, EG-06, D-158",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-88",
+      "section": "endgame",
+      "keys": [
+        "master_torpedoes"
+      ],
+      "type": "int",
+      "default": "99",
+      "unit": "",
+      "meaning": "Torpedoes a Master is refilled to every turn (torpedoes have no other cap).",
+      "used_by": "EG-07, D-159",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-89",
+      "section": "ui",
+      "keys": [
+        "ceremony_seconds"
+      ],
+      "type": "int",
+      "default": "6",
+      "unit": "s",
+      "meaning": "Length of the T3 fireworks animation on mastery.",
+      "used_by": "EG-08, OUT-15, D-159",
       "status": "Proposed"
     }
   ]
