@@ -125,11 +125,11 @@
         "start"
       ],
       "type": "int",
-      "default": "10",
+      "default": "30",
       "unit": "0–100",
-      "meaning": "Starting respect.",
+      "meaning": "Starting respect. 30 since M4 (D-152; was 10).",
       "used_by": "LV-02",
-      "status": "Proposed"
+      "status": "Agreed"
     },
     {
       "id": "CFG-11",
@@ -408,11 +408,11 @@
         "planet_attack_respect_max"
       ],
       "type": "int",
-      "default": "20",
+      "default": "10",
       "unit": "",
-      "meaning": "Planets may attack below this respect.",
+      "meaning": "Stronger planets open fire below this respect (EF-05). Below the refusal threshold (CFG-43, 20) so refusal precedes fire. 10 since M4 (D-152; was 20).",
       "used_by": "EF-05",
-      "status": "Proposed"
+      "status": "Agreed"
     },
     {
       "id": "CFG-32",
@@ -575,7 +575,7 @@
       "type": "int",
       "default": "20, 20, 10",
       "unit": "%",
-      "meaning": "Trade effects of respect.",
+      "meaning": "Trade effects of respect. planet_refuse_respect 20 confirmed 2026-10-31 (D-152); the two bands stay Proposed.",
       "used_by": "EF-03, EF-04",
       "status": "Proposed"
     },
@@ -1114,6 +1114,19 @@
       "unit": "",
       "meaning": "Cap on shield_max from upgrades and loot (SH-03, UP-03).",
       "used_by": "SH-03, UP-03",
+      "status": "Proposed"
+    },
+    {
+      "id": "CFG-83",
+      "section": "ai",
+      "keys": [
+        "respect_start"
+      ],
+      "type": "int",
+      "default": "40",
+      "unit": "0–100",
+      "meaning": "Starting respect of AI captains: generated (SP-06), mutineers (SUP-04c) and --spawn captains without --respect. The player uses [respect] start (CFG-10). A balance knob for the AI economy loop (D-144), not a design value.",
+      "used_by": "LV-02, SP-06, SUP-04c, D-144, D-149",
       "status": "Proposed"
     }
   ]

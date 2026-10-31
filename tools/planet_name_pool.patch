@@ -1,0 +1,42 @@
+diff --git a/starbour/world/names.py b/starbour/world/names.py
+index ed659c7..93b6626 100644
+--- a/starbour/world/names.py
++++ b/starbour/world/names.py
+@@ -39,10 +39,19 @@ SHIP_NOUNS = (
+     "Halyard", "Bellwether", "Sparrow", "Tinder", "Wharf", "Ballast", "Marlin", "Fathom", "Gull", "Lodestar",
+ )
+ 
+-PLANET_STARTS = ("Or", "Vel", "Tam", "Kes", "Ar", "Bel", "Dun", "Eth", "Fal", "Gal", "Hal", "Isk", "Jor", "Kal", "Lum",
+-                 "Mor", "Nar", "Osk", "Pel", "Quor", "Ren", "Sol", "Tor", "Ul", "Var", "Wen", "Yar", "Zel")
+-PLANET_MIDDLES = ("a", "e", "i", "o", "u", "ae", "ia", "io", "ou", "y")
+-PLANET_ENDS = ("th", "ris", "dan", "mir", "non", "vek", "lis", "sa", "rum", "nd", "ph", "x", "ndra", "sk", "tha", "ven")
++# PL-01 (Agreed: original names): 64 x 12 x 56 three-part names plus 64 x 56 two-part ones = 46,592 combinations for the
++# 26,000-odd planets of the default universe, so the numeric suffix in unique() is a rare fallback (M4; was 4,480 -> every planet suffixed).
++# Lists avoid every syllable pair that spells a franchise planet or character (D-03).
++PLANET_STARTS = ("Or", "Vel", "Tam", "Kes", "Ar", "Bel", "Dun", "Eth", "Fal", "Gal", "Hal", "Isk", "Jor", "Kal", "Lum", "Mor",
++                 "Nar", "Osk", "Pel", "Quor", "Ren", "Sol", "Tor", "Ul", "Var", "Wen", "Yar", "Zel", "Ab", "Bran", "Dav", "Fen",
++                 "Gar", "Hol", "Il", "Jen", "Kor", "Lan", "Mar", "Nol", "Par", "Quen", "Ros", "Sar", "Tel", "Ur", "Vor", "Wil",
++                 "Yor", "Zar", "Bur", "Er", "Fir", "Gol", "Hun", "Ist", "Jul", "Ast", "Brim", "Cer", "Dral", "Esk", "Fol", "Grel")
++PLANET_MIDDLES = ("a", "e", "i", "o", "u", "ae", "ia", "io", "ou", "y", "ea", "ui")
++PLANET_ENDS = ("th", "ris", "dan", "mir", "non", "vek", "lis", "sa", "rum", "nd", "ph", "x", "ndra", "sk",
++               "tha", "ven", "ra", "mar", "nis", "bel", "cas", "dun", "gan", "hem", "kin", "lor", "mos", "nix",
++               "pol", "quin", "rok", "sil", "tan", "vor", "wen", "zar", "lia", "nor", "bar", "cel", "fel", "gor",
++               "kar", "lun", "mel", "nar", "por", "rin", "sol", "tir", "vin", "dek", "den", "lum", "sha", "ond")
++SHORT_PLANET_NAME_P = 0.15      # share of two-part names (start + end), e.g. Orth, Garth
+ 
+ 
+ def captain_name(rng: random.Random) -> str:
+@@ -58,8 +67,11 @@ def ship_name(rng: random.Random) -> str:
+ 
+ 
+ def planet_name(rng: random.Random) -> str:
+-    """Start + middle + end syllables, e.g. Oreth - PL-01."""
+-    return rng.choice(PLANET_STARTS) + rng.choice(PLANET_MIDDLES) + rng.choice(PLANET_ENDS)
++    """Start + end or start + middle + end syllables, e.g. Orth, Galiaven - PL-01 (original names)."""
++    start, end = rng.choice(PLANET_STARTS), rng.choice(PLANET_ENDS)
++    if rng.random() < SHORT_PLANET_NAME_P:
++        return start + end
++    return start + rng.choice(PLANET_MIDDLES) + end
+ 
+ 
+ def president_name(rng: random.Random) -> str:

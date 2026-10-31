@@ -2,7 +2,7 @@
 
 **Generated from `docs/master_of_starbour_blueprint.xlsx` by `tools/blueprint_to_design.py`. Do not edit by hand — edit the workbook and regenerate.**
 
-Workbook version: v2.5 · 2026-10-30 · your blueprint + chat facts (A1–A32) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M3 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…82, D-136…139). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
+Workbook version: v2.6 · 2026-10-31 · your blueprint + chat facts (A1–A33) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M4 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…83, D-136…139, D-152: respect start 30, planets fire below 10). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.
 
 How to read this file:
 
@@ -38,9 +38,9 @@ Contents:
 
 ## 0 Index
 
-**Master of Starbour — Design Blueprint (structured v2.5)**
+**Master of Starbour — Design Blueprint (structured v2.6)**
 
-*v2.5 · 2026-10-30 · your blueprint + chat facts (A1–A32) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M3 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…82, D-136…139). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
+*v2.6 · 2026-10-31 · your blueprint + chat facts (A1–A33) + your answers to Q-01…Q-37 (tab 16; Q-38 open) + M1–M4 playtest changes (CMD-08, UX-04, UX-09, OB-05, CFG-25 retuned, CFG-74…83, D-136…139, D-152: respect start 30, planets fire below 10). Yellow = yours to fill or a calculator input. Purple 'Proposed' = Claude's placeholder awaiting your yes.*
 
 ### Project
 
@@ -59,27 +59,27 @@ Live counts from each tab's Status column. Proposed = Claude's proposal awaiting
 
 | Tab | Group | What it holds | Agreed | Proposed | Draft | Needs detail | Not started | Rows | % Agreed | Open · no Q |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 5 T3 Output | Terminals | Message types, log behaviour | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 5b T4 Status | Terminals | Permanent status panels | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 9 Ships | Entities | Ship attributes, movement, warp curve, classes | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 11 Items & Planets | Entities | Items, element catalogue, planets | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 13 Combat | Rules | Combat model recommendation, outcomes, loot | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 15 Config Keys | Config | Config keys for controls_config.ini | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
-| 16 Open Questions | Questions | Open design questions, answers, resolution | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | — |
-| 17 Decisions | Decisions | Decision log | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | — |
-| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| 1 Overview | Concept | Game type, purpose, player goals, win/lose, turn phases | 16 | 4 | 4 | 0 | 0 | 24 | 0.6667 | 0 |
+| 2 Architecture | Concept | Terminals, bus, process model, message catalogue, diagram | 12 | 10 | 0 | 0 | 0 | 22 | 0.5455 | 0 |
+| 3 T1 Command | Terminals | Command catalogue, prompt behaviour, order queueing | 16 | 8 | 6 | 0 | 0 | 30 | 0.5333 | 0 |
+| 4 T2 Grid | Terminals | View levels, symbol legend, overlays, refresh | 4 | 21 | 0 | 0 | 0 | 25 | 0.16 | 0 |
+| 5 T3 Output | Terminals | Message types, log behaviour | 6 | 5 | 12 | 0 | 0 | 23 | 0.2609 | 0 |
+| 5b T4 Status | Terminals | Permanent status panels | 2 | 5 | 0 | 0 | 0 | 7 | 0.2857 | 0 |
+| 6 World Grids | World | Grid hierarchy, cell contents, generation rules | 7 | 5 | 0 | 0 | 0 | 12 | 0.5833 | 0 |
+| 7 Stellar | World | Stellar types, derived quantities, buckets, calculator | 5 | 7 | 0 | 0 | 0 | 12 | 0.4167 | 0 |
+| 8 Hazards | World | Gravity pull, shield drain, black holes, wormholes, calculator | 5 | 5 | 0 | 0 | 0 | 10 | 0.5 | 0 |
+| 9 Ships | Entities | Ship attributes, movement, warp curve, classes | 7 | 11 | 0 | 1 | 0 | 19 | 0.3684 | 1 |
+| 10 Captain | Entities | Captain attributes, fleet rules, endgame eligibility | 14 | 9 | 0 | 0 | 0 | 23 | 0.6087 | 0 |
+| 11 Items & Planets | Entities | Items, element catalogue, planets | 14 | 21 | 0 | 0 | 0 | 35 | 0.4 | 0 |
+| 12 Trade & Economy | Rules | Currencies, trade rules, upgrade map, sources and sinks | 17 | 3 | 0 | 0 | 0 | 20 | 0.85 | 0 |
+| 13 Combat | Rules | Combat model recommendation, outcomes, loot | 8 | 9 | 0 | 0 | 0 | 17 | 0.4706 | 0 |
+| 14 Fear & Respect | Rules | Fear / respect events, level mechanics, effects | 11 | 11 | 0 | 0 | 0 | 22 | 0.5 | 0 |
+| 15 Config Keys | Config | Config keys for controls_config.ini | 21 | 62 | 0 | 0 | 0 | 83 | 0.253 | 0 |
+| 16 Open Questions | Questions | Open design questions, answers, resolution | 37 | 0 | 0 | 1 | 0 | 38 | 0.9737 | — |
+| 17 Decisions | Decisions | Decision log | 64 | 0 | 0 | 0 | 0 | 64 | 1 | — |
+| 18 Build & Release | Delivery | Repo, environment, packaging, distribution, build-kit files | 25 | 8 | 0 | 0 | 0 | 33 | 0.7576 | 0 |
 | Source v1 | Source | Original blueprint, verbatim, plus chat addendum | — | — | — | — | — | — | — | — |
-| Total |  |  | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) | (recalc) |
+| Total |  |  | 291 | 204 | 22 | 2 | 0 | 519 | 0.5607 | 1 |
 
 ### Legend
 
@@ -467,10 +467,10 @@ Inputs are placeholders; tune in playtest.
 - **10000** — blue-white
 - **30000** — blue
 - **Example star** — radius · base_energy · volume · energy · bucket · temperature K · colour
-- **dying star** — 0.3 · 2 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **Sun-like** — 1 · 5 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **giant** — 3 · 8 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **your own** — 1.5 · 6 · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
+- **dying star** — 0.3 · 2 · 0.1131 · 0.2262 · low · 1862 · red
+- **Sun-like** — 1 · 5 · 4.189 · 20.94 · medium · 5776 · yellow
+- **giant** — 3 · 8 · 113.1 · 904.8 · high · 1.481e+04 · blue-white
+- **your own** — 1.5 · 6 · 14.14 · 84.82 · medium · 8194 · white
 
 ---
 
@@ -506,20 +506,20 @@ All inputs are placeholders — the 7-turn Sun-like star is only the blueprint's
 - **sun_mass** — 1 · a Sun-like star's mass
 - **pull_turns_scale** — 7 · [hazards] pull_turns_scale
 - **distance** — black hole pull · min engine to move · turns to pulled in · neutron pull · min engine to move · turns to pulled in
-- **0** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **1** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **2** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **3** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **4** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **5** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **6** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **7** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **8** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **9** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **10** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **11** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **12** — (recalc) · (recalc) · (recalc) · (recalc) · (recalc) · (recalc)
-- **Sun-like star, same cell:** — (recalc) · (recalc) · ← pull, turns until pulled in (should read 7 with the defaults)
+- **0** — 20 · impossible · 1 · 8 · 8.1 · 1
+- **1** — 7.071 · 7.1 · 1 · 2.828 · 2.9 · 3
+- **2** — 3.849 · 3.9 · 2 · 1.54 · 1.6 · 5
+- **3** — 2.5 · 2.6 · 3 · 1 · 1.1 · 7
+- **4** — 1.789 · 1.8 · 4 · 0.7155 · 0.8 · 10
+- **5** — 1.361 · 1.4 · 6 · 0.5443 · 0.6 · 13
+- **6** — 1.08 · 1.1 · 7 · 0.432 · 0.5 · 17
+- **7** — 0.8839 · 0.9 · 8 · 0.3536 · 0.4 · 20
+- **8** — 0.7407 · 0.8 · 10 · 0.2963 · 0.4 · 24
+- **9** — 0.6325 · 0.7 · 12 · 0.253 · 0.3 · 28
+- **10** — 0.5482 · 0.6 · 13 · 0.2193 · 0.3 · 32
+- **11** — 0.4811 · 0.5 · 15 · 0.1925 · 0.3 · 37
+- **12** — 0.4267 · 0.5 · 17 · 0.1707 · 0.2 · 42
+- **Sun-like star, same cell:** — 1 · 7 · ← pull, turns until pulled in (should read 7 with the defaults)
 
 ---
 
@@ -562,19 +562,19 @@ B and p are placeholders; tune in playtest.
 - **B** — 16 · [movement] warp_curve_base
 - **p** — 4 · [movement] warp_curve_exponent
 - **warp factor** — reach (sectors) · note
-- **1** — (recalc)
-- **2** — (recalc)
-- **3** — (recalc)
-- **4** — (recalc)
-- **5** — (recalc)
-- **6** — (recalc)
-- **7** — (recalc)
-- **8** — (recalc)
-- **9** — (recalc)
-- **9.5** — (recalc)
-- **9.9** — (recalc)
-- **10** — (recalc) · universe diameter ≈ 181 sectors at 8 × 16
-- **10** — (recalc)
+- **1** — 1
+- **2** — 2.009
+- **3** — 3.068
+- **4** — 4.294
+- **5** — 5.946
+- **6** — 8.594
+- **7** — 13.62
+- **8** — 24.91
+- **9** — 55.5
+- **9.5** — 90.88
+- **9.9** — 142
+- **10** — 160 · universe diameter ≈ 181 sectors at 8 × 16
+- **10** — anywhere
 
 ### Ship classes
 
@@ -818,7 +818,7 @@ Levels are ints 0–100. Base deltas are config keys, scaled by the strength rat
 | ID | Aspect | Current thinking | Example | Edge cases | Config key | Open Q | Origin | Status |
 |---|---|---|---|---|---|---|---|---|
 | LV-01 | Range | int 0–100 for both. |  |  |  | Q-15 | Ans Q-15 | Agreed |
-| LV-02 | Starting values | 10 and 10. |  |  | [fear] start = 10, [respect] start = 10 | Q-35 | Claude | Proposed |
+| LV-02 | Starting values | Fear 10, respect 30. |  | Respect 30 agreed 2026-10-31 (D-152, option A): at 10 with EF-04 refusal at 20 a new captain cannot buy food (the only respect without trade is FR-03 / FR-08). Fear 10 is still a placeholder. | [fear] start = 10, [respect] start = 30 | Q-35 | Claude; Chat A33 | Agreed |
 | LV-03 | Scaling | delta × clamp(strength ratio of the opponent vs you, 0.5, 2.0) — beating a much stronger fleet counts double. |  |  | [reputation] scale_min = 0.5, scale_max = 2.0 | Q-22 | BP r111; Claude | Proposed |
 | LV-04 | Visibility | Other captains' levels are visible when in the same sector (via scan). |  |  |  | Q-36 | Ans Q-36 | Agreed |
 | LV-05 | Tuning | All deltas are placeholders. No target turn count — tune by playtest until the game feels right. |  |  |  | Q-35 | Chat A15 | Agreed |
@@ -833,8 +833,8 @@ Split agreed (Chat A13): FEAR acts on ships — AI captains yield. RESPECT acts 
 | EF-01 | AI captains — attacking | Attack the player only if the player's fear < attack_fear_max, or they are ≥ attack_ratio_min stronger. | — |  | [ai] attack_fear_max = 50, attack_ratio_min = 1.3 | Q-24 | Claude | Proposed |
 | EF-02 | AI captains — yielding | Offer peace earlier as fear rises (shield threshold 30% at fear 0 → 60% at fear 100); at fear ≥ yield_fear_min a weaker captain surrenders the ship outright when its shields drop below 20%. | Accept the player's peace offers more readily as respect rises. | Surrender = the player gains the ship (FL-02). | [ai] peace_shield_pct (at fear 0) = 30, peace_shield_pct_at_fear100 = 60, yield_fear_min = 80, surrender_shield_pct = 20 | Q-24 | Claude; Chat A26 | Agreed |
 | EF-03 | AI captains — trade | — | Accept trades at slightly worse terms for themselves as respect rises (±10%). | Minor; delete if you want respect to be planets-only. | [economy] respect_price_band = 10 | Q-24 | Claude | Proposed |
-| EF-04 | Planets — trade | — | Refuse trade below planet_refuse_respect; prices improve up to planet_price_band % at respect 100. |  | [economy] planet_refuse_respect = 20, planet_price_band = 20 | Q-24 | Chat A13; Claude | Proposed |
-| EF-05 | Planets — attacking | — | May attack if respect < planet_attack_respect_max and they are stronger. |  | [ai] planet_attack_respect_max = 20 | Q-24 | Claude | Proposed |
+| EF-04 | Planets — trade | — | Refuse trade below planet_refuse_respect; prices improve up to planet_price_band % at respect 100. | Refusal threshold 20 confirmed 2026-10-31 (D-152); the price band stays Proposed. Refusal precedes fire: EF-05 fires only below 10. | [economy] planet_refuse_respect = 20, planet_price_band = 20 | Q-24 | Chat A13; Claude | Proposed |
+| EF-05 | Planets — attacking | — | May attack if respect < planet_attack_respect_max and they are stronger. | 10, not 20 (D-152): 'refused' (EF-04, below 20) and 'shot at' were one tier. From the start of 30 each started fight is −5 (FR-06) and each bullying win −8 more (FR-04/05); two bullying wins reach 4 and every stronger planet within phaser range opens fire. Build: a planet opens only within phaser range, then fights at full range (kit D-150). | [ai] planet_attack_respect_max = 10 | Q-24 | Claude; Chat A33 | Agreed |
 | EF-06 | After mastery | Both at 100: every ship yields; every planet trades. |  |  |  | Q-37 | Ans Q-37 | Agreed |
 
 ---
@@ -860,7 +860,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-07 | [respect] | start_fight_delta | int | 5 |  | Respect lost for starting any fight. | FR-06 | Q-23 | Claude | Proposed |
 | CFG-08 | [respect] | trade_accepted_delta | int | 3 |  | Respect gained per accepted trade. | FR-07 | Q-35 | Claude | Proposed |
 | CFG-09 | [respect] | special_item_delta | int | 6 |  | Respect gained per special item. | FR-08 | Q-35 | Claude | Proposed |
-| CFG-10 | [respect] | start | int | 10 | 0–100 | Starting respect. | LV-02 | Q-35 | Claude | Proposed |
+| CFG-10 | [respect] | start | int | 30 | 0–100 | Starting respect. 30 since M4 (D-152; was 10). | LV-02 | Q-35 | Claude; Chat A33 | Agreed |
 | CFG-11 | [reputation] | scale_min, scale_max | float | 0.5, 2.0 |  | Clamp on the strength-ratio multiplier. | LV-03 | Q-22 | Claude | Proposed |
 | CFG-12 | [stellar] | temp_scale | float | 2700 | K | temperature = temp_scale × energy^0.25. | DQ-03 | Q-10 | Claude | Proposed |
 | CFG-13 | [stellar] | energy_low_max | float | 5 |  | Energy below this = low bucket. | EB-01 | Q-10 | Claude | Proposed |
@@ -881,7 +881,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-28 | [battle] | peace_loot_max | int | 50 | % | Max share transferred on peace. | CB-03 | Q-12 | Claude | Proposed |
 | CFG-29 | [ai] | attack_ratio_min, attack_fear_max | float | 1.3, 50 |  | When AI captains attack. | CM-10, EF-01 | Q-24 | Claude | Proposed |
 | CFG-30 | [ai] | peace_shield_pct, escape_shield_pct | int | 30, 15 | % | When AI offers peace / tries to escape. | CM-10 | Q-24 | Claude | Proposed |
-| CFG-31 | [ai] | planet_attack_respect_max | int | 20 |  | Planets may attack below this respect. | EF-05 | Q-24 | Claude | Proposed |
+| CFG-31 | [ai] | planet_attack_respect_max | int | 10 |  | Stronger planets open fire below this respect (EF-05). Below the refusal threshold (CFG-43, 20) so refusal precedes fire. 10 since M4 (D-152; was 20). | EF-05 | Q-24 | Claude; Chat A33 | Agreed |
 | CFG-32 | [economy] | silver_per_gold | int | 20 |  | 1 gold = 20 silver. | TR-01 | Q-14 | Ans Q-14 | Agreed |
 | CFG-33 | [upgrades] | torpedoes | list | iridium:4, positronium:10 | ammo | Elements that add torpedoes, and how many. | UP-01 | Q-14 | Chat A17; Claude (values) | Agreed |
 | CFG-34 | [upgrades] | phasers | list | osmium:0.5, sunstone:1, adamantine:2 | power | Elements that raise phaser power (cap 10). | UP-02 | Q-14 | Chat A17; Claude (values) | Agreed |
@@ -893,7 +893,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-40 | [prices] | element_sell_pct | int | 60 | % | What a planet pays for an element, as % of its value. | PRC-04 | Q-14 | Chat A17; Claude (values) | Agreed |
 | CFG-41 | [prices] | ship_kestrel, ship_corsair | int | 40, 120 | gold | Ship purchase prices. | PRC-05 | Q-13 | Chat A17; Claude (values) | Agreed |
 | CFG-42 | [elements] | <name> = category, value, rarity | list | see tab 11 |  | One line per element in the catalogue; the game never hard-codes elements. | EL-01…12 | Q-14, Q-20 | Chat A17; Claude (values) | Agreed |
-| CFG-43 | [economy] | planet_refuse_respect, planet_price_band, respect_price_band | int | 20, 20, 10 | % | Trade effects of respect. | EF-03, EF-04 | Q-24 | Claude | Proposed |
+| CFG-43 | [economy] | planet_refuse_respect, planet_price_band, respect_price_band | int | 20, 20, 10 | % | Trade effects of respect. planet_refuse_respect 20 confirmed 2026-10-31 (D-152); the two bands stay Proposed. | EF-03, EF-04 | Q-24 | Claude | Proposed |
 | CFG-44 | [ai] | yield_fear_min | int | 80 |  | Fear at which weaker AI captains surrender their ship. | EF-02 | Q-24 | Claude | Proposed |
 | CFG-45 | [supplies] | food_start, water_start | int | 30, 30 |  | Starting supplies; −1 each per turn. | CP-07 | Q-19 | Claude | Proposed |
 | CFG-46 | [supplies] | warn_turns | int | 5 | turns | Warn when food or water is at or below this. | SUP-02 | Q-19 | Claude | Proposed |
@@ -933,6 +933,7 @@ Structure agreed; every numeric value is a placeholder you can change outside th
 | CFG-80 | [world] | item_units_min, item_units_max | int | 1, 3 | units | Units in an element stack lying in space (SP-03 items). | SP-03, IT-03, IT-05 | Q-07 | Claude (D-141) | Proposed |
 | CFG-81 | [ai] | buy_supplies_below, docking_income_silver | int | 10, 10 | units, silver/turn | An AI captain heads for a planet and restocks when food or water falls below the first; the second is a placeholder income while docked at a planet that will trade with it, so the AI economy neither starves nor explodes — tune by the population gate. | OV-10, D-60, SUP-03, D-144 | Q-13, Q-19 | Claude (D-144) | Proposed |
 | CFG-82 | [battle] | shield_cap | float | 100 |  | Cap on shield_max from upgrades and loot (SH-03, UP-03). | SH-03, UP-03 | Q-14 | Claude (D-143) | Proposed |
+| CFG-83 | [ai] | respect_start | int | 40 | 0–100 | Starting respect of AI captains: generated (SP-06), mutineers (SUP-04c) and --spawn captains without --respect. The player uses [respect] start (CFG-10). A balance knob for the AI economy loop (D-144), not a design value. | LV-02, SP-06, SUP-04c, D-144, D-149 | Q-24 | Claude (D-149) | Proposed |
 
 ---
 
@@ -1174,3 +1175,4 @@ Addendum — stated in chat on 2026-10-25, verbatim.
 - **A30** — youre right, i didnt enter the phaser command, i just did.. end end end. so i should have fired phasers for each turn.
 - **A31** — [asked: 1 standing fire orders? 2 'fire <target>' = one torpedo + phasers? 3 show the combat numbers in-game?] 1. no, every turn the user should put in the fire commands  2. yes  3. yes
 - **A32** — [after a second Kestrel duel, played correctly and lost on torpedo rolls in three turns; offered torpedo_damage 25 → 15 or Kestrel shields 60 → 100] make the change yourself please
+- **A33** — [after the M4 build, 2026-10-31; asked: A = accept respect start 30 and lower the planet-fire threshold to 10 so refusal (20) precedes fire, or B = keep 10 and lower both thresholds] option A
