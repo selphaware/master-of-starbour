@@ -1461,6 +1461,20 @@ def c25(ctx: Ctx) -> list[str]:
         return [str(e)]
 
 
+def volley_size(hits_needed: int, p: float, *, short_tolerance: float = 1e-9, cap: int = 5000) -> int:
+    """The smallest torpedo volley n with P(Binomial(n, p) < hits_needed) < short_tolerance.  The rolls are seeded (D-67),
+    but the plan must hold for any torpedo_damage / shield_max / engine the ini sets (CM-03, CFG-25, HZ-09; smoke/26)."""
+    if hits_needed < 1:
+        return 1
+    if not 0.0 < p <= 1.0:
+        raise ScenarioError(f"torpedo hit chance {p:.2f} at the target's engine lands nothing — the one-exchange kill cannot be built with this ini (CFG-25; gate logic)")
+    q = 1.0 - p
+    for n in range(hits_needed, cap + 1):
+        if sum(math.comb(n, i) * p ** i * q ** (n - i) for i in range(hits_needed)) < short_tolerance:
+            return n
+    raise ScenarioError(f"{hits_needed} torpedo hits at p = {p:.2f} need a volley above {cap} — the one-exchange kill cannot be built with this ini (CFG-25, HZ-09; gate logic)")
+
+
 def c26(ctx: Ctx) -> list[str]:
     """smoke/26 — destruction, loot and mutual annihilation (CB-01, HZ-09, D-105, D-123)."""
     require_pkg(ctx)
@@ -1469,22 +1483,32 @@ def c26(ctx: Ctx) -> list[str]:
         a = arena(ctx)
         cls = k["classes"][k["starting_class"]]
         cell, _ = line_cell(a, 0)
-        # (a) a Corsair at distance 0; the player's Kestrel gets the shields to outlast it (temp ini) — loot rules read every number from the probe
-        ini = {("ships", k["starting_class"]): class_line(dict(cls, torpedoes=max(cls["torpedoes"], 12), shield_max=cls["shield_max"] + 300))}
+        # (a) a Corsair at distance 0.  HZ-09 / D-120: within an exchange every torpedo lands first, then the phasers, and a
+        # hit on 0 shields destroys — so ONE exchange must carry the Corsair from shield_max through 0 to the destroying
+        # hit: ⌈shield_max / torpedo_damage⌉ torpedo hits leave it at 0 and the phaser volley (always hits, CM-04)
+        # finishes it.  Spread over turns the kill never comes: below escape_shield_pct the Corsair leaves the turn
+        # after (EF-02, D-128; engine 6 clears torpedo range 5) and no hit lands — the plan tuned to torpedo_damage 25
+        # did exactly that at 15.  The volley size (temp class ammo) and the Kestrel's shields (to outlast the return
+        # fire: one torpedo + phasers a turn, D-137) come from the ini it runs with; a quiet turn 1 gives D-105 a
+        # previous turn to count captains against.  Loot rules read every number from the probe.
+        cor = k["classes"]["corsair"]
+        p = CB.torpedo_hit_p(k["torpedo_hit_base"], k["torpedo_evade"], cor["engine"])
+        hits_to_zero = int(math.ceil(cor["shield_max"] / k["torpedo_damage"]))
+        volley = volley_size(hits_to_zero, p)
+        turns = 4
+        incoming = turns * (CB.phaser_damage(cor["phasers"], k["phaser_per_unit"], 0) + k["torpedo_damage"])
+        ini = {("ships", k["starting_class"]): class_line(dict(cls, torpedoes=max(cls["torpedoes"], volley), shield_max=max(cls["shield_max"], incoming + 1)))}
         sp = [spawn_str(a, "corsair", cell)]
         probe_rep, probe_snap = probe_spawn(ctx, "loot", a, sp, ini=ini)
         victim = victim_facts(probe_rep, probe_snap)
         pf = player_facts(probe_snap)
-        turns = 8
-        per_turn = max(1, int(pf["torpedoes"]) // 3)
-        script = []
-        left = int(pf["torpedoes"])
-        for _ in range(turns):
-            n = min(per_turn, left)
-            left -= n
-            script.append((f"fire torpedo {victim['ship']} {n}; " if n else "") + f"fire phaser {victim['ship']}")
-        what = f"smoke/26 destroy a Corsair at distance 0 (torpedoes then phasers each turn)"
-        scn = scenario(what, "CB-01, HZ-09, D-105, D-123, C10", turns=turns, script=script, spawn=sp, ini=ini, teleport=a.teleport)
+        if (victim["shield_max"], victim["engine"]) != (cor["shield_max"], cor["engine"]):
+            raise ScenarioError(f"the spawned Corsair has shield_max {victim['shield_max']:g} / engine {victim['engine']:g} but the [ships] corsair line says "
+                                f"{cor['shield_max']:g} / {cor['engine']:g} — the volley was sized from the class line (C10, CLS-02; gate logic)")
+        n = min(volley, int(pf["torpedoes"]))
+        script = ["", f"fire torpedo {victim['ship']} {n}; fire phaser {victim['ship']}"]
+        what = f"smoke/26 destroy a Corsair at distance 0 (one volley of {n} torpedoes at p {p:.2f} for {hits_to_zero} hits to 0 shields, then the phasers)"
+        scn = scenario(what, "CB-01, HZ-09, D-105, D-120, D-123, C10", turns=turns, script=script, spawn=sp, ini=ini, teleport=a.teleport)
         rep, _, snap = run_scenario_full(ctx, "loot", scn, seed=a.world.seed)
         caps = {"phasers": 10.0, "engine": k["impulse_max"], "warp": k["warp_max"]}   # phaser cap 10: [upgrades] comment, no CFG key ([ASSUMED], D-128)
         problems = CB.check_destruction(rep, snap, victim=victim, player_before=pf, caps=caps, torpedo_damage=k["torpedo_damage"], what=what)
