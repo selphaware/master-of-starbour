@@ -11,7 +11,7 @@ from rich.console import RenderableType
 
 from starbour.config import GameConfig
 from starbour.terminals._base import ViewTerminal
-from starbour.terminals.render_status import cargo_stacks, docked_planet_id, in_battle, render
+from starbour.terminals.render_status import cargo_stacks, docked_planet_id, guardians_alive, in_battle, master_flag, render
 
 
 def _render(snapshot: dict, view: dict | None, cfg: GameConfig, width: int, height: int | None = None) -> RenderableType:
@@ -23,8 +23,10 @@ class StatusTerminal(ViewTerminal):
         super().__init__("status", cfg, pub_port, _render, "T4 Status")
 
     def heartbeat_fields(self) -> dict:
+        """C5: in_battle (M3), docked and items (M4), master and lodestone_guardians_alive (M5, C12 / live/11)."""
         snap = self.snapshot or {}
-        return {"in_battle": in_battle(snap), "docked": docked_planet_id(snap), "items": cargo_stacks(snap)}
+        return {"in_battle": in_battle(snap), "docked": docked_planet_id(snap), "items": cargo_stacks(snap),
+                "master": master_flag(snap), "lodestone_guardians_alive": guardians_alive(snap)}
 
 
 def main(cfg: GameConfig, pub_port: int) -> int:

@@ -48,6 +48,7 @@ class Planet:
     elements_gen: dict[str, int] = field(default_factory=dict)
     destroyed: bool = False
     target: str | None = None       # the ship it last fired at (GRD-08)
+    last_docked: int | None = None  # [ASSUMED] D-165: the turn a captain last docked here - the planet is listed that turn (C11 additive)
 
     # ---- the combatant protocol shared with Ship (CM-08, CM-11)
     @property
@@ -105,8 +106,11 @@ class Planet:
         self.food_base, self.water_base, self.stock_turn = int(food), int(water), int(turn_no)
 
     def untouched(self, cfg, turn_no: int) -> bool:
-        """True when every dynamic field still follows the seed (the snapshot may omit the record)."""
+        """True when every dynamic field still follows the seed (the snapshot may omit the record); a planet docked at this turn is
+        listed this turn whatever its numbers ([ASSUMED] D-165), so the snapshot shows where the AI trades."""
         if self.destroyed or self.shield_current < self.shield_max or self.torpedoes != self.torpedoes_gen:
+            return False
+        if self.last_docked is not None and int(self.last_docked) == int(turn_no):
             return False
         if self.elements != self.elements_gen:
             return False
@@ -131,7 +135,7 @@ class Planet:
             "stock": {"food": self.stock("food", turn_no, cfg), "water": self.stock("water", turn_no, cfg),
                       "elements": {k: int(v) for k, v in sorted(self.elements.items()) if int(v) > 0}},
             "disposition_to_player": int(disposition), "trades_with_player": bool(trades) and not self.destroyed,
-            "in_battle": in_battle, "destroyed": bool(self.destroyed), "target": self.target,
+            "in_battle": in_battle, "destroyed": bool(self.destroyed), "target": self.target, "last_docked": self.last_docked,
         }
 
     def apply_record(self, d: dict, turn_no: int) -> None:
@@ -147,3 +151,5 @@ class Planet:
             self.elements = {str(k): int(v) for k, v in els.items() if int(v) > 0}
         self.destroyed = bool(d.get("destroyed", False))
         self.target = d.get("target")
+        ld = d.get("last_docked")
+        self.last_docked = int(ld) if ld is not None else None

@@ -289,6 +289,15 @@ class Engine:
                    "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver}
         return M.GameEnd(self.state.turn_no, str(over.get("cause") or "ship destroyed"), summary).to_dict()
 
+    def mastery_payload(self, mastery: dict) -> dict:
+        """MSG-09 / C12: {turn_no, captain, item} plus the GameEnd cause and summary T1 prints."""
+        cap = self.state.player
+        summary = {"turns": self.state.turn_no, "sectors_visited": self.state.sectors_visited(), "mutinies": self.state.player_mutinies,
+                   "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver}
+        d = M.GameEnd(self.state.turn_no, f"{cap.name} holds the {mastery.get('item')} - MASTER OF STARBOUR", summary).to_dict()
+        d.update({"captain": str(mastery.get("captain") or cap.id), "item": str(mastery.get("item") or self.cfg.ultimate_item_name)})
+        return d
+
     # ------------------------------------------------------------------ the turn
     def resolve_and_publish(self) -> dict:
         """TP-01...08: resolve, publish turn.resolved (MSG-03), autosave (OV-12) or game.over (MSG-09), record (C2)."""
@@ -315,6 +324,13 @@ class Engine:
         else:
             self.autosave(snapshot)
             self.event_log("system", "muted", f"autosaved turn {self.state.turn_no}")
+        mastery = self.state.last_stats.get("mastery")
+        if mastery:
+            # MSG-09 / OUT-15 / D-159: game.mastery once, the turn of the pickup - never on load (the save carries master = true)
+            self._publish(M.GAME_MASTERY, self.mastery_payload(mastery))
+            self.event_log("game", "highlight", f"MASTER OF STARBOUR at turn {self.state.turn_no}: {mastery.get('captain_name', '')} holds the "
+                                                f"{mastery.get('item')} (EG-07, OUT-15)")
+            log.info("mastery at turn %d: %s", self.state.turn_no, mastery)
         self.turns_done += 1
         stats = dict(self.state.last_stats)
         stats.update({"snapshot_hash": snap_hash, "snapshot_bytes": snap_bytes, "resolve_ms": resolve_ms})
@@ -324,9 +340,9 @@ class Engine:
             self.gamelog.append_turn(self.state, events, stats)
         if self.recorder is not None:
             self.recorder.record_turn(self.state, events, stats)
-        if self.state.game_over or self.state.mastery_turn is not None:
+        if self.state.game_over:
             if not self.bus:
-                self.request_stop(0)      # D-106: the in-process sim stops the turn the game ends
+                self.request_stop(0)      # D-106: the in-process sim stops the turn the game ends (mastery is not an end: play continues, D-159)
         elif self.max_turns is not None and self.turns_done >= self.max_turns:
             self.request_stop(0)
         return stats

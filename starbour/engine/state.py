@@ -622,6 +622,12 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
         lodestone = {"sector": str(lodestone["sector"]), "cell": (int(lodestone["cell"][0]), int(lodestone["cell"][1])),
                      "distance": int(lodestone.get("distance") or 0), "placed_turn": int(lodestone.get("placed_turn") or 0),
                      "guardians": [str(g) for g in lodestone.get("guardians") or []], "picked_up_turn": lodestone.get("picked_up_turn")}
+        if lodestone["picked_up_turn"] is None:
+            # C6 / C12: the item lies in a sector the player may never have visited, so the sector list cannot carry it - the row does
+            lg, ls = parse_sector_key(lodestone["sector"])
+            placed = world.sector(lg, ls)
+            if placed is not None and not any(i.id == LODESTONE_ID for i in placed.items):
+                placed.items.append(lodestone_item(lodestone["cell"]))
     return GameState(
         cfg, seed, world, captains, ships, str(snap["player_id"]),
         turn_no=turn_no, visited=visited, view=dict(snap.get("view") or {"level": "follow"}),

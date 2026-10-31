@@ -158,3 +158,34 @@ def supplies_style(value: int, warn_turns: int) -> str:
     if value <= warn_turns:
         return STYLES["warn"]
     return STYLES["good"]
+
+
+# OUT-15 / EG-08 / D-159: the 5-row block font for the mastery title (every letter of MASTER OF STARBOUR), no new dependency.
+# Written with the full block so the source stays readable; ``title_rows`` swaps it for '#' under the ascii glyph set.
+BLOCK = "█"
+TITLE_FONT: dict[str, tuple[str, str, str, str, str]] = {
+    "M": ("█   █", "██ ██", "█ █ █", "█   █", "█   █"),
+    "A": (" ███ ", "█   █", "█████", "█   █", "█   █"),
+    "S": (" ████", "█    ", " ███ ", "    █", "████ "),
+    "T": ("█████", "  █  ", "  █  ", "  █  ", "  █  "),
+    "E": ("█████", "█    ", "████ ", "█    ", "█████"),
+    "R": ("████ ", "█   █", "████ ", "█  █ ", "█   █"),
+    "O": (" ███ ", "█   █", "█   █", "█   █", " ███ "),
+    "F": ("█████", "█    ", "████ ", "█    ", "█    "),
+    "B": ("████ ", "█   █", "████ ", "█   █", "████ "),
+    "U": ("█   █", "█   █", "█   █", "█   █", " ███ "),
+    " ": ("   ", "   ", "   ", "   ", "   "),
+}
+TITLE_WORDS = "MASTER OF STARBOUR"
+FIREWORK_COLOURS = ("bright_yellow", "bright_red", "bright_magenta", "bright_cyan", "bright_green", "bright_white", "orange1")
+FIREWORK_GLYPHS = {"unicode": "*+o·✦", "ascii": "*+o.x"}
+
+
+def title_rows(text: str = TITLE_WORDS, block: str = BLOCK) -> list[str]:
+    """The block-letter rows of ``text`` (5 rows, one space between letters); unknown characters render as a space."""
+    rows = ["", "", "", "", ""]
+    for ch in text.upper():
+        glyph = TITLE_FONT.get(ch, TITLE_FONT[" "])
+        for i in range(5):
+            rows[i] += glyph[i].replace(BLOCK, block) + " "
+    return [r.rstrip() for r in rows]

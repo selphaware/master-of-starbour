@@ -34,6 +34,7 @@ COINS = (GOLD, SILVER)
 EPS = 1e-9
 FR_07, FR_08 = "FR-07", "FR-08"
 COMPONENT_STAT = {"torpedoes": "torpedoes", "phasers": "phasers", "shields": "shield_max", "engine": "engine", "warp": "warp"}
+INFINITE_WEALTH = 10 ** 12      # EG-07 / SUP-05 / D-159: what a Master's coins count as in every price check (nothing is ever deducted)
 
 
 # --------------------------------------------------------------------------- formulas (tabs 11, 12, 14; D-142)
@@ -119,12 +120,18 @@ def affordable(unit: float, want: int, wealth: int) -> int:
 
 
 def wealth(cap: Captain, cfg: GameConfig) -> int:
+    """TR-01 silver-equivalent; a Master's infinite wealth passes every check (EG-07, D-159)."""
+    if cap.infinite_wealth:
+        return INFINITE_WEALTH
     return int(cap.gold) * int(cfg.silver_per_gold) + int(cap.silver)
 
 
 def pay(cap: Captain, cost: int, cfg: GameConfig) -> bool:
-    """TR-01: pay ``cost`` silver; gold converts at silver_per_gold only when silver runs short.  False when the captain cannot."""
+    """TR-01: pay ``cost`` silver; gold converts at silver_per_gold only when silver runs short.  False when the captain cannot.
+    A Master pays nothing (EG-07, SUP-05)."""
     cost = int(cost)
+    if cap.infinite_wealth:
+        return True
     if wealth(cap, cfg) < cost:
         return False
     if cap.silver < cost:
@@ -163,9 +170,9 @@ def captain_holds(cap: Captain, ship: Ship | None, item: str) -> int:
     if item == TORPEDO:
         return int(ship.torpedoes) if ship is not None else 0
     if item == GOLD:
-        return int(cap.gold)
+        return INFINITE_WEALTH if cap.infinite_wealth else int(cap.gold)
     if item == SILVER:
-        return int(cap.silver)
+        return INFINITE_WEALTH if cap.infinite_wealth else int(cap.silver)
     return int(cap.items.get(item, 0))
 
 
@@ -188,9 +195,11 @@ def captain_give(cap: Captain, ship: Ship | None, bundle: dict[str, int]) -> Non
             if ship is not None:
                 ship.torpedoes -= n
         elif item == GOLD:
-            cap.gold -= n
+            if not cap.infinite_wealth:
+                cap.gold -= n
         elif item == SILVER:
-            cap.silver -= n
+            if not cap.infinite_wealth:
+                cap.silver -= n
         else:
             cap.take_item(item, n)
 
@@ -309,12 +318,13 @@ def resolve_buy(cap: Captain, ship: Ship, planet: Planet | None, item: str, n: i
         spec = cfg.ships.get(cls)
         if price is None or spec is None:
             return _refused(cap, with_, kind, {}, {"ship": cls}, f"{planet.name} sells no ship of class {cls!r} (PRC-05, [prices] ship_<class>)")
-        if cap.gold < int(price):
+        if not cap.infinite_wealth and cap.gold < int(price):
             return _refused(cap, with_, kind, {GOLD: int(price)}, {"ship": cls}, f"not enough gold: {price} needed, {cap.gold} held (PRC-05)")
-        cap.gold -= int(price)
+        if not cap.infinite_wealth:
+            cap.gold -= int(price)
         new = Ship.of_class(str(new_ship_id), str(ship_name), spec, cap.id, ship.position)
         cap.ships.append(new.id)
-        row = trade_row(cap.id, with_, kind, {GOLD: int(price)}, {"ship": cls, "id": new.id}, accepted=True)
+        row = trade_row(cap.id, with_, kind, {} if cap.infinite_wealth else {GOLD: int(price)}, {"ship": cls, "id": new.id}, accepted=True)
         return TradeResult(True, row, f"Bought a {spec.name.capitalize()}, the {new.name} ({new.id}), from {planet.name} for {price} gold; it joins your fleet here (OUT-07, PRC-05, FL-02)",
                            [fr07(cap, cfg)], ("OUT-07", "PRC-05", "FL-02", "FR-07"), new_ship=new)
     unit = planet_unit_price(cfg, item, cap.respect, selling=False)
@@ -334,8 +344,10 @@ def resolve_buy(cap: Captain, ship: Ship, planet: Planet | None, item: str, n: i
     pay(cap, cost, cfg)
     captain_receive(cap, ship, {item: n})
     planet_give(planet, {item: n}, turn_no, cfg)
-    row = trade_row(cap.id, with_, kind, {SILVER: cost}, {item: n}, accepted=True, factor=factor)
-    return TradeResult(True, row, f"Bought {n} {item} from {planet.name} for {cost} silver (factor {factor:.2f}, OUT-07)", [fr07(cap, cfg)],
+    gave = {} if cap.infinite_wealth else {SILVER: cost}     # EG-07: a Master's purchase deducts nothing
+    row = trade_row(cap.id, with_, kind, gave, {item: n}, accepted=True, factor=factor)
+    paid = f"for nothing - a Master's wealth has no end (EG-07, SUP-05; list {cost} silver" if cap.infinite_wealth else f"for {cost} silver (factor {factor:.2f}"
+    return TradeResult(True, row, f"Bought {n} {item} from {planet.name} {paid}, OUT-07)", [fr07(cap, cfg)],
                        ("OUT-07", "CMD-20", "TR-04", "FR-07"))
 
 
@@ -466,6 +478,7 @@ def ai_dock(cap: Captain, ship: Ship, planet: Planet, cfg: GameConfig, turn_no: 
     Counts land in ``stats['ai_economy']``; the rows in ``stats['trades']``; returns the FR-07 rows earned."""
     econ = stats["ai_economy"]
     econ["docked"] = econ.get("docked", 0) + 1
+    planet.last_docked = int(turn_no)      # [ASSUMED] D-165: the planet is listed in this turn's snapshot (C11 additive)
     if int(cfg.docking_income_silver) > 0:
         cap.silver += int(cfg.docking_income_silver)
     rep: list[dict] = []

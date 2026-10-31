@@ -771,6 +771,8 @@ def _outcomes(t: Turn) -> None:
                 "shield_current": victim.shield_current, "shield_max": victim.shield_max, "hazard": None, "name": victim.name}
         bt = next((x for x in t.touched.values() if x.involves(victim.captain_id) and killer is not None and x.involves(killer.captain_id)), None)
         cap, was_active = st.remove_ship(victim.id)
+        if cap is not None and cap.guardian:
+            t.stats["guardians_destroyed"] = t.stats.get("guardians_destroyed", 0) + 1     # C12 (EG-06)
         if cap is not None and cap.is_player and was_active:
             st.game_over_turn = t.turn_no
             t.stats["game_over"] = {"cause": f"destroyed in combat by {kname} in {where}", "kind": "combat", "by": killer_id, "cell": [cell[0], cell[1]]}

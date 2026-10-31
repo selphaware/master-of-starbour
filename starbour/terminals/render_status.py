@@ -44,12 +44,55 @@ def _player(snapshot: dict) -> tuple[dict, dict | None]:
     return cap, ship
 
 
+def infinity(cfg: GameConfig) -> str:
+    """C12: a Master's coins and supplies render as ∞ (ascii glyph set: inf)."""
+    return "∞" if cfg.glyph_set == "unicode" else "inf"
+
+
+def tick(cfg: GameConfig) -> str:
+    return "✓" if cfg.glyph_set == "unicode" else "ok"
+
+
+def master_flag(snapshot: dict) -> bool:
+    """C5 (M5): whether the player is the Master of Starbour - carried by T4's heartbeat."""
+    cap, _ = _player(snapshot)
+    return bool(cap.get("master"))
+
+
+def guardians_alive(snapshot: dict) -> int | None:
+    """C5 (M5): lodestone.guardians_alive once the item is placed, else None."""
+    ld = snapshot.get("lodestone")
+    return int(ld.get("guardians_alive", 0)) if isinstance(ld, dict) else None
+
+
+def item_label(cfg: GameConfig) -> str:
+    words = str(cfg.ultimate_item_name).split()
+    return words[0] if words else "Lodestone"
+
+
+def mastery_line(snapshot: dict, cap: dict, cfg: GameConfig) -> tuple[str, str, str]:
+    """PNL-08 / D-158 / C12: (label, text, style) - before placement 'Mastery: wealth ✓ · fear 72/90 · respect ✓ · specials 1/3' (the unmet
+    thresholds as value/minimum); after it 'Lodestone: 5,1/9,12 · guardians 4 alive'; once held, the title."""
+    from starbour.engine.endgame import eligibility    # a pure rule; no sockets
+    ld = snapshot.get("lodestone")
+    if cap.get("master"):
+        return item_label(cfg), f"held since turn {snapshot.get('mastery_turn', '?')} - MASTER OF STARBOUR (EG-07)", P.STYLES["title"]
+    if isinstance(ld, dict):
+        alive = ld.get("guardians_alive", len(ld.get("guardians") or []))
+        return item_label(cfg), f"{ld.get('sector')} · guardians {alive} alive", P.STYLES["accent"]
+    rows = eligibility(cap, cfg)
+    ok = tick(cfg)
+    parts = [f"{key} {ok}" if rows[key]["ok"] else f"{key} {rows[key]['value']}/{rows[key]['min']}" for key in ("wealth", "fear", "respect", "specials")]
+    return "Mastery", " · ".join(parts), P.STYLES["label"]
+
+
 def captain_panel(snapshot: dict, cap: dict, cfg: GameConfig, width: int) -> Panel:
-    """PNL-01."""
+    """PNL-01, PNL-08."""
     t = _grid()
     _kv(t, "Captain", cap.get("name", "?"), P.STYLES["title"])
-    _kv(t, "Gold", f"{cap.get('gold', 0)}", "bold yellow")
-    _kv(t, "Silver", f"{cap.get('silver', 0)}", "bright_white")
+    rich = bool(cap.get("infinite_wealth"))
+    _kv(t, "Gold", infinity(cfg) if rich else f"{cap.get('gold', 0)}", "bold yellow")
+    _kv(t, "Silver", infinity(cfg) if rich else f"{cap.get('silver', 0)}", "bright_white")
     fear, respect = int(cap.get("fear", 0)), int(cap.get("respect", 0))
     fb = P.level_bar(cfg, fear, 100, 20, "red")
     fb.append(f" {fear}/100", style=P.STYLES["value"])
@@ -57,9 +100,8 @@ def captain_panel(snapshot: dict, cap: dict, cfg: GameConfig, width: int) -> Pan
     rb = P.level_bar(cfg, respect, 100, 20, "green")
     rb.append(f" {respect}/100", style=P.STYLES["value"])
     _kv(t, "Respect", rb)
-    eligible = fear >= cfg.fear_min and respect >= cfg.respect_min
-    _kv(t, "Ultimate item", "eligible" if eligible else f"not yet (needs fear {cfg.fear_min}, respect {cfg.respect_min}, wealth {cfg.wealth_min_silver} silver)",
-        P.STYLES["good"] if eligible else P.STYLES["label"])
+    label, text, style = mastery_line(snapshot, cap, cfg)
+    _kv(t, label, text, style)
     if cap.get("master"):
         _kv(t, "Title", "Master of Starbour", P.STYLES["title"])
     return Panel(t, title="Captain", title_align="left", border_style=P.STYLES["accent"], width=min(width, PANEL_WIDTH))
@@ -93,6 +135,12 @@ def supplies_panel(cap: dict, cfg: GameConfig, width: int) -> Panel:
     """PNL-03 / SUP-02: food and water as turns remaining, colour-coded; countdown at 0."""
     t = _grid()
     food, water = int(cap.get("food", 0)), int(cap.get("water", 0))
+    if cap.get("master"):
+        # SUP-05 / C12: a Master's food and water never fall - shown as ∞
+        _kv(t, "Food", f"{infinity(cfg)} ({food} held, never falls)", P.STYLES["good"])
+        _kv(t, "Water", f"{infinity(cfg)} ({water} held, never falls)", P.STYLES["good"])
+        _kv(t, "Status", "a Master's supplies have no end (SUP-05)", P.STYLES["good"])
+        return Panel(t, title="Supplies", title_align="left", border_style=P.STYLES["accent"], width=min(width, PANEL_WIDTH))
     _kv(t, "Food", f"{food} (turns)", P.supplies_style(food, cfg.warn_turns))
     _kv(t, "Water", f"{water} (turns)", P.supplies_style(water, cfg.warn_turns))
     countdown = cap.get("mutiny_countdown")
@@ -368,20 +416,24 @@ def game_over_banner(snapshot: dict, width: int) -> Panel:
     return Panel(t, border_style=P.STYLES["game_over"], width=min(width, PANEL_WIDTH))
 
 
-def header(snapshot: dict, width: int) -> Text:
+def header(snapshot: dict, width: int, cfg: GameConfig | None = None) -> Text:
+    """The header; after mastery it carries ★ MASTER OF STARBOUR ★ permanently (EG-08, C12)."""
     t = Text(no_wrap=True, overflow="crop")
     t.append("Master of Starbour", style=P.STYLES["title"])
     t.append(f"  v{snapshot.get('version', '?')}", style=P.STYLES["label"])
     t.append(f"  seed {snapshot.get('seed', '?')}", style=P.STYLES["label"])
     t.append("  Turn ", style=P.STYLES["label"])
     t.append(f"{snapshot.get('turn_no', 0)}", style=P.STYLES["title"])
+    if master_flag(snapshot):
+        star = "★" if cfg is None or cfg.glyph_set == "unicode" else "*"
+        t.append(f"  {star} MASTER OF STARBOUR {star}", style=P.STYLES["highlight"] if "highlight" in P.STYLES else P.STYLES["title"])
     return t
 
 
 def render(snapshot: dict, view: dict | None, cfg: GameConfig, width: int = 120) -> RenderableType:
     """C4: the whole status column."""
     cap, ship = _player(snapshot)
-    parts: list[RenderableType] = [header(snapshot, width)]
+    parts: list[RenderableType] = [header(snapshot, width, cfg)]
     if snapshot.get("game_over"):
         parts.append(game_over_banner(snapshot, width))
     parts += [captain_panel(snapshot, cap, cfg, width), ship_panel(snapshot, cap, ship, cfg, width), supplies_panel(cap, cfg, width)]

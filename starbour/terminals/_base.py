@@ -105,6 +105,13 @@ class ViewTerminal:
     def on_other(self, topic: str, payload: dict) -> None:   # noqa: ARG002 - T3 overrides
         return
 
+    def on_idle(self) -> None:
+        """Called once per loop iteration, message or not (T3 animates its ceremony here while still consuming turn.resolved, OUT-15)."""
+        return
+
+    def recv_ms(self) -> int:
+        return RECV_MS
+
     def dispatch(self, topic: str, payload: dict) -> bool:
         """Returns False when the terminal should exit."""
         if topic == M.TURN_RESOLVED:
@@ -133,8 +140,9 @@ class ViewTerminal:
         first = True
         try:
             while True:
-                got = sub.recv(RECV_MS)
+                got = sub.recv(self.recv_ms())
                 if got is None:
+                    self.on_idle()
                     continue
                 topic, payload, _raw = got
                 if first:
@@ -143,6 +151,7 @@ class ViewTerminal:
                 try:
                     if not self.dispatch(topic, payload):
                         return 0
+                    self.on_idle()
                 except Exception:   # noqa: BLE001 - a bad message must not kill the window
                     log.exception("%s: error handling %s", self.role, topic)
         except KeyboardInterrupt:

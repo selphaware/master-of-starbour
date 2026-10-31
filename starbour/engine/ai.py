@@ -222,6 +222,11 @@ def battle_orders(captain: Captain, ship: Ship, battle: Battle, here: list[Ship]
     enemy_fear = int(getattr(enemy, "fear", 0))
     where = f"in battle {battle.id}, {'weaker' if weaker else 'not weaker'} (strength {own:.0f} v {theirs:.0f}, shields {pct:.0f}%)"
     out: list[Order] = []
+    if isinstance(enemy, Captain) and enemy.master and not captain.guardian:
+        # EF-06 / D-159: every ship yields to the Master - an AI the Master fires on surrenders that turn (FL-02, shield condition waived)
+        note(trace, captain, ship, f"{where}: {enemy_id} is the Master of Starbour -> every ship yields: surrenders to {enemy_id}", "EF-06", "FL-02", "D-159",
+             kind=KIND_BATTLE)
+        return [Order(C.SURRENDER, (enemy_id,), ship.id, QUEUED)]
     if weaker and isinstance(enemy, Planet) and cells > 0:
         # D-150: a planet cannot pursue (CM-11), so a ship it outguns simply leaves its range (CB-02) instead of trading fire
         target = away_target(ship.cell, nearest.cell, cells, cfg.sector_size, blocked)
@@ -314,7 +319,7 @@ def attack_orders(captain: Captain, ship: Ship, here: list[Ship], state: GameSta
         if d > reach:
             continue
         tcap = state.captains.get(s.captain_id)
-        if tcap is None or tcap.fear >= cfg.attack_fear_max:
+        if tcap is None or tcap.master or tcap.fear >= cfg.attack_fear_max:     # EF-06 / D-159: no AI opens fire on the Master
             continue
         theirs = C.strength([x for x in here if x.captain_id == s.captain_id], cfg)
         ratio = own / theirs if theirs > 0 else float("inf")
@@ -488,6 +493,12 @@ def decide(captain: Captain, state: GameState, rng: random.Random, cfg: GameConf
         ship = state.ships.get(sid)
         if ship is None:
             continue
+        if captain.guardian:
+            # CM-13 / D-158: a guardian never roams, restocks, trades, picks up, wanders or yields; it fires at the start of TP-04,
+            # after movement, at any non-guardian ship in range (starbour.engine.endgame.guardian_fire_orders)
+            note(trace, captain, ship, "guardian of the ultimate item: holds its post; fires on any non-guardian ship in range at TP-04 (CM-13)",
+                 "CM-13", "D-158", kind=KIND_HOLD)
+            continue
         terrain = state.terrain_of(ship)
         blocked = {(int(t.cell[0]), int(t.cell[1])) for t in terrain}
         hz = H.strongest(terrain, ship.cell, cfg)
@@ -580,7 +591,7 @@ def planet_orders(planet: Planet, state: GameState, cfg: GameConfig, here: list[
         if d > reach:
             continue
         cap = state.captains.get(s.captain_id)
-        if cap is None or int(cap.respect) >= int(cfg.planet_attack_respect_max):
+        if cap is None or cap.master or int(cap.respect) >= int(cfg.planet_attack_respect_max):    # EF-06: planets never fire on the Master
             continue
         if C.open_battle_between(state, planet.id, cap.id) is not None:
             continue
