@@ -471,7 +471,10 @@ class GameState:
             if p is None:
                 continue
             if pid not in keep and pid in self.touched_planets and p.untouched(self.cfg, self.turn_no) and self.battle_of_ship(p) is None:
-                continue      # D-150 (2): back on the seed's trajectory (stock regenerated, shields full, nothing sold to it) - the seed supplies it
+                # D-150 (2) / D-167: back on the seed's trajectory (stock regenerated, shields full, nothing sold to it) - the seed supplies it
+                # from now on, so it leaves the touched set too (the set grew to 8,500 planets over 2,000 turns and this loop with it)
+                self.touched_planets.discard(pid)
+                continue
             bt = self.battle_of_ship(p) if not p.destroyed else None
             out[pid] = p.record(self.cfg, self.turn_no, disposition=disp, trades=self.trades_with_player(p), in_battle=bt.id if bt else None)
         return out
