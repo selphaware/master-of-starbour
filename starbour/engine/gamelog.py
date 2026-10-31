@@ -39,8 +39,17 @@ def one_line(text: object) -> str:
 
 
 def header_line(seed: int) -> str:
+    """The three line forms (C12): a T3 event, an AI decision, and (D-155) a line the player typed with its outcome."""
     return (f"# Master of Starbour gameplay log - seed {seed}. 'T<n> <phase> <severity>/<type>: text [ids]' is a T3 event; "
-            f"'T<n> <captain> <name>: reason (ids)' is an AI decision. Never read by the game.")
+            f"'T<n> <captain> <name>: reason (ids)' is an AI decision; 'T<n> you > <line>: <outcome>' is a line typed at the command "
+            f"terminal with its outcome - 'queued as <order>', 'rejected: <reason>' or the first line of the immediate reply (D-155, D-160). "
+            f"Never read by the game.")
+
+
+def player_line(turn_no: int, line: str, outcome: str) -> str:
+    """D-155 / D-160 / C12: ``T3 you > warp 8 8 0 0: rejected: galaxy 8,8 is outside the universe 8x8 (CMD-07, VW-01)`` - the turn being
+    prepared, the line as typed, the outcome T1 showed."""
+    return f"T{turn_no} you > {one_line(line).strip()}: {one_line(outcome).strip() or 'ok'}"
 
 
 def event_line(turn_no: int, event: dict) -> str:
@@ -166,6 +175,17 @@ class GameLogs:
         if not self.broken:
             log.error("gameplay logs in %s disabled: %s", self.text_path.parent, e)
         self.broken = True
+
+    def append_player(self, turn_no: int, line: str, outcome: str) -> None:
+        """D-155 / D-160: one player line, written the moment the engine receives the order (or T1's command.echo) - before the
+        turn's own lines, under the turn being prepared."""
+        if self.broken:
+            return
+        try:
+            with self.text_path.open("a", encoding="utf-8", newline="\n") as f:
+                f.write(player_line(turn_no, line, outcome) + "\n")
+        except OSError as e:
+            self._fail(e)
 
     def append_turn(self, state: GameState, events: list[dict], stats: dict) -> None:
         """Append the turn just resolved to both files (after ``stats`` carries the snapshot hash and size)."""

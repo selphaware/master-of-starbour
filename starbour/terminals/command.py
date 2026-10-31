@@ -203,6 +203,14 @@ class CommandTerminal:
         text = acc.text or f"queued as order {acc.queue_position} for this turn"
         self.console.print(f"  ok: {text}", style=P.STYLES["command_ok"])
 
+    def echo(self, line: str, summary: str) -> None:
+        """D-155 / D-160 / MSG-10: a line T1 answered itself (or refused to send) goes to the engine as command.echo, so the one
+        gameplay log carries every line typed; the engine logs it and changes nothing."""
+        try:
+            self.push.send(M.COMMAND_ECHO, M.CommandEcho(line, "T1", summary).to_dict())
+        except Exception:   # noqa: BLE001 - the log is a convenience, never a reason to lose the prompt
+            log.exception("command.echo not sent")
+
     def confirm(self, session, question: str) -> bool:
         """UX-04: y/N confirmation."""
         try:
@@ -293,13 +301,16 @@ class CommandTerminal:
             order = parse(line, self.active_ship_id())
         except CommandError as e:
             self.console.print(f"  {e}", style=P.STYLES["command_error"])
+            self.echo(line, f"rejected: {e}")
             return True
         cmd, args = order.command, list(order.args)
         snap, _ = self.listener.current()
         snap = snap or {}
         if cmd == "help":
             # D-154: structured help at the live console width (never the 200-column prompt buffer)
-            self.console.print(RC.render_help(parse_help(args), self.console.width, self.cfg, snap))
+            topic = parse_help(args)
+            self.console.print(RC.render_help(topic, self.console.width, self.cfg, snap))
+            self.echo(line, f"help shown: {topic or 'every group'}")
         elif cmd == "fire":
             # CM-01 / UX-04: firing on a captain or planet you are not yet in battle with starts a fight - confirm first (D-137: fire <target>)
             target_text = args[1] if args and args[0].lower() in WEAPON_WORDS and len(args) > 1 else (args[0] if args else "")
@@ -308,23 +319,32 @@ class CommandTerminal:
                 question = f"Start a fight with {tcap.get('name', tcap.get('id'))}? Respect −{self.cfg.respect_start_fight_delta}"
                 if not self.confirm(session, question):
                     self.console.print("  fire order not sent", style=P.STYLES["command_info"])
+                    self.echo(line, "fire order not sent - the fight was not confirmed (UX-04)")
                     return True
             self.show_reply(self.send_order(cmd, args), line)
         elif cmd == "status":
-            for t in RC.status_lines(snap, self.cfg):
+            lines_ = RC.status_lines(snap, self.cfg)
+            for t in lines_:
                 self.console.print(t)
+            self.echo(line, lines_[0].plain.strip() if lines_ else "status shown")
         elif cmd == "fleet":
             self.console.print(RC.fleet_table(snap))
+            cap = (snap.get("captains") or {}).get(snap.get("player_id")) or {}
+            self.echo(line, f"fleet shown: {len(cap.get('ships') or [])} ship(s)")
         elif cmd == "shields":
-            for t in RC.shields_lines(snap):   # CMD-09: answered from the snapshot (D-92)
+            lines_ = RC.shields_lines(snap)   # CMD-09: answered from the snapshot (D-92)
+            for t in lines_:
                 self.console.print(t)
+            self.echo(line, lines_[0].plain.strip() if lines_ else "shields shown")
         elif cmd == "view":
             level = parse_view(args)
             self.push.send(M.VIEW_CHANGED, M.ViewChanged(level).to_dict())
             self.console.print(f"  grid view: {level}", style=P.STYLES["command_ok"])
+            self.echo(line, f"grid view: {level}")
         elif cmd == "end":
             if self.game_over():
                 self.console.print("  game over - type 'new' to start again (CMD-19)", style=P.STYLES["command_error"])
+                self.echo(line, "rejected: game over - type new to start again (CMD-19)")
                 return True
             hz = self.countdown_without_escape()
             if hz is not None:
@@ -333,15 +353,18 @@ class CommandTerminal:
                             f"End the turn anyway?")
                 if not self.confirm(session, question):   # CMD-17, UX-04
                     self.console.print("  turn not ended - queue a move or warp first", style=P.STYLES["command_info"])
+                    self.echo(line, "turn not ended - a hazard countdown is running with no move or warp queued (UX-04)")
                     return True
             ship = self.battle_without_fire()
             if ship is not None:
                 question = f"No fire order for {ship.get('name', 'your ship')} this turn — end anyway?"
                 if not self.confirm(session, question):   # UX-04 (M4), D-136, D-146
                     self.console.print("  turn not ended - 'fire <target>' fires one torpedo and the phasers", style=P.STYLES["command_info"])
+                    self.echo(line, "turn not ended - in battle with no fire order queued (UX-04)")
                     return True
             self.listener.resolved.clear()
             _, turn_no = self.listener.current()
+            self.echo(line, f"ends turn {turn_no + 1}")
             self.push.send(M.TURN_END, M.TurnEnd(turn_no).to_dict())
             if self.spinner_wait():
                 self.pending.clear()
@@ -352,15 +375,19 @@ class CommandTerminal:
                     self.console.print(f"  {e.get('text', '')}", style=P.severity_style(str(e.get("severity"))))
         elif cmd == "quit":
             if self.confirm(session, "Quit the game? It is autosaved every turn."):
+                self.echo(line, "quit confirmed - autosave and shut down (CMD-18)")
                 self.push.send(M.SYSTEM_SHUTDOWN, M.SystemShutdown("quit from the command terminal").to_dict())
                 self.console.print("  shutting down ...", style=P.STYLES["command_info"])
                 time.sleep(0.3)
                 return False
+            self.echo(line, "quit not confirmed")
         elif cmd == "new":
             # CMD-19: offered without confirmation after game over, with confirmation otherwise (UX-04)
             if self.game_over() or self.confirm(session, "Start a new game? The current save is deleted."):
                 self.pending.clear()
                 self.show_reply(self.send_order("new", args), line)
+            else:
+                self.echo(line, "new game not confirmed")
         else:
             self.show_reply(self.send_order(cmd, args), line)
         return True

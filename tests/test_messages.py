@@ -11,7 +11,8 @@ def test_topic_names_are_the_msg_names() -> None:
     assert M.VIEW_CHANGED == "view.changed" and M.EVENT_LOG == "event.log" and M.ORDER_REJECTED == "order.rejected"
     assert M.ORDER_ACCEPTED == "order.accepted" and M.SYSTEM_SHUTDOWN == "system.shutdown"
     assert M.GAME_OVER == "game.over" and M.GAME_MASTERY == "game.mastery" and M.STATE_HELLO == "state.hello"
-    assert len(set(M.TOPICS)) == 11
+    assert M.COMMAND_ECHO == "command.echo", "MSG-10 (C12, D-160)"
+    assert len(set(M.TOPICS)) == 12
     assert M.HELLO_INTERVAL_S == 2.0
 
 
@@ -27,6 +28,7 @@ def test_topic_names_are_the_msg_names() -> None:
     M.SystemShutdown("command terminal closed"),
     M.GameEnd(57, "destroyed", {"turns": 57}),
     M.StateHello(0, {"turn_no": 0}, 1234, "0.1.0"),
+    M.CommandEcho("help fighting", "T1", "Fighting: fire, peace, escape"),
 ])
 def test_payload_round_trip(obj) -> None:
     d = obj.to_dict()

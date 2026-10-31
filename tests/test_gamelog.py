@@ -233,3 +233,45 @@ def test_every_full_redraw_clears_the_scrollback(role: str, cfg: GameConfig, sma
     term.on_resolved({"turn_no": 1, "snapshot": small_state.snapshot(), "events": []})
     text = out.getvalue()
     assert SCROLLBACK_CLEAR in text and text.index(SCROLLBACK_CLEAR) < text.index("\n"), "scrollback cleared before the frame is printed"
+
+
+# ---------------------------------------------------------------- player lines (M5 step 1c: D-155, D-160, MSG-10, C12)
+
+def test_every_player_line_is_logged_with_its_outcome(small_cfg: GameConfig, tmp_path: Path) -> None:
+    """'T<n> you > <line>: <outcome>' on receipt: a rejection verbatim, a T1-only command, an immediate reply, a parse error, a queued order."""
+    engine = Engine(small_cfg, seed=99, save_path=tmp_path / "saves" / "game.json", bus=False, ai_player=False, resume=False, log_dir=tmp_path / "logs")
+    engine.start()
+    uw, uh = small_cfg.universe_size
+    ok, _ = engine.apply_script_line(f"warp {uw} {uh} 0 0")
+    assert not ok
+    engine.apply_script_line("help")
+    engine.apply_script_line("scan")
+    engine.apply_script_line("bogus 1")
+    path = tmp_path / "logs" / log_names(99)[0]
+    text = path.read_text(encoding="utf-8")
+    assert "you >" in text.splitlines()[0], "the header documents the third line form (C12)"
+    lines = [ln for ln in text.splitlines() if ln.startswith("T") and " you > " in ln]
+    assert lines[0].startswith(f"T1 you > warp {uw} {uh} 0 0: rejected: galaxy {uw},{uh} is outside the universe") and "CMD-07" in lines[0]
+    assert lines[1].startswith("T1 you > help: rejected:") and "command terminal" in lines[1]
+    assert lines[2].startswith("T1 you > scan: Scan:")
+    assert lines[3].startswith("T1 you > bogus 1: rejected: unknown command")
+    engine.resolve_and_publish()
+    engine.apply_script_line("move +1 +0")
+    last = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.startswith("T") and " you > " in ln][-1]
+    assert last.startswith("T2 you > move +1 +0: ") and ("queued as move +1 +0" in last or ": rejected:" in last)
+
+
+def test_command_echo_is_logged_and_changes_nothing(small_cfg: GameConfig, tmp_path: Path) -> None:
+    """MSG-10 / D-160: the engine writes one line per echo, answers nothing and leaves the snapshot hash untouched."""
+    from starbour.bus import messages as M
+    from starbour.engine.gamelog import player_line
+    engine = Engine(small_cfg, seed=99, save_path=tmp_path / "saves" / "game.json", bus=False, ai_player=False, resume=False, log_dir=tmp_path / "logs")
+    engine.start()
+    before = engine.state.snapshot_hash()
+    engine.handle(M.COMMAND_ECHO, M.CommandEcho("help fighting", "T1", "Fighting: fire, peace, escape").to_dict())
+    engine.handle(M.COMMAND_ECHO, {"line": "status", "handled": "T1", "summary": ""})
+    assert engine.state.snapshot_hash() == before and not engine.state.queues
+    text = (tmp_path / "logs" / log_names(99)[0]).read_text(encoding="utf-8")
+    assert "T1 you > help fighting: Fighting: fire, peace, escape" in text
+    assert "T1 you > status: answered by T1" in text
+    assert player_line(3, "a\nb", "c\nd") == "T3 you > a / b: c / d"

@@ -357,8 +357,28 @@ class Engine:
             self.autosave()
             self._publish(M.SYSTEM_SHUTDOWN, {"reason": reason})
             self.request_stop(0)
+        elif topic == M.COMMAND_ECHO:
+            # MSG-10 / D-160: a line T1 answered itself - logged, then dropped: no reply, no re-publish, no state change (C12)
+            echo = M.CommandEcho.from_dict(payload)
+            summary = echo.summary.strip().splitlines()
+            self.log_player(echo.line, summary[0] if summary else f"answered by {echo.handled}")
         else:
             log.debug("ignoring topic %s", topic)
+
+    def log_player(self, line: str, outcome: str) -> None:
+        """D-155: every line the player typed reaches logs/game-<seed>.log with its outcome, under the turn being prepared."""
+        if self.gamelog is not None:
+            self.gamelog.append_player(self.state.turn_no + 1, line, outcome)
+
+    @staticmethod
+    def outcome_text(order: Order, result: O.Accepted | O.Rejected) -> str:
+        """C12: 'queued as <order>' (plus the engine's note), 'rejected: <reason>', or the first line of an immediate reply."""
+        if isinstance(result, O.Rejected):
+            return f"rejected: {result.reason}"
+        first = (result.text or "").strip().splitlines()
+        if order.kind == IMMEDIATE:
+            return first[0] if first else "ok"
+        return f"queued as {order.text()}" + (f" - {first[0]}" if first else "")
 
     def apply_order(self, order: Order) -> O.Accepted | O.Rejected:
         """Route a parsed order: immediate ones are applied at once (D-92), queued ones validated and queued."""
@@ -379,15 +399,18 @@ class Engine:
             self._publish(M.ORDER_REJECTED, M.OrderRejected(payload, f"malformed order.submitted: {e} (MSG-01)").to_dict())
             return
         ship_id = sub.ship_id or (self.state.player.active_ship or "")
+        line = " ".join([sub.command, *sub.args]).strip()
         try:
             order = parse_tokens([sub.command, *sub.args], ship_id)
         except CommandError as e:
+            self.log_player(line, f"rejected: {e}")
             self._publish(M.ORDER_REJECTED, M.OrderRejected(sub.to_dict(), str(e)).to_dict())
             return
         if order.command == "new":
-            self.handle_new(order)
+            self.handle_new(order, line)
             return
         result = self.apply_order(order)
+        self.log_player(line, self.outcome_text(order, result))      # D-155: logged on receipt, whatever the outcome
         if isinstance(result, O.Rejected):
             log.info("rejected %s: %s", order.text(), result.reason)
             self._publish(M.ORDER_REJECTED, M.OrderRejected(order.to_dict(), result.reason).to_dict())
@@ -414,27 +437,35 @@ class Engine:
 
     def _apply_script_order(self, text: str) -> tuple[bool, str]:
         ship_id = self.state.player.active_ship or ""
+        line = text.strip()
         try:
             order = parse_tokens(text.split(), ship_id)
         except CommandError as e:
+            self.log_player(line, f"rejected: {e}")
             return False, f"script order {text!r} not parsed: {e}"
         if order.command == "new":
+            self.log_player(line, "rejected: 'new' is not supported in the sim (D-104)")
             return False, "script order 'new' is not supported in the sim"
         result = self.apply_order(order)
+        self.log_player(line, self.outcome_text(order, result))      # D-155 / D-162 (3): a sim has no T1, the engine's outcome stands
         if isinstance(result, O.Rejected):
             return False, f"script order {order.text()!r} rejected: {result.reason}"
         return True, f"script order {order.text()!r} accepted" + (f": {result.text}" if result.text else "")
 
-    def handle_new(self, order: Order) -> None:
+    def handle_new(self, order: Order, line: str | None = None) -> None:
         """CMD-19 / OV-09c: delete the save, regenerate, announce (also the way out of game over, D-105)."""
+        line = line if line is not None else order.text()
         try:
             seed = parse_new(order.args)
         except CommandError as e:
+            self.log_player(line, f"rejected: {e}")
             self._publish(M.ORDER_REJECTED, M.OrderRejected(order.to_dict(), str(e)).to_dict())
             return
         if self.save_path is not None:
             S.delete(self.save_path)
-        self._new_game(pick_seed(self.cfg, seed) if seed is not None else random.SystemRandom().randrange(1, 2**31 - 1))
+        new_seed = pick_seed(self.cfg, seed) if seed is not None else random.SystemRandom().randrange(1, 2**31 - 1)
+        self.log_player(line, f"new game started with seed {new_seed}")     # D-155: the last line of the game being left
+        self._new_game(new_seed)
         self.turns_done = 0
         self.autosave()
         self._publish(M.ORDER_ACCEPTED, M.OrderAccepted(order.to_dict(), 0, 0, f"new game started with seed {self.state.seed}").to_dict())

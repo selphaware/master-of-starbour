@@ -18,9 +18,10 @@ SYSTEM_SHUTDOWN = "system.shutdown"   # MSG-08  launcher/T1 -> engine -> all
 GAME_OVER = "game.over"               # MSG-09  engine -> all
 GAME_MASTERY = "game.mastery"         # MSG-09  engine -> all
 STATE_HELLO = "state.hello"           # [ASSUMED] D-70, D-83  engine -> all, every 2 s
+COMMAND_ECHO = "command.echo"         # MSG-10 (C12, D-160)  T1 -> engine: a line T1 answered itself, for the gameplay log only
 
 TOPICS = (ORDER_SUBMITTED, TURN_END, TURN_RESOLVED, VIEW_CHANGED, EVENT_LOG, ORDER_REJECTED, ORDER_ACCEPTED,
-          SYSTEM_SHUTDOWN, GAME_OVER, GAME_MASTERY, STATE_HELLO)
+          SYSTEM_SHUTDOWN, GAME_OVER, GAME_MASTERY, STATE_HELLO, COMMAND_ECHO)
 
 HELLO_INTERVAL_S = 2.0   # D-70 / D-83: a protocol constant, not a play tunable
 
@@ -218,10 +219,29 @@ class StateHello:
         return cls(int(d["turn_no"]), dict(d["snapshot"]), int(d.get("seed") or 0), str(d.get("version") or ""))
 
 
+@dataclass(frozen=True, slots=True)
+class CommandEcho:
+    """MSG-10 (C12, D-155, D-160): a line T1 answered locally (help, status, fleet, shields, view ...), so the engine - the only
+    writer of the gameplay log - can record it as ``T<n> you > <line>: <summary>``.  The engine changes nothing for it, answers
+    nothing and never re-publishes it."""
+
+    line: str
+    handled: str = "T1"
+    summary: str = ""
+    topic = COMMAND_ECHO
+
+    def to_dict(self) -> dict:
+        return {"line": self.line, "handled": self.handled, "summary": self.summary}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "CommandEcho":
+        return cls(str(d.get("line") or ""), str(d.get("handled") or "T1"), str(d.get("summary") or ""))
+
+
 PAYLOADS = {
     ORDER_SUBMITTED: OrderSubmitted, TURN_END: TurnEnd, TURN_RESOLVED: TurnResolved, VIEW_CHANGED: ViewChanged,
     EVENT_LOG: EventLog, ORDER_REJECTED: OrderRejected, ORDER_ACCEPTED: OrderAccepted, SYSTEM_SHUTDOWN: SystemShutdown,
-    GAME_OVER: GameEnd, GAME_MASTERY: GameEnd, STATE_HELLO: StateHello,
+    GAME_OVER: GameEnd, GAME_MASTERY: GameEnd, STATE_HELLO: StateHello, COMMAND_ECHO: CommandEcho,
 }
 
 
