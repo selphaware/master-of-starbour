@@ -26,10 +26,12 @@ class Captain:
     ships: list[str] = field(default_factory=list)
     active_ship: str | None = None
     items: dict[str, int] = field(default_factory=dict)
-    is_master: bool = False
+    master: bool = False              # EG-07: the Master of Starbour (C12 captains[*].master); levels locked, stats maxed (D-159)
     zero_turns: int = 0   # consecutive upkeep phases with food or water at 0 - SUP-03, D-76
     rep_seen_turn: int | None = None   # LV-04: the turn a scan revealed this captain's fear and respect (C10 visible_reputation)
     restock_target: str | None = None  # D-144: the planet an AI captain is heading for
+    guardian: bool = False            # EG-06 / CM-13: a guardian of the ultimate item - never roams, restocks, trades or yields (D-158)
+    infinite_wealth: bool = False     # EG-07 / SUP-05: every price check passes and nothing is deducted (D-159)
 
     @classmethod
     def new(cls, captain_id: str, name: str, is_player: bool, cfg: GameConfig, *, gold: int | None = None,
@@ -90,7 +92,8 @@ class Captain:
             "fear": self.fear, "respect": self.respect, "food": self.food, "water": self.water,
             "ships": list(self.ships), "active_ship": self.active_ship,
             "items": {k: int(v) for k, v in sorted(self.items.items()) if int(v) > 0},
-            "is_master": self.is_master, "mutiny_countdown": self.mutiny_countdown(cfg),
+            "master": self.master, "guardian": self.guardian, "infinite_wealth": self.infinite_wealth,
+            "mutiny_countdown": self.mutiny_countdown(cfg),
             "zero_turns": self.zero_turns, "rep_seen_turn": self.rep_seen_turn,
             "visible_reputation": self.visible_reputation(turn_no), "restock_target": self.restock_target,
         }
@@ -100,8 +103,9 @@ class Captain:
         seen = d.get("rep_seen_turn")
         return cls(captain_id, str(d["name"]), bool(d["is_player"]), int(d["gold"]), int(d["silver"]), int(d["fear"]),
                    int(d["respect"]), int(d["food"]), int(d["water"]), [str(s) for s in d.get("ships", [])],
-                   d.get("active_ship"), items_from(d.get("items")), bool(d.get("is_master", False)),
-                   int(d.get("zero_turns", 0)), int(seen) if seen is not None else None, d.get("restock_target"))
+                   d.get("active_ship"), items_from(d.get("items")), bool(d.get("master", d.get("is_master", False))),
+                   int(d.get("zero_turns", 0)), int(seen) if seen is not None else None, d.get("restock_target"),
+                   bool(d.get("guardian", False)), bool(d.get("infinite_wealth", False)))
 
 
 def items_from(raw: object) -> dict[str, int]:

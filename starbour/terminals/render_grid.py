@@ -92,7 +92,7 @@ def hazard_tints(terrain: list[dict]) -> tuple[str | None, dict[tuple[int, int],
 def planet_states(snapshot: dict, cfg: GameConfig, skey: str, cap: dict | None) -> tuple[bool, dict[tuple[int, int], dict]]:
     """SYM-08 (M4): whether planets trade with the player by respect (EF-04, TR-10), and the C11 records of this sector by cell."""
     cap = cap or {}
-    trades = bool(cap.get("is_master")) or int(cap.get("respect", 0)) >= int(cfg.planet_refuse_respect)
+    trades = bool(cap.get("master")) or int(cap.get("respect", 0)) >= int(cfg.planet_refuse_respect)
     records: dict[tuple[int, int], dict] = {}
     for pid, p in (snapshot.get("planets") or {}).items():
         if isinstance(p, dict) and str(p.get("sector")) == skey and isinstance(p.get("cell"), list):
@@ -192,7 +192,8 @@ def render_sector(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
     visible_rows = sh if height is None else max(1, height - 7)
     y0, y1 = _window(sh, cy, visible_rows)
     docked = planet_names.get((cx, cy))
-    head = _line((f"Sector {sx},{sy}", P.STYLES["title"]), ("  galaxy ", P.STYLES["label"]), (f"{gx},{gy}", P.STYLES["value"]),
+    deep = sector.get("kind") == "void"       # C12 / D-153: a deep-space sector - dots, ships and revealed stacks only
+    head = _line((f"{'Deep space' if deep else 'Sector'} {sx},{sy}", P.STYLES["title"]), ("  galaxy ", P.STYLES["label"]), (f"{gx},{gy}", P.STYLES["value"]),
                  ("  turn ", P.STYLES["label"]), (f"{turn_no}", P.STYLES["value"]),
                  ("  fog ", P.STYLES["label"]), ("on" if fog else "off", P.STYLES["value"]),
                  (f"  BATTLE {in_battle}" if in_battle else "", P.STYLES["ship_ai_battle"]),
@@ -308,6 +309,8 @@ def render_galaxy(snapshot: dict, cfg: GameConfig, width: int, height: int | Non
                     row.append(g["sector"].ljust(CELL_W), style=P.STYLES["sector_visited"])
                 else:
                     row.append(g["sector"].ljust(CELL_W), style=P.STYLES["sector"])
+            elif (x, y) in visited:
+                row.append(g["void"].ljust(CELL_W), style=P.STYLES["sector_visited"])    # D-153: a visited deep-space cell (SYM-01 glyph, visited shading)
             else:
                 row.append(g["void"].ljust(CELL_W), style=P.STYLES["void"])
         lines.append(row)

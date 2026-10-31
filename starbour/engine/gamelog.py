@@ -102,14 +102,17 @@ def turn_row(state: GameState, events: list[dict], stats: dict, notes: list[str]
                   "hazard": lost.get("hazard"), "move_remaining": None}
     player.update({"food": cap.food, "water": cap.water, "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver,
                    "in_battle": state.player_in_battle(), "ships": len([s for s in cap.ships if s in state.ships]),
-                   "items": {k: int(v) for k, v in sorted(cap.items.items()) if int(v) > 0}})
+                   "items": {k: int(v) for k, v in sorted(cap.items.items()) if int(v) > 0},
+                   "master": bool(cap.master), "infinite_wealth": bool(cap.infinite_wealth)})
     econ = dict(stats.get("ai_economy") or {})
     return {
         "turn_no": state.turn_no,
         "orders_executed": dict(stats.get("orders_executed") or {"player": 0, "ai": 0}),
         "ai_ships_moved": int(stats.get("ai_ships_moved") or 0),
         "player": player,
-        "captains": len(state.captains),
+        "captains": state.population(),      # C12: guardians excluded (D-158)
+        "void_visits": bool(stats.get("void_visits")),
+        "lodestone": state.lodestone_row(),
         "events": list(notes) + [str(e.get("text", "")) for e in events],
         "snapshot_hash": stats.get("snapshot_hash"),
         "snapshot_bytes": int(stats.get("snapshot_bytes") or 0),

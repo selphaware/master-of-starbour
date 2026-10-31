@@ -10,7 +10,7 @@ from __future__ import annotations
 from starbour.config import GameConfig
 from starbour.engine import reputation as R
 from starbour.entities.captain import Captain
-from starbour.entities.item import Item
+from starbour.entities.item import LODESTONE_ID, Item
 
 FR_08 = "FR-08"
 
@@ -27,8 +27,11 @@ def reveal(sector, cell) -> list[Item]:
     return found
 
 
-def item_text(item: Item) -> str:
-    """OUT-10: element, units and rarity, e.g. 'iridium (2 units, normal)'."""
+def item_text(item: Item, cfg: GameConfig | None = None) -> str:
+    """OUT-10: element, units and rarity, e.g. 'iridium (2 units, normal)'; the ultimate item by its display name (EG-05)."""
+    if item.ultimate:
+        name = cfg.ultimate_item_name if cfg is not None else LODESTONE_ID
+        return f"{name} (the ultimate item - 'pickup {LODESTONE_ID}' takes it, EG-05)"
     return f"{item.element} ({item.units} unit{'s' if item.units != 1 else ''}, {item.rarity})"
 
 

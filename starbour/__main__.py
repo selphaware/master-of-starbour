@@ -22,6 +22,8 @@ from starbour.config import ConfigError, GameConfig, load_config
 
 ROLES = ("engine", "command", "grid", "output", "status")
 AI_MODES = ("normal", "passive")
+AI_PLAYER_MODES = ("starve", "trade")     # C12 / D-161
+WORLD_INDEX_MODES = ("all", "voids")      # C12 / D-162 (1)
 TELEPORT_HELP = 'debug (D-104): place the player\'s active ship at "gx gy sx sy cx cy" before turn 1'
 SPAWN_HELP = 'debug (D-126, repeatable): an AI captain with one ship, "<class> gx gy sx sy cx cy [fear] [respect]", before turn 1'
 AI_HELP = "debug (D-125): 'passive' = AI captains never open a battle (they still defend, offer peace, escape, surrender)"
@@ -56,7 +58,8 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("sim", help="headless simulation (D-55, C2, C9, C10, C11)")
     s.add_argument("--seed", type=int, default=None)
     s.add_argument("--turns", type=int, default=30)
-    s.add_argument("--ai-player", action="store_true")
+    s.add_argument("--ai-player", nargs="?", const="starve", choices=AI_PLAYER_MODES, default=None,
+                   help="the AI drives the player's ship: 'starve' (default, never trades) or 'trade' (restocks, trades, roams; D-161, C12)")
     s.add_argument("--report", type=Path, default=None)
     s.add_argument("--config", type=Path, default=None)
     s.add_argument("--save-dir", type=Path, default=None)
@@ -66,7 +69,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--log-level", default="INFO")
     _debug_args(s)
     s.add_argument("--player-script", type=Path, default=None, help="one line per turn, blank = none, orders separated by ';' (replaces --ai-player)")
-    s.add_argument("--world-index", action="store_true", help="add world_index (stars, holes, neutron stars, planets, items) to the report")
+    s.add_argument("--world-index", nargs="?", const="all", choices=WORLD_INDEX_MODES, default=None,
+                   help="add world_index (stars, holes, neutron stars, planets, items) to the report; 'voids' adds the start galaxy's deep-space sectors (C12)")
     return p
 
 
@@ -128,9 +132,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.player_script is not None and not args.player_script.is_file():
             sys.stderr.write(f"--player-script {args.player_script} not found\n")
             return 1
-        return run_sim(cfg, seed=pick_seed(cfg, args.seed), turns=args.turns, ai_player=args.ai_player, report_path=args.report,
+        return run_sim(cfg, seed=pick_seed(cfg, args.seed), turns=args.turns, ai_player=args.ai_player or False, report_path=args.report,
                        save_dir=save_dir, bus=args.bus, pub_port=args.pub_port, pull_port=args.pull_port, teleport=teleport,
-                       script_path=args.player_script, with_world_index=args.world_index, spawns=spawns, ai_passive=ai_passive,
+                       script_path=args.player_script, with_world_index=args.world_index or False, spawns=spawns, ai_passive=ai_passive,
                        log_dir=paths.logs_dir() if args.save_dir is None else args.save_dir / "logs",   # a gate's --save-dir keeps its logs with it
                        give=give, coins=coins, respect=respect, fear=fear)
     pub_port = args.pub_port if args.pub_port is not None else cfg.pub_port

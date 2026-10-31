@@ -144,8 +144,27 @@ def _reach_box(ship: Ship, state: GameState, cfg: GameConfig, pull: float) -> tu
     return int(min(reach + MV.EPS, cap)), flat_sector(ship.galaxy, ship.sector, cfg.galaxy_size)
 
 
+def void_destinations(ship: Ship, state: GameState, cfg: GameConfig, r: int, flat: Coord) -> list[tuple[Coord, Coord]]:
+    """D-156: every deep-space sector inside the reach box (flattened coordinates inside the universe that hold no generated
+    sector), in a fixed order (D-67)."""
+    fx, fy = flat
+    gw, gh = cfg.galaxy_size
+    uw, uh = cfg.universe_size
+    here = (ship.galaxy, ship.sector)
+    out: list[tuple[Coord, Coord]] = []
+    for y in range(max(0, fy - r), min(uh * gh, fy + r + 1)):
+        for x in range(max(0, fx - r), min(uw * gw, fx + r + 1)):
+            if (x, y) in state.world.flat_sectors:
+                continue
+            gs = ((x // gw, y // gh), (x % gw, y % gh))
+            if gs != here:
+                out.append(gs)
+    return out
+
+
 def roam_destination(ship: Ship, state: GameState, rng: random.Random, cfg: GameConfig, pull: float) -> tuple[Coord, Coord] | None:
-    """D-125: a random sector within the warp reach (MV-02, netted by the pull here, HZ-10) that holds no hole.
+    """D-125: a random sector within the warp reach (MV-02, netted by the pull here, HZ-10) that holds no hole; with probability
+    ``[ai] roam_void_pct`` a deep-space sector within reach instead (D-156, CFG-85).
 
     Candidates are read from the world's flattened index inside the reach box, in a fixed order, so the
     draw is deterministic (D-67).  None when the pull nets the factor to nothing or nothing is reachable."""
@@ -154,6 +173,10 @@ def roam_destination(ship: Ship, state: GameState, rng: random.Random, cfg: Game
         return None
     r, (fx, fy) = box
     here = (ship.galaxy, ship.sector)
+    if int(cfg.roam_void_pct) > 0 and rng.random() * 100.0 < float(cfg.roam_void_pct):
+        voids = void_destinations(ship, state, cfg, r, (fx, fy))
+        if voids:
+            return voids[rng.randrange(len(voids))]
     candidates: list[tuple[Coord, Coord]] = []
     for y in range(fy - r, fy + r + 1):
         for x in range(fx - r, fx + r + 1):
@@ -451,11 +474,12 @@ def restock_orders(captain: Captain, ship: Ship, state: GameState, cfg: GameConf
 
 def decide(captain: Captain, state: GameState, rng: random.Random, cfg: GameConfig, *, passive: bool = False,
            index: dict[tuple[Coord, Coord], list[Ship]] | None = None, trace: list[Decision] | None = None,
-           roamers: set[str] | None = None, stats: dict | None = None) -> list[Order]:
+           roamers: set[str] | None = None, stats: dict | None = None, trade: bool = False) -> list[Order]:
     """The captain's orders for this turn (see the module docstring).  ``index`` is ``state.ships_by_sector()``,
     built once per turn by the caller; ``passive`` is the ``--ai passive`` debug mode (never opens a battle);
     ``trace`` collects a ``Decision`` per ship (reason + rule IDs) for the gameplay log; ``roamers`` receives the ids
-    of ships that warp because a roam is due (CFG-73 counts those, not restock warps); ``stats`` counts restock trips."""
+    of ships that warp because a roam is due (CFG-73 counts those, not restock warps); ``stats`` counts restock trips;
+    ``trade`` lets the AI-driven *player* run restock trips too (``--ai-player trade``, D-161)."""
     if index is None:
         index = state.ships_by_sector()
     orders: list[Order] = []
@@ -474,8 +498,9 @@ def decide(captain: Captain, state: GameState, rng: random.Random, cfg: GameConf
         if battle is not None:
             orders += battle_orders(captain, ship, battle, here, state, cfg, cells, blocked, trace)
             continue
-        if not passive and not captain.is_player and sid == captain.active_ship and not (hz is not None and hz.kind in HOLE_KINDS):
-            # D-150 (17): the AI driving the player (--ai-player) never trades - the economy is the human's to play
+        if not passive and (trade or not captain.is_player) and sid == captain.active_ship and not (hz is not None and hz.kind in HOLE_KINDS):
+            # D-150 (17): the AI driving the player (--ai-player starve) never trades - the economy is the human's to play;
+            # --ai-player trade (D-161) runs the restock trips for the player too
             trip = restock_orders(captain, ship, state, cfg, cells, pull, blocked, stats, trace)
             if trip is not None:
                 orders += trip

@@ -1,4 +1,4 @@
-"""GameState, snapshot(), from_snapshot(), snapshot_hash() - BUS-04, BUS-07, C3, C6, C9, C10, C11, D-67, D-87.
+"""GameState, snapshot(), from_snapshot(), snapshot_hash() - BUS-04, BUS-07, C3, C6, C9, C10, C11, C12, D-67, D-87.
 
 The engine is the only owner of this object (BUS-04).  ``snapshot()`` is the full
 dynamic state plus the terrain and items of every sector the player has visited; the
@@ -11,6 +11,11 @@ M4 adds ``planets`` (C11): the records of every planet whose dynamic state no lo
 follows the seed (``touched``), every planet in an open battle and the planet in the
 player's active ship's cell - the rest regenerate from the seed (D-150 [ASSUMED]) - plus the
 debug ``--give`` / ``--coins`` / ``--respect`` / ``--fear`` setters.
+M5 adds deep space (D-153, D-156): ``sector_at`` materialises a Void coordinate on demand from
+``starbour.world.deepspace`` and ``void_removed`` remembers the stacks picked up there (saved as
+``deep_space.removed``); and the endgame (EG-01...08, C12): ``lodestone`` (where the ultimate item
+lies, its guardians, when it was placed and picked up), ``eligible_turn`` and the captains'
+``master`` / ``guardian`` / ``infinite_wealth`` flags (``starbour.engine.endgame`` holds the rules).
 """
 from __future__ import annotations
 
@@ -29,9 +34,13 @@ from starbour.entities.captain import Captain, clamp_level
 from starbour.entities.item import Item
 from starbour.entities.planet import Planet
 from starbour.entities.ship import Position, Ship
+from starbour.world import deepspace as DS
 from starbour.world import names
-from starbour.world.generate import Sector, World, galaxy_key, generate_world, populate, sector_key
+from starbour.world.generate import VOID, Sector, World, galaxy_key, generate_world, populate, sector_key
 from starbour.world.grid import Coord, chebyshev, manhattan
+
+LODESTONE_ID = "lodestone"   # C12: the ultimate item's catalogue id, whatever [endgame] ultimate_item_name says (EG-05)
+ULTIMATE = "ultimate"        # its rarity word in the snapshot
 
 
 def canonical_json(obj: object) -> bytes:
@@ -58,6 +67,16 @@ def is_planet_id(text: str) -> bool:
     return isinstance(text, str) and text.startswith("p-")
 
 
+def lodestone_item(cell: Coord) -> Item:
+    """EG-05 / C12: the placed ultimate item as a sector item - id and element 'lodestone', rarity 'ultimate', one unit."""
+    return Item(LODESTONE_ID, LODESTONE_ID, ULTIMATE, (int(cell[0]), int(cell[1])), units=1)
+
+
+def parse_sector_key(key: str) -> tuple[Coord, Coord]:
+    gtext, stext = str(key).split("/")
+    return _parse_coord(gtext), _parse_coord(stext)
+
+
 @dataclass(slots=True)
 class GameState:
     """Everything the engine knows.  Only ``starbour.engine`` mutates it."""
@@ -78,10 +97,14 @@ class GameState:
     battles: dict[str, Battle] = field(default_factory=dict)
     game_over_turn: int | None = None
     mastery_turn: int | None = None
+    eligible_turn: int | None = None                 # C12: the turn EG-01...04 first held (placement turn, D-158)
+    lodestone: dict | None = None                    # C12: {sector, cell, distance, placed_turn, guardians, picked_up_turn} once placed
     player_mutinies: int = 0                         # for the game.over summary (C9)
     spawned: list[dict] = field(default_factory=list)   # C10: the ships --spawn created (D-126)
     pending_reputation: list[dict] = field(default_factory=list)   # FR-06 rows from fires accepted between turns, applied at the next TP-07
     touched_planets: set[str] = field(default_factory=set)         # C11: planets whose dynamic state left the seed (D-150)
+    void_sectors: dict[tuple[Coord, Coord], Sector] = field(default_factory=dict)   # D-156: deep-space sectors materialised so far (not saved)
+    void_removed: set[tuple[Coord, Coord]] = field(default_factory=set)             # D-156 / IT-05: deep-space stacks picked up, by coordinates (saved)
     hazard_note_sector: Coord | None = None          # D-127: 'planet cells are safe' once per sector entry (not saved)
     last_stats: dict = field(default_factory=dict)   # the last resolved turn's counters (not part of the snapshot)
 
@@ -101,12 +124,41 @@ class GameState:
             return None
         return self.ships.get(cap.active_ship)
 
+    # ---- sectors, deep space included (WG-02, D-153, D-156)
+    def in_universe(self, galaxy: Coord, sector: Coord) -> bool:
+        """CMD-07: inside universe_size x galaxy_size (VW-01, VW-02)."""
+        return DS.in_universe(galaxy, sector, self.cfg)
+
+    def is_deep_space(self, galaxy: Coord, sector: Coord) -> bool:
+        """A coordinate inside the universe that holds no generated sector (D-153)."""
+        return DS.is_deep_space(self.world, galaxy, sector, self.cfg)
+
+    def sector_at(self, galaxy: Coord, sector: Coord) -> Sector | None:
+        """The generated sector, or the deep-space sector materialised on first use (D-156), or None outside the universe."""
+        galaxy, sector = (int(galaxy[0]), int(galaxy[1])), (int(sector[0]), int(sector[1]))
+        found = self.world.sector(galaxy, sector)
+        if found is not None:
+            return found
+        if not self.in_universe(galaxy, sector):
+            return None
+        key = (galaxy, sector)
+        sec = self.void_sectors.get(key)
+        if sec is None:
+            sec = DS.materialise(self.seed, galaxy, sector, self.cfg, removed=key in self.void_removed)
+            self.void_sectors[key] = sec
+        return sec
+
     def sector_of(self, ship) -> Sector | None:
-        return self.world.sector(ship.galaxy, ship.sector)
+        return self.sector_at(ship.galaxy, ship.sector)
 
     def terrain_of(self, ship) -> list:
         sector = self.sector_of(ship)
         return sector.terrain() if sector is not None else []
+
+    def note_pickup(self, sector: Sector) -> None:
+        """D-156 / IT-05: a stack taken from a deep-space sector is recorded by coordinates so it never respawns (C6)."""
+        if sector.kind == VOID:
+            self.void_removed.add((sector.galaxy, sector.coord))
 
     def is_visited(self, galaxy: Coord, sector: Coord) -> bool:
         return sector in self.visited.get(galaxy, set())
@@ -142,6 +194,29 @@ class GameState:
             s = self.ships[sid]
             out.setdefault((s.galaxy, s.sector), []).append(s)
         return out
+
+    # ---- the endgame (EG-01...08, C12)
+    def guardians(self) -> list[Captain]:
+        """Captains flagged guardian still in the game (D-158)."""
+        return [self.captains[cid] for cid in sorted(self.captains) if self.captains[cid].guardian]
+
+    def guardians_alive(self) -> int:
+        if self.lodestone is None:
+            return 0
+        return sum(1 for cid in self.lodestone.get("guardians") or [] if cid in self.captains)
+
+    def population(self) -> int:
+        """C12: the captain count the report and the population bound use - guardians excluded (D-158)."""
+        return sum(1 for c in self.captains.values() if not c.guardian)
+
+    def lodestone_row(self) -> dict | None:
+        """C12 ``lodestone``: {sector, cell, distance, placed_turn, guardians, guardians_alive, picked_up_turn} or None."""
+        if self.lodestone is None:
+            return None
+        ld = self.lodestone
+        return {"sector": str(ld["sector"]), "cell": [int(ld["cell"][0]), int(ld["cell"][1])], "distance": int(ld["distance"]),
+                "placed_turn": int(ld["placed_turn"]), "guardians": [str(g) for g in ld.get("guardians") or []],
+                "guardians_alive": self.guardians_alive(), "picked_up_turn": ld.get("picked_up_turn")}
 
     # ---- planets (C11, CM-11, D-140, D-145)
     def planet(self, planet_id: str) -> Planet | None:
@@ -206,9 +281,9 @@ class GameState:
         return holder.name if holder is not None else side_id
 
     def trades_with_player(self, planet: Planet) -> bool:
-        """EF-04 / PR-05 / TR-10 for the player's current respect."""
+        """EF-04 / PR-05 / TR-10 for the player's current respect; a Master trades everywhere (EF-06)."""
         cap = self.player
-        return not planet.destroyed and (bool(cap.is_master) or int(cap.respect) >= int(self.cfg.planet_refuse_respect))
+        return not planet.destroyed and (bool(cap.master) or int(cap.respect) >= int(self.cfg.planet_refuse_respect))
 
     def docked_planet(self) -> Planet | None:
         """The live planet in the player's active ship's cell (PR-04; the T4 panel and heartbeat)."""
@@ -288,17 +363,22 @@ class GameState:
         return cap, was_active
 
     # ---- debug affordances before turn 1 (C9, C10, C11)
+    def _debug_sector(self, flag: str, galaxy: Coord, sector: Coord, cell: Coord) -> Sector:
+        target = self.sector_at(galaxy, sector)
+        if target is None:
+            raise ValueError(f"{flag}: galaxy {galaxy[0]},{galaxy[1]} sector {sector[0]},{sector[1]} is outside the universe (CMD-07, VW-01)")
+        if not target.grid.in_bounds(cell[0], cell[1]):
+            raise ValueError(f"{flag}: cell {cell[0]},{cell[1]} is outside the {target.grid.width}x{target.grid.height} sector")
+        return target
+
     def teleport(self, position: Position) -> Ship:
-        """D-104 debug: place the player's active ship before turn 1 (C9 ``--teleport``); a terrain cell is allowed."""
+        """D-104 debug: place the player's active ship before turn 1 (C9 ``--teleport``); a terrain cell is allowed, and so is a
+        deep-space sector (D-153)."""
         ship = self.active_ship()
         if ship is None:
             raise ValueError("--teleport: the player has no active ship")
         galaxy, sector, cell = position
-        target = self.world.sector(galaxy, sector)
-        if target is None:
-            raise ValueError(f"--teleport: no sector at galaxy {galaxy[0]},{galaxy[1]} sector {sector[0]},{sector[1]} (Void or outside the universe)")
-        if not target.grid.in_bounds(cell[0], cell[1]):
-            raise ValueError(f"--teleport: cell {cell[0]},{cell[1]} is outside the {target.grid.width}x{target.grid.height} sector")
+        self._debug_sector("--teleport", galaxy, sector, cell)
         ship.position = (galaxy, sector, cell)
         ship.hazard_turns = 0
         ship.hazard_key = None
@@ -309,11 +389,7 @@ class GameState:
         """D-126 debug ``--spawn``: an AI captain with one ship of ``class_name`` at ``position`` before turn 1 (C10 ``spawned``)."""
         spec = self.cfg.ship_class(class_name)
         galaxy, sector, cell = position
-        target = self.world.sector(galaxy, sector)
-        if target is None:
-            raise ValueError(f"--spawn: no sector at galaxy {galaxy[0]},{galaxy[1]} sector {sector[0]},{sector[1]} (Void or outside the universe)")
-        if not target.grid.in_bounds(cell[0], cell[1]):
-            raise ValueError(f"--spawn: cell {cell[0]},{cell[1]} is outside the {target.grid.width}x{target.grid.height} sector")
+        self._debug_sector("--spawn", galaxy, sector, cell)
         rng = spawn_rng(self.seed, len(self.spawned) + 1)
         used_c = {c.name for c in self.captains.values()}
         used_s = {s.name for s in self.ships.values()}
@@ -376,7 +452,7 @@ class GameState:
         anchor = hz.cell if hz is not None else here
         return max(free, key=lambda c: (chebyshev(c, anchor), manhattan(c, anchor), -c[0], -c[1]))
 
-    # ---- snapshot (C3, C9, C10, C11)
+    # ---- snapshot (C3, C9, C10, C11, C12)
     def planet_records(self) -> dict[str, dict]:
         """C11 ``planets``: the touched planets, every planet in an open battle, and the planet under the player's active ship (D-150)."""
         ids = set(self.touched_planets)
@@ -401,7 +477,8 @@ class GameState:
         return out
 
     def snapshot(self) -> dict:
-        """The C3 snapshot: full dynamic state plus visited sectors' terrain and items (D-87)."""
+        """The C3 snapshot: full dynamic state plus visited sectors' terrain and items (D-87); deep-space sectors visited are listed
+        with kind 'void' (C12)."""
         galaxies: dict[str, dict] = {}
         for gcoord in self.world.galaxy_coords():
             static = self.world.static_galaxies[galaxy_key(gcoord)]
@@ -413,7 +490,7 @@ class GameState:
         sectors: dict[str, dict] = {}
         for gcoord in sorted(self.visited):
             for scoord in sorted(self.visited[gcoord]):
-                sector = self.world.sector(gcoord, scoord)
+                sector = self.sector_at(gcoord, scoord)
                 if sector is not None:
                     sectors[sector_key(gcoord, scoord)] = sector.to_dict()
         ships: dict[str, dict] = {}
@@ -434,12 +511,15 @@ class GameState:
             "galaxies": galaxies,
             "sectors": sectors,
             "planets": self.planet_records(),
+            "deep_space": {"removed": sorted(sector_key(g, s) for g, s in self.void_removed)},
             "fog_of_war": self.cfg.fog_of_war,
             "view": dict(self.view),
             "counters": {"captain": self.next_captain_no, "ship": self.next_ship_no, "battle": self.next_battle_no},
             "battles": [self.battles[bid].to_dict() for bid in sorted(self.battles) if self.battles[bid].open],
             "game_over_turn": self.game_over_turn,
             "mastery_turn": self.mastery_turn,
+            "eligible_turn": self.eligible_turn,
+            "lodestone": self.lodestone_row(),
             "game_over": self.game_over,
             "player_mutinies": self.player_mutinies,
             "spawned": [dict(s) for s in self.spawned],
@@ -473,6 +553,21 @@ def _parse_coord(text: str) -> Coord:
     return int(a), int(b)
 
 
+def _merge_items(sector: Sector, saved_items: list) -> None:
+    """C11 / D-141 / C12: the saved list says which stacks remain and which are revealed; element and units come from the seed (or,
+    for the ultimate item, from its id - its cell is the saved one)."""
+    saved = {str(i.get("id")): i for i in saved_items if isinstance(i, dict)}
+    by_id = {i.id: i for i in sector.items}
+    merged: list[Item] = []
+    for iid, raw in saved.items():
+        item = by_id.get(iid)
+        if item is None:
+            item = lodestone_item((int(raw["cell"][0]), int(raw["cell"][1]))) if iid == LODESTONE_ID else Item.from_dict(raw)
+        item.revealed = bool(raw.get("revealed", False))
+        merged.append(item)
+    sector.items = merged
+
+
 def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
     """Rebuild a state whose ``snapshot()`` equals ``snap`` - C6 round trip (tests/test_save.py)."""
     seed = int(snap["seed"])
@@ -490,21 +585,22 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
         cells = {(int(c[0]), int(c[1])) for c in g.get("visited") or []}
         if cells:
             visited[_parse_coord(gkey)] = cells
+    removed: set[tuple[Coord, Coord]] = set()
+    for key in (snap.get("deep_space") or {}).get("removed") or []:
+        try:
+            removed.add(parse_sector_key(key))
+        except ValueError:
+            continue
+    void_sectors: dict[tuple[Coord, Coord], Sector] = {}
     for key, sec in snap.get("sectors", {}).items():
-        gtext, stext = key.split("/")
-        sector = world.sector(_parse_coord(gtext), _parse_coord(stext))
+        g, s = parse_sector_key(key)
+        sector = world.sector(g, s)
+        if sector is None and DS.in_universe(g, s, cfg):
+            # C12 / D-156: a visited deep-space sector comes back from its own stream, minus the stack recorded as removed
+            sector = DS.materialise(seed, g, s, cfg, removed=(g, s) in removed)
+            void_sectors[(g, s)] = sector
         if sector is not None:
-            # C11 / D-141: the saved list says which stacks remain and which are revealed; element and units come from the seed
-            saved = {str(i.get("id")): i for i in (sec.get("items") or []) if isinstance(i, dict)}
-            by_id = {i.id: i for i in sector.items}
-            merged: list[Item] = []
-            for iid, raw in saved.items():
-                item = by_id.get(iid)
-                if item is None:
-                    item = Item.from_dict(raw)
-                item.revealed = bool(raw.get("revealed", False))
-                merged.append(item)
-            sector.items = merged
+            _merge_items(sector, sec.get("items") or [])
     touched: set[str] = set()
     for pid, rec in sorted((snap.get("planets") or {}).items()):
         planet = world.planets.get(pid)
@@ -521,6 +617,11 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
     for b in snap.get("battles") or []:
         bt = Battle.from_dict(b)
         battles[bt.id] = bt
+    lodestone = snap.get("lodestone") if isinstance(snap.get("lodestone"), dict) else None
+    if lodestone is not None:
+        lodestone = {"sector": str(lodestone["sector"]), "cell": (int(lodestone["cell"][0]), int(lodestone["cell"][1])),
+                     "distance": int(lodestone.get("distance") or 0), "placed_turn": int(lodestone.get("placed_turn") or 0),
+                     "guardians": [str(g) for g in lodestone.get("guardians") or []], "picked_up_turn": lodestone.get("picked_up_turn")}
     return GameState(
         cfg, seed, world, captains, ships, str(snap["player_id"]),
         turn_no=turn_no, visited=visited, view=dict(snap.get("view") or {"level": "follow"}),
@@ -528,6 +629,8 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
         next_ship_no=int(counters.get("ship") or (len(ships) + 1)),
         next_battle_no=int(counters.get("battle") or (len(battles) + 1)),
         queues=queues, battles=battles, game_over_turn=snap.get("game_over_turn"), mastery_turn=snap.get("mastery_turn"),
+        eligible_turn=snap.get("eligible_turn"), lodestone=lodestone,
         player_mutinies=int(snap.get("player_mutinies") or 0), spawned=[dict(s) for s in snap.get("spawned") or []],
         pending_reputation=[dict(r) for r in snap.get("pending_reputation") or []], touched_planets=touched,
+        void_sectors=void_sectors, void_removed=removed,
     )

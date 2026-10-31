@@ -22,7 +22,9 @@ from starbour.engine import economy as E
 from starbour.engine import items as I
 from starbour.engine import movement as MV
 from starbour.engine.state import GameState
+from starbour.entities.item import LODESTONE_ID
 from starbour.entities.planet import Planet
+from starbour.world.generate import VOID
 from starbour.world.grid import chebyshev
 
 
@@ -169,8 +171,7 @@ def validate(state: GameState, order: Order, cfg: GameConfig) -> str | None:
             return f"galaxy {gx},{gy} is outside the universe {uw}x{uh} (CMD-07, VW-01)"
         if not (0 <= sx < gw and 0 <= sy < gh):
             return f"sector {sx},{sy} is outside the galaxy {gw}x{gh} (CMD-07, VW-02)"
-        if state.world.sector((gx, gy), (sx, sy)) is None:
-            return f"destination {gx},{gy}/{sx},{sy} is Void - there is no sector there (CMD-07, WG-02)"
+        # D-153: a Void cell is deep space, a valid destination like any other - only out-of-bounds is rejected (WG-02)
         if (gx, gy) == ship.galaxy and (sx, sy) == ship.sector:
             return f"the {ship.name} is already in sector {gx},{gy}/{sx},{sy} (CMD-07)"
         pull = state.pull_at(ship)
@@ -288,6 +289,8 @@ def validate(state: GameState, order: Order, cfg: GameConfig) -> str | None:
         if I.revealed_stack(sector, ship.cell, element) is None:
             seen = ", ".join(sorted({i.element for i in stacks if i.revealed}))
             return f"no scanned {element} here; the scan found {seen} (CMD-15)"
+        if element == LODESTONE_ID and state.guardians_alive() > 0:
+            return "the guardians still hold the sector (CM-13)"
         return None
     return f"{order.command} cannot be queued yet ({order.command} arrives in a later milestone)"
 
@@ -455,9 +458,10 @@ def scan_text(state: GameState, ship, cfg: GameConfig) -> str:
     captain in the sector with fear and respect."""
     sector = state.sector_of(ship)
     found: list[str] = []
+    deep = sector is not None and sector.kind == VOID
     if sector is not None:
         state.mark_visited(ship.galaxy, ship.sector)
-        found = [I.item_text(item) for item in I.reveal(sector, ship.cell)]
+        found = [I.item_text(item, cfg) for item in I.reveal(sector, ship.cell)]
         terrain = sector.terrain_at(ship.cell)
     else:
         terrain = None
@@ -482,8 +486,13 @@ def scan_text(state: GameState, ship, cfg: GameConfig) -> str:
         bt = C.open_battle_between(state, ship.captain_id, cap.id)
         others.append(f"{cap.name} ({cap.id}) in the {s.name} ({sid}, {s.cls.capitalize()}) {chebyshev(s.cell, ship.cell)} cells away: "
                       f"fear {cap.fear}, respect {cap.respect}, shields {s.shield_current:g}/{s.shield_max:g}" + (f", in battle {bt.id} with you" if bt else ""))
-    text = (f"Scan: {len(found)} item(s) in this cell: {', '.join(found)} - 'pickup <element>' takes a stack{here}{warn}" if found
-            else f"Scan: nothing to pick up in cell {ship.cell[0]},{ship.cell[1]}{here}{warn}")
+    where = f"deep space {ship.galaxy[0]},{ship.galaxy[1]}/{ship.sector[0]},{ship.sector[1]}" if deep else f"cell {ship.cell[0]},{ship.cell[1]}"
+    if found:
+        text = f"Scan: {where} - {len(found)} item(s) in this cell: {', '.join(found)} - 'pickup <element>' takes a stack{here}{warn}"
+    elif deep:
+        text = f"Scan: {where} - nothing here, no star, planet or hazard (OUT-10, D-153){warn}"      # D-156: a drifting stack lies in some deep-space sectors
+    else:
+        text = f"Scan: nothing to pick up in {where}{here}{warn}"
     if others:
         text += "; captains in this sector (LV-04): " + " | ".join(others)
     else:

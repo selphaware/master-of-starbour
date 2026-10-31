@@ -77,7 +77,11 @@ def test_roaming_schedule_and_destinations(small_state: GameState, small_cfg: Ga
         dest = ai.roam_destination(ship, small_state, game_rng(_), small_cfg, 0.0)
         if dest is None:
             continue
-        assert dest != (ship.galaxy, ship.sector) and not small_state.world.sectors[dest].has_hole(), "never a sector holding a hole (D-125)"
+        assert dest != (ship.galaxy, ship.sector)
+        if dest in small_state.world.sectors:
+            assert not small_state.world.sectors[dest].has_hole(), "never a sector holding a hole (D-125)"
+        else:
+            assert small_state.is_deep_space(*dest), "a roam outside the generated sectors is a deep-space destination (D-156)"
     assert ai.roam_destination(ship, small_state, game_rng(1), small_cfg, ship.warp) is None, "effective factor <= 0: no roam (HZ-10)"
     state, _ = resolve_turn(small_state, small_cfg, game_rng(7), ai_player=False)
     while state.turn_no < every + 1:

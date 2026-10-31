@@ -32,7 +32,7 @@ from starbour.entities.captain import Captain
 from starbour.entities.planet import Planet
 from starbour.entities.ship import Ship
 from starbour.world import names
-from starbour.world.generate import flatten_cell
+from starbour.world.generate import VOID, flatten_cell
 from starbour.world.grid import Coord, chebyshev, free_cell_at_distance, nearest_free_cell
 from starbour.world.stellar import WORMHOLE
 
@@ -68,9 +68,10 @@ def sector_text(galaxy: Coord, sector: Coord) -> str:
 # --------------------------------------------------------------------------- TP-01 orders
 
 def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: list[dict], stats: dict,
-                 ai_player: bool, ai_passive: bool = False) -> dict[str, list[Order]]:
+                 ai_player: bool | str, ai_passive: bool = False) -> dict[str, list[Order]]:
     """TP-01: the player's queued orders (persisting moves included, D-98) plus every AI captain's decisions (OV-10, D-125)
-    and every planet's (EF-05, CM-11, D-145)."""
+    and every planet's (EF-05, CM-11, D-145).  ``ai_player`` False | True / 'starve' | 'trade' (C12, D-161): the AI drives the
+    player's ship, trading like any AI captain only in 'trade' mode."""
     by_ship: dict[str, list[Order]] = take_all(state)
     player_count = sum(len(q) for q in by_ship.values())
     index = state.ships_by_sector()
@@ -78,7 +79,8 @@ def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: 
     roamers: set[str] = stats.setdefault("roamers", set())
     econ = stats["ai_economy"]
     if ai_player and not state.game_over:
-        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index, trace=trace, roamers=roamers, stats=econ):
+        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index, trace=trace, roamers=roamers, stats=econ,
+                               trade=(ai_player == "trade")):
             if order.ship_id not in by_ship:
                 by_ship[order.ship_id] = [order]
                 player_count += 1
@@ -222,13 +224,13 @@ def resolve_warp(state: GameState, cfg: GameConfig, ship: Ship, order: Order, ev
     factor = min(warp_factor(spec.factor, ship.warp), ship.warp)
     pull = state.pull_at(ship)
     dest_g, dest_s = spec.galaxy, spec.sector
-    sector = state.world.sector(dest_g, dest_s)
+    sector = state.sector_at(dest_g, dest_s)        # D-153: a Void cell is deep space, materialised on arrival (D-156)
     distance = MV.warp_distance(ship.galaxy, ship.sector, dest_g, dest_s, cfg.galaxy_size)
     ok, eff, reach = MV.within_reach(distance, factor, pull, cfg.warp_curve_base, cfg.warp_curve_exponent)
     here = sector_text(ship.galaxy, ship.sector)
     there = sector_text(dest_g, dest_s)
     if sector is None:
-        events.append(event("TP-02", "error", "error", f"{ship.name}: warp to {there} impossible - no sector there (CMD-07)", ["CMD-07"]))
+        events.append(event("TP-02", "error", "error", f"{ship.name}: warp to {there} impossible - outside the universe (CMD-07, VW-01)", ["CMD-07"]))
         return False
     if eff <= 0:
         if visible:
@@ -250,17 +252,23 @@ def resolve_warp(state: GameState, cfg: GameConfig, ship: Ship, order: Order, ev
     ship.position = (dest_g, dest_s, cell)
     ship.hazard_turns = 0
     ship.hazard_key = None
+    deep = sector.kind == VOID
     if ship.captain_id == state.player_id:
         state.mark_visited(dest_g, dest_s)
+        if deep and ship.id == state.player.active_ship:
+            stats["void_visits"] = True                 # C12: the player entered a deep-space sector this turn
+    elif deep:
+        stats["ai_void_visits"] = stats.get("ai_void_visits", 0) + 1   # C12: an AI arrival in deep space (D-156)
     if ship.id in stats.get("roamers", ()):
         stats["roams"] = stats.get("roams", 0) + 1     # C10: AI roams (CFG-73, D-125); a restock warp is not a roam (D-144)
     stats["warps"].append({"ship": ship.id, "captain": ship.captain_id, "from": [[old_g[0], old_g[1]], [old_s[0], old_s[1]]],
                            "to": [[dest_g[0], dest_g[1]], [dest_s[0], dest_s[1]]], "factor": float(factor), "effective": round(eff, 3)})
     if visible:
         netted = f", effective {eff:.2f} after pull {pull:.2f}" if pull > 0 else f", effective {eff:g}"
+        kind = " - deep space: no star, planet or hazard here (D-153)" if deep else ""
         events.append(event("TP-02", "warp", "info",
                             f"{ship.name} warped {here} -> {there}: {distance} sectors at factor {factor:g}{netted}; arrived at cell "
-                            f"{cell[0]},{cell[1]} nearest the centre (MV-05)", ["CMD-07", "MV-02", "MV-05", "OUT-02"]))
+                            f"{cell[0]},{cell[1]} nearest the centre (MV-05){kind}", ["CMD-07", "MV-02", "MV-05", "OUT-02"] + (["D-153"] if deep else [])))
     return True
 
 
@@ -516,6 +524,7 @@ def resolve_economy_order(state: GameState, cfg: GameConfig, rng: random.Random,
                                     ["OUT-10", "CMD-15", "IT-04"]))
             return
         row, rep = I.pickup(sector, cap, stack, cfg)
+        state.note_pickup(sector)                       # D-156: a deep-space stack never respawns
         stats["pickups"].append(row)
         if rep is not None:
             stats["reputation"].append(rep)
@@ -526,21 +535,25 @@ def resolve_economy_order(state: GameState, cfg: GameConfig, rng: random.Random,
 
 
 def ai_pickups(state: GameState, cfg: GameConfig, cap: Captain, ship: Ship, stats: dict) -> None:
-    """D-144 [ASSUMED]: an AI ship scans its cell and picks up every stack lying there."""
+    """D-144 [ASSUMED]: an AI ship scans its cell and picks up every stack lying there - never the ultimate item (D-158)."""
     sector = state.sector_of(ship)
     if sector is None:
         return
     for item in I.reveal(sector, ship.cell):
+        if item.ultimate:
+            continue
         row, rep = I.pickup(sector, cap, item, cfg)
+        state.note_pickup(sector)
         stats["pickups"].append(row)
         if rep is not None:
             stats["reputation"].append(rep)
 
 
 def phase_trade(state: GameState, cfg: GameConfig, rng: random.Random, by_ship: dict[str, list[Order]], events: list[dict], stats: dict,
-                ai_passive: bool) -> None:
+                ai_passive: bool, ai_player: bool | str = False) -> None:
     """TP-05 / CMD-12/13/15/20 / D-144: the queued economy orders (ship-id order), then every AI captain's docking economy and
-    automatic pickups.  ``--ai passive`` keeps the AI out of the economy as it keeps it out of everything else (D-125, D-132)."""
+    automatic pickups - the AI-driven player's too with ``--ai-player trade`` (D-161).  ``--ai passive`` keeps the AI out of the
+    economy as it keeps it out of everything else (D-125, D-132)."""
     watched = _watched(state)
     for sid in sorted(by_ship):
         ship = state.ships.get(sid)
@@ -558,7 +571,7 @@ def phase_trade(state: GameState, cfg: GameConfig, rng: random.Random, by_ship: 
     if not ai_passive:
         for cid in sorted(state.captains):
             cap = state.captains[cid]
-            if cap.is_player:
+            if cap.is_player and ai_player != "trade":
                 continue
             for sid in list(cap.ships):
                 ship = state.ships.get(sid)
@@ -724,7 +737,7 @@ def phase_reputation(state: GameState, cfg: GameConfig, events: list[dict], stat
 
 # --------------------------------------------------------------------------- the turn
 
-def resolve_turn(state: GameState, cfg: GameConfig, rng: random.Random, *, ai_player: bool = False,
+def resolve_turn(state: GameState, cfg: GameConfig, rng: random.Random, *, ai_player: bool | str = False,
                  ai_passive: bool = False) -> tuple[GameState, list[dict]]:
     """Resolve one turn in the fixed order TP-01...08 (OV-02); ``state.turn_no`` increments first."""
     state.turn_no += 1
@@ -734,13 +747,14 @@ def resolve_turn(state: GameState, cfg: GameConfig, rng: random.Random, *, ai_pl
                    "wormhole_crossings": 0, "battles": [], "reputation": list(state.pending_reputation), "captures": [], "roams": 0,
                    "battles_opened": 0, "ai_vs_ai_opened": 0, "exchanges": 0,
                    "trades": [], "pickups": [], "upgrades": [], "planet_events": [], "planets_destroyed": 0,
-                   "ai_economy": {"purchases": 0, "sales": 0, "restock_trips": 0, "docked": 0}, "roamers": set()}
+                   "ai_economy": {"purchases": 0, "sales": 0, "restock_trips": 0, "docked": 0}, "roamers": set(),
+                   "void_visits": False, "ai_void_visits": 0}
     state.pending_reputation = []
     by_ship = phase_orders(state, cfg, rng, events, stats, ai_player, ai_passive)
     phase_movement(state, cfg, by_ship, events, stats)
     phase_hazards(state, cfg, events, stats)
     phase_combat(state, cfg, rng, by_ship, events, stats)
-    phase_trade(state, cfg, rng, by_ship, events, stats, ai_passive)
+    phase_trade(state, cfg, rng, by_ship, events, stats, ai_passive, ai_player)
     phase_upkeep(state, cfg, rng, events, stats, ai_passive)
     phase_recharge(state, cfg, events, stats)
     phase_reputation(state, cfg, events, stats)

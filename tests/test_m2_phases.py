@@ -392,8 +392,12 @@ def test_warp_rejections_name_cmd_07(small_state: GameState, small_cfg: GameConf
         if void:
             break
     if void is not None:
-        rej = O.submit(small_state, parse(f"warp {void[0][0]} {void[0][1]} {void[1][0]} {void[1][1]}", ship.id), small_cfg)
-        assert isinstance(rej, O.Rejected) and "Void" in rej.reason
+        # M5 / D-153: a Void cell is deep space - a valid destination like any other (only reach and bounds apply)
+        got = O.submit(small_state, parse(f"warp {void[0][0]} {void[0][1]} {void[1][0]} {void[1][1]} 10", ship.id), small_cfg)
+        assert isinstance(got, O.Rejected) and "warpcore_power" in got.reason, "factor 10 still exceeds a Kestrel's warp core (CMD-07)"
+        got = O.submit(small_state, parse(f"warp {void[0][0]} {void[0][1]} {void[1][0]} {void[1][1]}", ship.id), small_cfg)
+        assert isinstance(got, O.Accepted) or "beyond the reach" in got.reason, "deep space is rejected only for reach, never for being Void (D-153)"
+        O.clear(small_state)
     same = O.submit(small_state, parse(f"warp {here[0][0]} {here[0][1]} {here[1][0]} {here[1][1]}", ship.id), small_cfg)
     assert isinstance(same, O.Rejected)
     # beyond reach: the farthest sector in a 2 x 2 universe of 3 x 3 galaxies is > 3.07 away for a Kestrel (warp 3)

@@ -57,6 +57,8 @@ class Recorder:
     planets_destroyed: int = 0
     ai_purchases: int = 0
     ai_mutinies: int = 0
+    ai_void_visits: int = 0        # C12: AI arrivals in deep space (D-156)
+    guardians_destroyed: int = 0   # C12: guardian ships destroyed (EG-06)
     captains_start: int = 0
     population_min: int | None = None
     population_max: int | None = None
@@ -70,8 +72,8 @@ class Recorder:
         self.notes.append(text)
 
     def start(self, state: GameState) -> None:
-        """C11: the captain count at turn 0 (after any --spawn) and the population bounds from it."""
-        n = len(state.captains)
+        """C11 / C12: the captain count at turn 0 (after any --spawn, guardians excluded) and the population bounds from it."""
+        n = state.population()
         self.captains_start = n
         self.population_min = n if self.population_min is None else min(self.population_min, n)
         self.population_max = n if self.population_max is None else max(self.population_max, n)
@@ -93,7 +95,9 @@ class Recorder:
         self.planets_destroyed += int(stats.get("planets_destroyed") or 0)
         self.ai_purchases += int((stats.get("ai_economy") or {}).get("purchases", 0))
         self.ai_mutinies += sum(1 for m in (stats.get("mutinies") or []) if str(m.get("captain")) != "player")
-        n = len(state.captains)
+        self.ai_void_visits += int(stats.get("ai_void_visits") or 0)
+        self.guardians_destroyed += int(stats.get("guardians_destroyed") or 0)
+        n = state.population()       # C12: guardians excluded (D-158)
         self.population_min = n if self.population_min is None else min(self.population_min, n)
         self.population_max = n if self.population_max is None else max(self.population_max, n)
         for b in battles:
@@ -122,11 +126,14 @@ class Recorder:
             "elapsed_s": round(time.perf_counter() - self.started, 3),
             "per_turn": self.per_turn,
             "final": {
-                "captains": len(state.captains),
+                "captains": state.population(),
                 "ships": len(state.ships),
                 "mutinies": list(self.mutinies),
                 "game_over_turn": state.game_over_turn,
                 "mastery_turn": state.mastery_turn,
+                "eligible_turn": state.eligible_turn,
+                "ai_void_visits": self.ai_void_visits,
+                "guardians_destroyed": self.guardians_destroyed,
                 "game_over_cause": self.game_over_cause,
                 "hazard_deaths": self.hazard_deaths,
                 "warps": self.warps,
@@ -144,8 +151,8 @@ class Recorder:
                 "planets_destroyed": self.planets_destroyed,
                 "ai_purchases": self.ai_purchases,
                 "ai_mutinies": self.ai_mutinies,
-                "population_min": self.population_min if self.population_min is not None else len(state.captains),
-                "population_max": self.population_max if self.population_max is not None else len(state.captains),
+                "population_min": self.population_min if self.population_min is not None else state.population(),
+                "population_max": self.population_max if self.population_max is not None else state.population(),
                 "captains_start": self.captains_start,
             },
             "spawned": [dict(s) for s in self.spawned],
@@ -179,10 +186,11 @@ def read_script(path: Path) -> list[str]:
     return out
 
 
-def world_index(state: GameState, cfg: GameConfig) -> dict:
+def world_index(state: GameState, cfg: GameConfig, voids: bool = False) -> dict:
     """C9 / C11 ``--world-index``: stars, black holes (wormholes with their exit), neutron stars, planets (with id, stock and
     defence) and items (element, units, rarity - fog ignored), nearest to the player's start first (Chebyshev on the flattened
-    cell grid), at most 200 per list."""
+    cell grid), at most 200 per list.  ``voids`` (C12 ``--world-index voids``, D-162 (1)) adds the start galaxy's deep-space
+    sectors with their would-be content."""
     ship = state.active_ship()
     start: Position = ship.position if ship else ((0, 0), (0, 0), (0, 0))
     origin = flatten_cell(start, cfg)
@@ -224,17 +232,22 @@ def world_index(state: GameState, cfg: GameConfig) -> dict:
         entries.sort(key=lambda kv: kv[0])
         return [e for _, e in entries[:INDEX_LIMIT]]
 
-    return {"player_start": [[start[0][0], start[0][1]], [start[1][0], start[1][1]], [start[2][0], start[2][1]]],
-            "stars": top(stars), "black_holes": top(holes), "neutron_stars": top(neutrons), "planets": top(planets), "items": top(items)}
+    out = {"player_start": [[start[0][0], start[0][1]], [start[1][0], start[1][1]], [start[2][0], start[2][1]]],
+           "stars": top(stars), "black_holes": top(holes), "neutron_stars": top(neutrons), "planets": top(planets), "items": top(items)}
+    if voids:
+        from starbour.world.deepspace import void_index
+        out["voids"] = void_index(state.seed, state.world, start[0], cfg)
+    return out
 
 
-def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool, report_path: Path | None,
+def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool | str, report_path: Path | None,
             save_dir: Path, bus: bool = False, pub_port: int = 0, pull_port: int = 0, teleport: Position | None = None,
-            script_path: Path | None = None, with_world_index: bool = False, spawns: list[str] | None = None,
+            script_path: Path | None = None, with_world_index: bool | str = False, spawns: list[str] | None = None,
             ai_passive: bool = False, log_dir: Path | None = None, give: dict[str, int] | None = None, coins: tuple[int, int] | None = None,
             respect: int | None = None, fear: int | None = None) -> int:
-    """C2 / C9 / C10 / C11.  Always a new game (never resumes) so the gates compare like with like.
-    ``log_dir`` receives the gameplay logs (gamelog.py); None writes none."""
+    """C2 / C9 / C10 / C11 / C12.  Always a new game (never resumes) so the gates compare like with like.
+    ``ai_player`` is False, True / 'starve' (the non-trading driver) or 'trade' (D-161); ``with_world_index`` is False, True / 'all'
+    or 'voids' (C12).  ``log_dir`` receives the gameplay logs (gamelog.py); None writes none."""
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     recorder = Recorder(seed, str(cfg.path), turns)
@@ -251,7 +264,7 @@ def run_sim(cfg: GameConfig, *, seed: int, turns: int, ai_player: bool, report_p
         recorder.spawned = [dict(s) for s in engine.state.spawned]
         recorder.start(engine.state)
         if with_world_index:
-            recorder.world_index = world_index(engine.state, cfg)
+            recorder.world_index = world_index(engine.state, cfg, voids=(str(with_world_index).lower() == "voids"))
         engine.start()
         if bus:
             if script:

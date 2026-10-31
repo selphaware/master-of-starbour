@@ -60,7 +60,7 @@ def captain_panel(snapshot: dict, cap: dict, cfg: GameConfig, width: int) -> Pan
     eligible = fear >= cfg.fear_min and respect >= cfg.respect_min
     _kv(t, "Ultimate item", "eligible" if eligible else f"not yet (needs fear {cfg.fear_min}, respect {cfg.respect_min}, wealth {cfg.wealth_min_silver} silver)",
         P.STYLES["good"] if eligible else P.STYLES["label"])
-    if cap.get("is_master"):
+    if cap.get("master"):
         _kv(t, "Title", "Master of Starbour", P.STYLES["title"])
     return Panel(t, title="Captain", title_align="left", border_style=P.STYLES["accent"], width=min(width, PANEL_WIDTH))
 
@@ -80,6 +80,9 @@ def ship_panel(snapshot: dict, cap: dict, ship: dict | None, cfg: GameConfig, wi
         _kv(t, "Engine", f"{ship.get('engine', 0):g} / {cfg.impulse_max:g}")
         _kv(t, "Warp core", f"{ship.get('warp', 0):g} / {cfg.warp_max:g}")
         pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
+        key = f"{pos[0][0]},{pos[0][1]}/{pos[1][0]},{pos[1][1]}"
+        deep = ((snapshot.get("sectors") or {}).get(key) or {}).get("kind") == "void"
+        _kv(t, "Location", f"{'Deep space' if deep else 'System'} {key}", P.STYLES["void"] if deep else P.STYLES["value"])    # PNL-01, C12 (D-153)
         _kv(t, "Position", f"galaxy {pos[0][0]},{pos[0][1]}  sector {pos[1][0]},{pos[1][1]}  cell {pos[2][0]},{pos[2][1]}")
         if ship.get("in_battle"):
             _kv(t, "Battle", f"in battle {ship.get('in_battle')} - no shield recharge (CM-05)", P.STYLES["bad"])

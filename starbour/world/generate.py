@@ -26,16 +26,20 @@ FullCell = tuple[Coord, Coord, Coord]   # (galaxy, sector, cell)
 
 PLAYER_ID = "c-000"
 PLAYER_SHIP_ID = "s-000"
+SYSTEM = "system"   # C12 sectors[*].kind: a generated star system
+VOID = "void"       # C12 sectors[*].kind: a deep-space sector (D-153, starbour.world.deepspace)
 
 
 @dataclass(slots=True)
 class Sector:
-    """WG-03: at most one terrain object per cell; any number of items (and ships)."""
+    """WG-03: at most one terrain object per cell; any number of items (and ships).  ``kind`` is 'system' for a generated
+    sector and 'void' for a deep-space one materialised on demand (D-153, D-156)."""
 
     galaxy: Coord
     coord: Coord
     grid: GeneralGrid
     items: list[Item] = field(default_factory=list)
+    kind: str = SYSTEM
 
     @property
     def key(self) -> str:
@@ -66,7 +70,8 @@ class Sector:
         return [i for i in self.items if i.cell == tuple(cell)]
 
     def to_dict(self) -> dict:
-        return {"terrain": [t.to_dict() for t in self.grid.values()], "items": [i.to_dict() for i in self.items]}
+        """C3 / C12: terrain, items and the kind ('system' | 'void')."""
+        return {"kind": self.kind, "terrain": [t.to_dict() for t in self.grid.values()], "items": [i.to_dict() for i in self.items]}
 
 
 def sector_key(galaxy: Coord, coord: Coord) -> str:

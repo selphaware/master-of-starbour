@@ -124,7 +124,7 @@ class Engine:
     """One game, one engine (BUS-04)."""
 
     def __init__(self, cfg: GameConfig, *, seed: int | None = None, save_path: Path | None = None, pub_port: int = 0,
-                 pull_port: int = 0, bus: bool = True, ai_player: bool = False, max_turns: int | None = None,
+                 pull_port: int = 0, bus: bool = True, ai_player: bool | str = False, max_turns: int | None = None,
                  recorder: Any = None, resume: bool = True, launcher_pid: int | None = None,
                  teleport: Position | None = None, spawns: list[str] | None = None, ai_passive: bool = False,
                  log_dir: Path | None = None, give: dict[str, int] | None = None, coins: tuple[int, int] | None = None,
@@ -135,7 +135,7 @@ class Engine:
         self.gamelog: GameLogs | None = None
         self.want_pub, self.want_pull = pub_port, pull_port
         self.bus = bus
-        self.ai_player = ai_player
+        self.ai_player: bool | str = ("starve" if ai_player is True else ai_player) or False    # C12: False | 'starve' | 'trade' (D-161)
         self.ai_passive = ai_passive
         self.max_turns = max_turns
         self.recorder = recorder

@@ -61,7 +61,7 @@ def floor_silver(amount: float) -> int:
 
 def trades_with(planet: Planet, cap: Captain, cfg: GameConfig) -> bool:
     """EF-04 / PR-05 / TR-10: a live planet trades at respect >= planet_refuse_respect; after mastery every planet trades."""
-    return not planet.destroyed and (bool(cap.is_master) or int(cap.respect) >= int(cfg.planet_refuse_respect))
+    return not planet.destroyed and (bool(cap.master) or int(cap.respect) >= int(cfg.planet_refuse_respect))
 
 
 def refusal(planet: Planet, cap: Captain, cfg: GameConfig) -> str | None:
