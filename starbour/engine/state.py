@@ -389,10 +389,13 @@ class GameState:
         player = self.player
         disp = int(round(2 * player.respect - 100))
         out: dict[str, dict] = {}
+        keep = {docked.id} if docked is not None else set()
         for pid in sorted(ids):
             p = self.world.planets.get(pid)
             if p is None:
                 continue
+            if pid not in keep and pid in self.touched_planets and p.untouched(self.cfg, self.turn_no) and self.battle_of_ship(p) is None:
+                continue      # D-150 (2): back on the seed's trajectory (stock regenerated, shields full, nothing sold to it) - the seed supplies it
             bt = self.battle_of_ship(p) if not p.destroyed else None
             out[pid] = p.record(self.cfg, self.turn_no, disposition=disp, trades=self.trades_with_player(p), in_battle=bt.id if bt else None)
         return out

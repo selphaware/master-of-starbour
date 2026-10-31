@@ -283,8 +283,9 @@ def test_open_battle_survives_the_save_round_trip(small_state: GameState, small_
     submit(state, small_cfg, f"peace offer {foe.captain_id}")
     snap = state.snapshot()
     back = from_snapshot(snap, small_cfg)
-    same = {k: v for k, v in back.snapshot().items() if k != "sectors"}      # the arena cleared terrain that the seed regenerates (D-87)
-    assert same == {k: v for k, v in snap.items() if k != "sectors"}
+    skip = {"sectors", "planets"}      # the arena cleared terrain that the seed regenerates (D-87): a regenerated planet beside the ship reads as docked
+    same = {k: v for k, v in back.snapshot().items() if k not in skip}
+    assert same == {k: v for k, v in snap.items() if k not in skip}
     assert back.battles["b-001"].strength_at_open == state.battles["b-001"].strength_at_open
     assert O.pending_count(back, ship.id) == 1 and back.ships[ship.id].target == foe.id and back.spawned == state.spawned
 

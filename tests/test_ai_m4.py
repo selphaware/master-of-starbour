@@ -98,6 +98,10 @@ def test_hostile_planet_cells_cover_its_range(small_state: GameState, small_cfg:
     from tests.test_economy import dock
     ship, planet = dock(small_state, small_cfg.planet_attack_respect_max - 5)
     cells = ai.hostile_planet_cells(small_state.player, ship, [ship], small_state, small_cfg)
-    assert planet.cell in cells and (planet.cell[0] + small_cfg.torpedo_range + 1, planet.cell[1]) not in cells
+    from starbour.world.grid import chebyshev
+    planets = small_state.planets_in(ship.galaxy, ship.sector)
+    assert planet.cell in cells
+    assert all(any(chebyshev(c, p.cell) <= small_cfg.phaser_range for p in planets) for c in cells), "EF-05 is point-blank: phaser range only (D-150 (14))"
+    assert all(chebyshev(c, planet.cell) > small_cfg.phaser_range or c in cells for c in ((x, y) for x in range(20) for y in range(20)))
     small_state.player.respect = small_cfg.planet_attack_respect_max
     assert ai.hostile_planet_cells(small_state.player, ship, [ship], small_state, small_cfg) == set()

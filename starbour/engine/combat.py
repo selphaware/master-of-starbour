@@ -598,7 +598,8 @@ def _escapes(t: Turn, escapes: set[str]) -> None:
 def _exchange(t: Turn, fires: list) -> None:
     """CM-06 / D-120: all torpedoes of both sides, then all phasers; attacker id order; HZ-09 after each landing hit."""
     st = t.state
-    alive_at_start = {cid for cid in list(st.ships) + [p.id for p in st.world.planets.values() if not p.destroyed] if t.alive(cid)}
+    # only firers are looked up below, so only they are tested (a scan of every planet cost ~30 ms a turn)
+    alive_at_start = {ship.id for ship, _ in fires if t.alive(ship.id)}
     plans: list = []
     for ship, order in sorted(fires, key=lambda so: so[0].id):
         if ship.id not in alive_at_start:

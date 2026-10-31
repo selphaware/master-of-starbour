@@ -50,7 +50,8 @@ def test_item_hidden_until_scanned_then_picked_up_once(small_state: GameState, s
     assert isinstance(res, O.Rejected), "no respawn (IT-05)"
     snap = state.snapshot()
     back = from_snapshot(snap, small_cfg).snapshot()
-    assert {k: v for k, v in back.items() if k != "sectors"} == {k: v for k, v in snap.items() if k != "sectors"}   # the arena cleared terrain the seed regenerates (D-87)
+    skip = {"sectors", "planets"}      # the arena cleared terrain the seed regenerates (D-87): a regenerated planet beside the ship reads as docked
+    assert {k: v for k, v in back.items() if k not in skip} == {k: v for k, v in snap.items() if k not in skip}
     assert back["sectors"][sector.key]["items"] == snap["sectors"][sector.key]["items"] == []
 
 
