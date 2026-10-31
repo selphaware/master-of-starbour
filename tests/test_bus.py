@@ -72,7 +72,8 @@ def test_hello_three_turns_accepted_rejected(engine: Engine) -> None:
         client.send(M.ORDER_SUBMITTED, {"command": "move", "args": ["99", "0"], "ship_id": sid, "turn_no": 0, "client": "command"})
         rej = client.wait_for(M.ORDER_REJECTED, 5)
         assert rej is not None and "CMD-06" in rej["reason"]
-        client.send(M.ORDER_SUBMITTED, {"command": "warp", "args": ["1", "1", "1", "1"], "ship_id": sid, "turn_no": 0, "client": "command"})
+        uw, uh = hello["snapshot"]["sizes"]["universe"]
+        client.send(M.ORDER_SUBMITTED, {"command": "warp", "args": [str(uw), str(uh), "0", "0"], "ship_id": sid, "turn_no": 0, "client": "command"})   # outside the universe (D-153: Void cells are destinations now)
         rej = client.wait_for(M.ORDER_REJECTED, 5)
         assert rej is not None and "CMD-07" in rej["reason"]
         turn = 0
