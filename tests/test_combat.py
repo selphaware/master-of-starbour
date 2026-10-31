@@ -156,7 +156,7 @@ def test_destruction_loots_the_victim_and_removes_the_captain(small_state: GameS
     ship = arena(small_state)
     cap, foe = spawn(small_state, "corsair", (5, 5), torpedoes=0, engine=0)   # immobile: at 0 shields a mobile AI would flee (EF-02)
     foe.shield_current = 0.0
-    cap.items = ["iridium", "iridium"]
+    cap.items = {"iridium": 2}
     captains = len(small_state.captains)
     submit(small_state, small_cfg, f"fire phaser {foe.id}")
     state, events = run(small_state, small_cfg)
@@ -166,7 +166,7 @@ def test_destruction_loots_the_victim_and_removes_the_captain(small_state: GameS
     b = state.last_stats["battles"][0]
     assert b["ended"] == "destroyed" and b["victor"] == state.player_id and b["transfer"] == {"gold": 5, "silver": 50, "items": {"iridium": 2}, "pct": 100}
     p = state.player
-    assert (p.gold, p.silver, p.items) == (10, 100, ["iridium", "iridium"])
+    assert (p.gold, p.silver, p.items) == (10, 100, {"iridium": 2})
     assert (ship.torpedoes, ship.phasers, ship.engine, ship.warp, ship.shield_max) == (6, 5.0, 4.0, 5.0, 60.0), "max(own, victim) capped (CB-01)"
     assert ship.shield_current == 60.0 - 25.0, "the Corsair's phaser landed; loot never restores shields and no recharge on a battle turn"
     rows = {r["rule"] for r in state.last_stats["reputation"] if r["captain"] == state.player_id}
@@ -222,7 +222,7 @@ def test_peace_victor_is_the_side_that_did_not_offer(small_state: GameState, sma
     assert b["transfer"] == {"gold": 5 * pct // 100, "silver": 50 * pct // 100, "items": {}, "pct": pct}
     assert state.player.silver == 50 - 50 * pct // 100 and cap.silver == 50 + 50 * pct // 100
     assert [r["rule"] for r in state.last_stats["reputation"] if r["captain"] == cap.id] == ["FR-01", "FR-03"]
-    assert not state.battles and state.player.respect == 5
+    assert not state.battles and state.player.respect == small_cfg.respect_start - small_cfg.respect_start_fight_delta
 
 
 def test_mutual_peace_offers_make_peace_with_no_victor(small_state: GameState, small_cfg: GameConfig) -> None:

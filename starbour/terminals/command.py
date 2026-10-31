@@ -1,11 +1,12 @@
-"""T1 Command process - T1, UX-01...08, CMD-*, D-92, D-94, D-105, D-112.
+"""T1 Command process - T1, UX-01...09, CMD-*, D-92, D-94, D-105, D-112, D-137, D-146.
 
-prompt_toolkit prompt in the main thread (history, tab completion of commands and ship
-names); a daemon thread listens to the bus, keeps the latest snapshot and prints replies
-above the prompt via ``patch_stdout``.  ``end`` locks the prompt behind a spinner until
-``turn.resolved`` (UX-06) and asks first when a hazard countdown is running with no move
-or warp queued (CMD-17, UX-04).  After game over only ``new`` and ``quit`` do anything
-(CMD-19).  Without a console (MOS_HEADLESS=1 in tests) T1 only listens.
+prompt_toolkit prompt in the main thread (history, tab completion of commands, ship,
+planet and element names); a daemon thread listens to the bus, keeps the latest snapshot
+and prints replies above the prompt via ``patch_stdout``.  ``end`` locks the prompt behind
+a spinner until ``turn.resolved`` (UX-06) and asks first when a hazard countdown is running
+with no move or warp queued, or when the active ship is in a battle with no fire order
+queued (CMD-17, UX-04).  After game over only ``new`` and ``quit`` do anything (CMD-19).
+Without a console (MOS_HEADLESS=1 in tests) T1 only listens.
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ from starbour import runtime
 from starbour.bus import messages as M
 from starbour.bus.zmq_io import Pusher, Subscriber
 from starbour.commands.catalogue import available_names
-from starbour.commands.parse import CommandError, parse, parse_help, parse_view
+from starbour.commands.parse import WEAPON_WORDS, CommandError, parse, parse_help, parse_view
 from starbour.config import GameConfig
 from starbour.terminals import palette as P
 from starbour.terminals import render_command as RC
@@ -124,7 +125,8 @@ class CommandTerminal:
         return str(cap.get("active_ship") or "")
 
     def ship_names(self) -> list[str]:
-        """UX-05: owned ship names, plus the ids and names of every ship in the active ship's sector (fire / peace targets)."""
+        """UX-05: owned ship names, the ids and names of every ship, captain and planet in the active ship's sector (fire / peace /
+        trade targets) and the element names (buy / sell / upgrade / pickup)."""
         snap, _ = self.listener.current()
         if not snap:
             return []
@@ -137,6 +139,13 @@ class CommandTerminal:
             p = s.get("position") or []
             if len(p) == 3 and len(pos) == 3 and list(p[:2]) == list(pos[:2]) and s.get("captain") != snap.get("player_id"):
                 names += [sid, str(s.get("name", sid)), str(s.get("captain", ""))]
+        if len(pos) == 3:
+            key = f"{pos[0][0]},{pos[0][1]}/{pos[1][0]},{pos[1][1]}"
+            for pid, p in (snap.get("planets") or {}).items():
+                if isinstance(p, dict) and str(p.get("sector")) == key and not p.get("destroyed"):
+                    names += [pid, str(p.get("name", pid))]
+        names += sorted(self.cfg.elements) + ["food", "water", "torpedo", "gold", "silver", "ship", "with", "give", "for",
+                                                "torpedoes", "phasers", "shields", "engine", "warp"]
         return names
 
     def active_ship(self) -> dict | None:
@@ -157,6 +166,15 @@ class CommandTerminal:
         if any(o.get("command") in ("move", "warp") for o in ship.get("orders") or []):
             return None
         return ship["hazard"]
+
+    def battle_without_fire(self) -> dict | None:
+        """CMD-17 / UX-04 / D-146: the active ship when it is in a battle and no fire order is queued for it (fire orders last one turn, D-136)."""
+        ship = self.active_ship()
+        if not ship or not ship.get("in_battle"):
+            return None
+        if any(o.get("command") == "fire" for o in ship.get("orders") or []):
+            return None
+        return ship
 
     def send_order(self, command: str, args: list[str]) -> tuple[str, dict] | None:
         snap, turn_no = self.listener.current()
@@ -240,7 +258,7 @@ class CommandTerminal:
         session: PromptSession = PromptSession(history=FileHistory(str(history_path)))
 
         def completer() -> WordCompleter:
-            words = available_names() + ["universe", "galaxy", "sector", "follow", "cancel", "all", "status"] + self.ship_names()
+            words = available_names() + ["universe", "galaxy", "sector", "follow", "cancel", "all", "status", "offer", "accept", "reject"] + self.ship_names()
             return WordCompleter(words, ignore_case=True)
 
         while not self.listener.shutdown.is_set():
@@ -280,11 +298,12 @@ class CommandTerminal:
         snap, _ = self.listener.current()
         snap = snap or {}
         if cmd == "help":
-            for t in RC.help_text(parse_help(args), self.cfg):
+            for t in RC.help_text(parse_help(args), self.cfg, snap):
                 self.console.print(t)
         elif cmd == "fire":
-            # CM-01 / UX-04: firing on a captain you are not yet in battle with starts a fight - confirm first
-            target, tcap, fighting = RC.battle_with(snap, args[1]) if len(args) > 1 else (None, None, False)
+            # CM-01 / UX-04: firing on a captain or planet you are not yet in battle with starts a fight - confirm first (D-137: fire <target>)
+            target_text = args[1] if args and args[0].lower() in WEAPON_WORDS and len(args) > 1 else (args[0] if args else "")
+            target, tcap, fighting = RC.battle_with(snap, target_text) if target_text else (None, None, False)
             if target is not None and tcap is not None and not fighting:
                 question = f"Start a fight with {tcap.get('name', tcap.get('id'))}? Respect −{self.cfg.respect_start_fight_delta}"
                 if not self.confirm(session, question):
@@ -314,6 +333,12 @@ class CommandTerminal:
                             f"End the turn anyway?")
                 if not self.confirm(session, question):   # CMD-17, UX-04
                     self.console.print("  turn not ended - queue a move or warp first", style=P.STYLES["command_info"])
+                    return True
+            ship = self.battle_without_fire()
+            if ship is not None:
+                question = f"No fire order for {ship.get('name', 'your ship')} this turn — end anyway?"
+                if not self.confirm(session, question):   # UX-04 (M4), D-136, D-146
+                    self.console.print("  turn not ended - 'fire <target>' fires one torpedo and the phasers", style=P.STYLES["command_info"])
                     return True
             self.listener.resolved.clear()
             _, turn_no = self.listener.current()

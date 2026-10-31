@@ -1,7 +1,8 @@
 """Original name generators for captains, ships, planets and presidents.
 
-[ASSUMED] D-90: syllable and word lists of our own; no franchise names anywhere
-(D-03).  Every generator draws only from the RNG it is given (D-67).
+[ASSUMED] D-90 / D-146: syllable and word lists of our own; no franchise names anywhere
+(D-03).  Every generator draws only from the RNG it is given (D-67).  M4 widens the pools to
+60 first names and 72 surnames so a sector of eight captains rarely repeats a first name.
 """
 from __future__ import annotations
 
@@ -12,12 +13,19 @@ FIRST_NAMES = (
     "Ansel", "Thea", "Rafe", "Imke", "Corwin", "Saskia", "Emrys", "Linnea", "Hollis", "Zora",
     "Idris", "Wren", "Osric", "Petra", "Kael", "Nerys", "Tobiah", "Freya", "Aldous", "Mirren",
     "Jorah", "Elin", "Dacre", "Yseult", "Ragnar", "Anouk", "Fenwick", "Tamsin", "Lucan", "Brisa",
+    "Avel", "Cerys", "Dael", "Eirlys", "Faelan", "Garnet", "Jessamy", "Kerensa", "Lowen", "Merryn",
+    "Nessa", "Oswin", "Perran", "Quenby", "Rowan", "Sorrel", "Ursel", "Vesper", "Xanthe", "Zennor",
 )
 
 SURNAMES = (
     "Vey", "Marrow", "Ashgrove", "Quill", "Stannard", "Holloway", "Pike", "Varga", "Lindqvist", "Mortlake",
     "Rook", "Caddel", "Brannock", "Sayer", "Thorne", "Oakes", "Fairweather", "Dunmore", "Kestle", "Ravel",
     "Harlow", "Penhallow", "Ostrander", "Blythe", "Carrick", "Wyndham", "Selkirk", "Treloar", "Voss", "Ingram",
+    "Ambrey", "Bellamy", "Calloway", "Draycott", "Elsworth", "Fairlie", "Garrow", "Hanbury", "Inchcape", "Jessop",
+    "Kirkbride", "Lanyon", "Merrow", "Nankervis", "Orrell", "Polwhele", "Quarrie", "Rosevear", "Sallow", "Tregenna",
+    "Umfraville", "Vasey", "Wendle", "Yeoward", "Axhill", "Boscawen", "Crewe", "Denholm", "Eastlake", "Furneaux",
+    "Gillow", "Hesketh", "Iredale", "Jago", "Kettering", "Lisle", "Maddox", "Nethercott", "Oddie", "Pellew",
+    "Rudd", "Scorrier",
 )
 
 SHIP_ADJECTIVES = (
@@ -38,24 +46,24 @@ PLANET_ENDS = ("th", "ris", "dan", "mir", "non", "vek", "lis", "sa", "rum", "nd"
 
 
 def captain_name(rng: random.Random) -> str:
-    """'Harrow Vey' style - CP-01."""
+    """First name and surname, e.g. Harrow Vey - CP-01."""
     return f"{rng.choice(FIRST_NAMES)} {rng.choice(SURNAMES)}"
 
 
 def ship_name(rng: random.Random) -> str:
-    """'Lantern' or 'Grey Heron' style - SH-08."""
+    """One noun or adjective + noun, e.g. Lantern, Grey Heron - SH-08."""
     if rng.random() < 0.5:
         return rng.choice(SHIP_NOUNS)
     return f"{rng.choice(SHIP_ADJECTIVES)} {rng.choice(SHIP_NOUNS)}"
 
 
 def planet_name(rng: random.Random) -> str:
-    """'Oreth' style - PL-01."""
+    """Start + middle + end syllables, e.g. Oreth - PL-01."""
     return rng.choice(PLANET_STARTS) + rng.choice(PLANET_MIDDLES) + rng.choice(PLANET_ENDS)
 
 
 def president_name(rng: random.Random) -> str:
-    """The planet's head - PL-05."""
+    """The head of a planet - PL-05."""
     return captain_name(rng)
 
 

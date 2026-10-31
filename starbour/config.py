@@ -123,6 +123,7 @@ class GameConfig:
     roam_every_turns: int
     buy_supplies_below: int
     docking_income_silver: int
+    ai_respect_start: int
     # [fear]
     fear_battle_won_delta: int
     fear_battle_lost_delta: int
@@ -505,6 +506,7 @@ def load_config(path: Path | str) -> GameConfig:
         roam_every_turns=r.at_least("ai", "roam_every_turns", 0),
         buy_supplies_below=r.at_least("ai", "buy_supplies_below", 0),
         docking_income_silver=r.at_least("ai", "docking_income_silver", 0),
+        ai_respect_start=r.pct("ai", "respect_start"),
         fear_battle_won_delta=r.integer("fear", "battle_won_delta"),
         fear_battle_lost_delta=r.integer("fear", "battle_lost_delta"),
         fear_start=r.integer("fear", "start"),

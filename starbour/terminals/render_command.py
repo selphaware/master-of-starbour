@@ -1,6 +1,7 @@
-"""T1 Command renderer - pure: the prompt and the immediate command outputs (C4, UX-01, CMD-01/02/04).
+"""T1 Command renderer - pure: the prompt and the immediate command outputs (C4, UX-01, UX-09, CMD-01/02/04).
 
 ``render(snapshot, view, cfg, width)`` returns the coloured prompt ``[T<turn> . <ship> . <n> orders] >``.
+``help_text('fire', cfg)`` carries the live combat numbers from the ini (UX-09, D-138, D-148 (9)).
 The process module turns it into prompt_toolkit input; nothing here touches a socket or stdin.
 """
 from __future__ import annotations
@@ -78,6 +79,15 @@ def status_lines(snapshot: dict, cfg: GameConfig) -> list[Text]:
     if cd is not None:
         sup.append(f"  mutiny in {cd} turn(s)", style=P.STYLES["bad"])
     out.append(sup)
+    items = cap.get("items") or {}
+    if items:
+        cargo = Text(no_wrap=True)
+        cargo.append("  cargo ", style=P.STYLES["label"])
+        if isinstance(items, dict):
+            cargo.append(", ".join(f"{k} x{v}" for k, v in sorted(items.items())), style=P.STYLES["value"])
+        else:
+            cargo.append(", ".join(str(i) for i in items), style=P.STYLES["value"])
+        out.append(cargo)
     if ship:
         pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
         s = Text(no_wrap=True)
@@ -134,23 +144,49 @@ def fleet_table(snapshot: dict) -> Table:
     return t
 
 
-def help_text(name: str | None = None, cfg: GameConfig | None = None) -> list[Text]:
-    """CMD-01 from the catalogue; the footer names the shield recharge from the config (CM-05, D-127)."""
+def fire_numbers(cfg: GameConfig, target_engine: float | None = None, phasers: float | None = None) -> dict:
+    """UX-09 / D-138 / D-148 (9): the live combat numbers from the ini - torpedo damage, the hit chance against ``target_engine``
+    (the starting class's engine when None) as a whole percentage, the phaser damage of ``phasers`` units (the starting class's
+    when None) at distance 0 ... phaser_range."""
+    from starbour.engine.combat import phaser_damage, torpedo_hit_p   # pure formulas; no sockets
+    start = cfg.ships[cfg.starting_class]
+    engine = float(start.engine) if target_engine is None else float(target_engine)
+    power = float(start.phasers) if phasers is None else float(phasers)
+    return {"torpedo_damage": float(cfg.torpedo_damage), "hit_pct": int(round(torpedo_hit_p(engine, cfg) * 100)), "engine": engine,
+            "phaser_damages": [phaser_damage(power, cfg.phaser_damage_per_unit, d) for d in range(0, int(cfg.phaser_range) + 1)],
+            "target": "the target" if target_engine is not None else f"a {start.name.capitalize()}"}
+
+
+def help_text(name: str | None = None, cfg: GameConfig | None = None, snapshot: dict | None = None) -> list[Text]:
+    """CMD-01 from the catalogue; the footer names the shield recharge from the config (CM-05, D-127); ``help fire`` prints the
+    live numbers (UX-09, D-138): against the starting class, or against the ship's last target when the snapshot shows one."""
+    numbers = None
+    if cfg is not None:
+        engine = phasers = None
+        if snapshot:
+            cap, ship = _player(snapshot)
+            if ship:
+                phasers = float(ship.get("phasers", 0) or 0)
+                target = (snapshot.get("ships") or {}).get(ship.get("target"))
+                if isinstance(target, dict):
+                    engine = float(target.get("engine", 0) or 0)
+        numbers = fire_numbers(cfg, engine, phasers)
     out = []
-    for line in help_lines(name, cfg.shield_recharge if cfg is not None else None):
+    for line in help_lines(name, cfg.shield_recharge if cfg is not None else None, numbers):
         style = P.STYLES["title"] if not line.startswith(" ") else P.STYLES["value"]
         out.append(Text(line, style=style, no_wrap=True))
     return out
 
 
 def battle_with(snapshot: dict, target_text: str) -> tuple[dict | None, dict | None, bool]:
-    """CM-01 / UX-04: (target ship, its captain, already in battle with the player) for a 'fire' target by id or name
+    """CM-01 / UX-04: (target ship or planet, its holder, already in battle with the player) for a fire target by id or name
     in the player's sector; (None, None, False) when the target is unknown (the engine will say why)."""
     cap, ship = _player(snapshot)
     if not ship:
         return None, None, False
     wanted = target_text.strip().lower()
     pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
+    pid = snapshot.get("player_id")
     target = None
     for sid, s in (snapshot.get("ships") or {}).items():
         p = s.get("position") or []
@@ -159,10 +195,19 @@ def battle_with(snapshot: dict, target_text: str) -> tuple[dict | None, dict | N
         if sid.lower() == wanted or str(s.get("name", "")).lower() == wanted:
             target = dict(s, id=sid)
             break
-    if target is None or target.get("captain") == snapshot.get("player_id"):
+    if target is None:
+        key = f"{pos[0][0]},{pos[0][1]}/{pos[1][0]},{pos[1][1]}"
+        for ppid, p in (snapshot.get("planets") or {}).items():
+            if isinstance(p, dict) and not p.get("destroyed") and str(p.get("sector")) == key and (ppid.lower() == wanted or str(p.get("name", "")).lower() == wanted):
+                target = dict(p, id=ppid, captain=ppid)
+                holder = {"id": ppid, "name": p.get("name", ppid)}
+                fighting = any(isinstance(b, dict) and b.get("ended") is None and {str(x) for x in (b.get("sides") or [])} == {pid, ppid}
+                               for b in (snapshot.get("battles") or []))
+                return target, holder, fighting
+        return None, None, False
+    if target.get("captain") == pid:
         return target, None, False
     tcap = (snapshot.get("captains") or {}).get(target.get("captain")) or {}
-    pid = snapshot.get("player_id")
     fighting = any(isinstance(b, dict) and b.get("ended") is None and {str(x) for x in (b.get("sides") or [])} == {pid, target.get("captain")}
                    for b in (snapshot.get("battles") or []))
     return target, dict(tcap, id=target.get("captain")), fighting

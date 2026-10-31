@@ -135,7 +135,7 @@ def test_engine_writes_both_logs_each_turn(small_cfg: GameConfig, tmp_path: Path
     for key in ("turn_no", "orders_executed", "ai_ships_moved", "player", "captains", "events", "snapshot_hash", "snapshot_bytes", "resolve_ms"):
         assert key in first, f"C2 per_turn key {key}"
     assert first["events"] == [e["text"] for e in first["event_records"]]
-    assert first["ai_decisions"] and set(first["ai_decisions"][0]) == {"captain", "name", "ship", "text", "ids"}
+    assert first["ai_decisions"] and set(first["ai_decisions"][0]) >= {"captain", "name", "ship", "text", "ids"}
     assert len(first["snapshot_hash"]) == 40
 
 

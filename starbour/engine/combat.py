@@ -1,22 +1,29 @@
-"""Ship combat - battle state, participants, the exchange, outcomes and strength (pure).
+"""Ship and planet combat - battle state, participants, the exchange, outcomes and strength (pure).
 
-CM-01...12, CB-01...04, FR-*, HZ-09, D-119...D-125, D-130, D-132.  ``phase_combat`` is TP-04:
-it takes the state (plain dataclasses), this turn's orders and the engine RNG and mutates
-the state in place, appending C10 records to ``stats`` and MSG-03 events to ``events``.
+CM-01...12, CB-01...04, FR-*, HZ-09, PR-02, EF-05, D-119...D-125, D-130, D-132, D-145, D-148.  ``phase_combat`` is
+TP-04: it takes the state (plain dataclasses), this turn's orders and the engine RNG and mutates
+the state in place, appending C10 / C11 records to ``stats`` and MSG-03 events to ``events``.
 No rich, no zmq, no clocks; every number comes from the config.
 
 Within a turn (D-120, M3 section 6):
-  1. accepted ``fire`` orders open battles (CM-01) - FR-06 for the opener;
+  1. accepted ``fire`` orders open battles (CM-01) - FR-06 for an opening captain (planets pay nothing);
   2. peace offers, accepts, rejects and surrenders resolve (CM-09, CB-03, EF-02, D-122, D-124);
-  3. a battle with no pair of ships in range after movement ends by escape (CB-02, D-119);
+  3. a battle with no pair of combatants in range after movement ends by escape (CB-02, D-119);
   4. the exchange: every torpedo of both sides, then every phaser volley, hits computed from the
-     state at the start of the phase and applied in attacker ship-id order; a hit landing on 0
+     state at the start of the phase and applied in attacker id order; a hit landing on 0
      shields destroys (HZ-09), also the next torpedo of the same volley; the rest of a volley at
      a destroyed target is held (ammo kept);
-  5. kills: the killer ship takes the victim's torpedoes and max(own, victim) phasers / engine /
-     warp (capped); a side wiped out hands its captain's coins and items to the captain whose ship
-     landed the last hit (CB-01, D-123); both sides wiped out transfers nothing;
+  5. kills: the killer takes the victim's torpedoes and max(own, victim) phasers / engine /
+     warp (capped); a side wiped out hands its captain's coins and items - or a planet's stock,
+     food, water and elements (CM-11, D-140) - to the captain whose ship landed the last hit
+     (CB-01, D-123); both sides wiped out transfers nothing; a destroyed planet leaves the map;
   6. reputation rows for every battle that ended with a victor (TP-07 applies them).
+
+Planets (CM-11, D-145): a planet is a side of its own (its id), fights with the same formulas,
+never moves, never offers peace, and accepts a standing offer when it is the weaker side
+(D-148 (5)); the victor of a peace is the side that did not offer, X % of the loser's coins
+(or a planet's stock) move.  Planet events (``planet_events[]``, C11): attacked, opened_fire,
+destroyed, peace.
 """
 from __future__ import annotations
 
@@ -24,13 +31,15 @@ import math
 import random
 from dataclasses import dataclass, field
 
-from starbour.commands.parse import CommandError, Order, parse_fire, parse_peace
+from starbour.commands.parse import BOTH, CommandError, Order, parse_fire, parse_peace
 from starbour.config import GameConfig
 from starbour.engine import reputation as R
+from starbour.engine.state import GameState as StateView
+from starbour.engine.state import is_planet_id
 from starbour.entities.battle import Battle
 from starbour.entities.captain import Captain
+from starbour.entities.planet import Planet
 from starbour.entities.ship import Ship
-from starbour.engine.state import GameState as StateView
 from starbour.world.grid import Coord, chebyshev
 
 TORPEDO, PHASER = "torpedo", "phaser"
@@ -49,18 +58,18 @@ def torpedo_hit_p(target_engine: float, cfg: GameConfig) -> float:
     return max(0.0, min(1.0, float(cfg.torpedo_hit_base) - float(cfg.torpedo_evade_per_engine) * float(target_engine)))
 
 
-def ship_strength(ship: Ship, cfg: GameConfig) -> float:
-    """CM-08: shield_current + torpedoes x torpedo_damage + phasers x phaser_damage_per_unit x 3."""
+def ship_strength(ship, cfg: GameConfig) -> float:
+    """CM-08: shield_current + torpedoes x torpedo_damage + phasers x phaser_damage_per_unit x 3 (ships and planets alike, CM-11)."""
     return float(ship.shield_current) + float(ship.torpedoes) * float(cfg.torpedo_damage) + float(ship.phasers) * float(cfg.phaser_damage_per_unit) * 3.0
 
 
-def strength(ships: list[Ship], cfg: GameConfig) -> float:
+def strength(ships: list, cfg: GameConfig) -> float:
     """CM-08 / FL-05: the fleet-in-sector total."""
     return sum(ship_strength(s, cfg) for s in ships)
 
 
-def weapon_range(ship: Ship, cfg: GameConfig) -> int:
-    """CM-02: the longest range the ship can shoot at - torpedoes 5 while it has ammo, phasers 2 while it has any."""
+def weapon_range(ship, cfg: GameConfig) -> int:
+    """CM-02: the longest range the combatant can shoot at - torpedoes 5 while it has ammo, phasers 2 while it has any."""
     best = 0
     if ship.torpedoes > 0:
         best = max(best, int(cfg.torpedo_range))
@@ -73,8 +82,8 @@ def range_of(weapon: str, cfg: GameConfig) -> int:
     return int(cfg.torpedo_range) if weapon == TORPEDO else int(cfg.phaser_range)
 
 
-def pair_in_range(a: Ship, b: Ship, cfg: GameConfig) -> bool:
-    """D-119 / D-128: either ship inside the other's weapon range (Chebyshev <= range) keeps the pair in battle."""
+def pair_in_range(a, b, cfg: GameConfig) -> bool:
+    """D-119 / D-128: either combatant inside the other's weapon range (Chebyshev <= range) keeps the pair in battle."""
     if a.galaxy != b.galaxy or a.sector != b.sector:
         return False
     return chebyshev(a.cell, b.cell) <= max(weapon_range(a, cfg), weapon_range(b, cfg))
@@ -96,9 +105,12 @@ def ai_peace_threshold(enemy_fear: float, cfg: GameConfig) -> float:
 
 # --------------------------------------------------------------------------- helpers over the state
 
-def ships_of(state: StateView, captain_id: str, galaxy: Coord, sector: Coord) -> list[Ship]:
-    """A captain's ships in one sector, by id (CM-08 'fleet in sector')."""
-    cap = state.captains.get(captain_id)
+def ships_of(state: StateView, side_id: str, galaxy: Coord, sector: Coord) -> list:
+    """A side's combatants in one sector, by id (CM-08 fleet in sector): a captain's ships, or the planet itself (CM-11)."""
+    if is_planet_id(side_id):
+        p = state.live_planet(side_id)
+        return [p] if p is not None and p.galaxy == galaxy and p.sector == sector else []
+    cap = state.captains.get(side_id)
     if cap is None:
         return []
     out = []
@@ -110,16 +122,19 @@ def ships_of(state: StateView, captain_id: str, galaxy: Coord, sector: Coord) ->
     return out
 
 
-def side_strength(state: StateView, captain_id: str, galaxy: Coord, sector: Coord, cfg: GameConfig) -> float:
-    return strength(ships_of(state, captain_id, galaxy, sector), cfg)
+def side_strength(state: StateView, side_id: str, galaxy: Coord, sector: Coord, cfg: GameConfig) -> float:
+    return strength(ships_of(state, side_id, galaxy, sector), cfg)
 
 
-def find_ship(state: StateView, text: str, *, galaxy: Coord | None = None, sector: Coord | None = None) -> Ship | None:
-    """A ship by id or name (case-insensitive), optionally only in one sector; ids win over names."""
+def find_ship(state: StateView, text: str, *, galaxy: Coord | None = None, sector: Coord | None = None):
+    """A ship or a live planet by id or name (case-insensitive), optionally only in one sector; ids win over names (D-148 (6))."""
     wanted = text.strip().lower()
     direct = state.ships.get(text.strip())
     if direct is not None and (galaxy is None or (direct.galaxy == galaxy and direct.sector == sector)):
         return direct
+    planet = state.find_planet(text, galaxy, sector)
+    if planet is not None:
+        return planet
     for sid in sorted(state.ships):
         s = state.ships[sid]
         if galaxy is not None and (s.galaxy != galaxy or s.sector != sector):
@@ -129,17 +144,26 @@ def find_ship(state: StateView, text: str, *, galaxy: Coord | None = None, secto
     return None
 
 
-def find_captain(state: StateView, text: str) -> Captain | None:
-    """A captain by id or name (case-insensitive)."""
+def find_side(state: StateView, text: str):
+    """A captain or a live planet by id or name (case-insensitive) - the counterparty of a peace order (CMD-10)."""
     wanted = text.strip().lower()
     direct = state.captains.get(text.strip())
     if direct is not None:
         return direct
+    planet = state.find_planet(text)
+    if planet is not None:
+        return planet
     for cid in sorted(state.captains):
         c = state.captains[cid]
         if c.name.lower() == wanted or cid.lower() == wanted:
             return c
     return None
+
+
+def find_captain(state: StateView, text: str) -> Captain | None:
+    """A captain by id or name (case-insensitive)."""
+    got = find_side(state, text)
+    return got if isinstance(got, Captain) else None
 
 
 def open_battle_between(state: StateView, a: str, b: str) -> Battle | None:
@@ -150,8 +174,8 @@ def open_battle_between(state: StateView, a: str, b: str) -> Battle | None:
     return None
 
 
-def battle_of_ship(state: StateView, ship: Ship) -> Battle | None:
-    """The open battle the ship's captain is in within the ship's sector (C10 ``in_battle``)."""
+def battle_of_ship(state: StateView, ship) -> Battle | None:
+    """The open battle the combatant's side is in within its sector (C10 ``in_battle``)."""
     for bid in sorted(state.battles):
         bt = state.battles[bid]
         if bt.open and bt.involves(ship.captain_id) and bt.galaxy == ship.galaxy and bt.sector == ship.sector:
@@ -159,17 +183,22 @@ def battle_of_ship(state: StateView, ship: Ship) -> Battle | None:
     return None
 
 
-def enemies_in_sector(state: StateView, ship: Ship, enemy_captain: str) -> list[Ship]:
-    """The enemy captain's ships in the ship's sector, nearest first (ties by id)."""
-    ships = ships_of(state, enemy_captain, ship.galaxy, ship.sector)
+def enemies_in_sector(state: StateView, ship, enemy_side: str) -> list:
+    """The enemy side's combatants in the ship's sector, nearest first (ties by id)."""
+    ships = ships_of(state, enemy_side, ship.galaxy, ship.sector)
     ships.sort(key=lambda s: (chebyshev(s.cell, ship.cell), s.id))
     return ships
 
 
-def exchange_row(attacker: Ship, defender: Ship, weapon: str, distance: int, hit: bool, damage: float, shields_after: float) -> dict:
+def exchange_row(attacker, defender, weapon: str, distance: int, hit: bool, damage: float, shields_after: float) -> dict:
     """One C10 ``exchanges[]`` entry."""
     return {"attacker": attacker.id, "defender": defender.id, "weapon": weapon, "distance": int(distance), "hit": bool(hit),
             "damage": round(float(damage), 4), "shields_after": round(float(shields_after), 4)}
+
+
+def planet_event(stats: dict, planet_id: str, event: str, by: str) -> None:
+    """C11 ``planet_events[]``: attacked | opened_fire | destroyed | peace | refused_trade."""
+    stats.setdefault("planet_events", []).append({"planet": planet_id, "event": event, "by": by})
 
 
 # --------------------------------------------------------------------------- the phase
@@ -185,7 +214,7 @@ class Turn:
     stats: dict
     turn_no: int
     watched: tuple[Coord, Coord] | None
-    dead: dict[str, str] = field(default_factory=dict)          # victim ship id -> killer ship id, in kill order
+    dead: dict[str, str] = field(default_factory=dict)          # victim id -> killer id, in kill order
     touched: dict[str, Battle] = field(default_factory=dict)    # battles recorded this turn
     exchanges: dict[str, list[dict]] = field(default_factory=dict)
 
@@ -199,32 +228,35 @@ class Turn:
         if battle is None or self.visible(battle):
             self.events.append({"phase": "TP-04", "type": type_, "severity": severity, "text": text, "ids": list(ids)})
 
-    def event_for(self, ship: Ship, type_: str, severity: str, text: str, ids: tuple[str, ...]) -> None:
-        """An event about one ship: shown for the player's ships and for ships in the player's sector (OB-01)."""
+    def event_for(self, ship, type_: str, severity: str, text: str, ids: tuple[str, ...]) -> None:
+        """An event about one combatant: shown for the player's ships and for anything in the player's sector (OB-01)."""
         if ship.captain_id == self.state.player_id or (self.watched is not None and (ship.galaxy, ship.sector) == self.watched):
             self.events.append({"phase": "TP-04", "type": type_, "severity": severity, "text": text, "ids": list(ids)})
 
-    def alive(self, ship_id: str) -> bool:
-        return ship_id in self.state.ships and ship_id not in self.dead
+    def combatant(self, cid: str):
+        return self.state.combatant(cid)
+
+    def alive(self, cid: str) -> bool:
+        return self.state.combatant(cid) is not None and cid not in self.dead
 
     def record(self, battle: Battle) -> None:
         self.touched[battle.id] = battle
         self.exchanges.setdefault(battle.id, [])
 
-    def name(self, captain_id: str) -> str:
-        cap = self.state.captains.get(captain_id)
-        return cap.name if cap is not None else captain_id
+    def name(self, side_id: str) -> str:
+        return self.state.side_name(side_id)
 
 
 def phase_combat(state: StateView, cfg: GameConfig, rng: random.Random, by_ship: dict[str, list[Order]], events: list[dict], stats: dict,
                  watched: tuple[Coord, Coord] | None) -> None:
-    """TP-04 (see the module docstring).  ``by_ship`` holds this turn's orders for every ship, AI included."""
+    """TP-04 (see the module docstring).  ``by_ship`` holds this turn's orders for every combatant, AI and planets included."""
     t = Turn(state, cfg, rng, events, stats, state.turn_no, watched)
     fires, peaces, surrenders, escapes = _collect(state, by_ship)
     _open_battles(t, fires)
     for bt in state.battles.values():
         if bt.open:
             t.record(bt)
+    _planet_openings(t)
     _peace(t, peaces)
     _surrenders(t, surrenders)
     _escapes(t, escapes)
@@ -233,13 +265,13 @@ def phase_combat(state: StateView, cfg: GameConfig, rng: random.Random, by_ship:
     _finish(t)
 
 
-def _collect(state: StateView, by_ship: dict[str, list[Order]]) -> tuple[list[tuple[Ship, Order]], list[tuple[Ship, Order]], list[tuple[Ship, Order]], set[str]]:
-    fires: list[tuple[Ship, Order]] = []
-    peaces: list[tuple[Ship, Order]] = []
-    surrenders: list[tuple[Ship, Order]] = []
+def _collect(state: StateView, by_ship: dict[str, list[Order]]) -> tuple[list, list, list, set[str]]:
+    fires: list = []
+    peaces: list = []
+    surrenders: list = []
     escapes: set[str] = set()
     for sid in sorted(by_ship):
-        ship = state.ships.get(sid)
+        ship = state.combatant(sid)
         if ship is None:
             continue
         for o in by_ship[sid]:
@@ -254,8 +286,8 @@ def _collect(state: StateView, by_ship: dict[str, list[Order]]) -> tuple[list[tu
     return fires, peaces, surrenders, escapes
 
 
-def _target_of(t: Turn, ship: Ship, order: Order) -> tuple[Ship | None, str, int, str | None]:
-    """(target ship, weapon, count, problem text) for a fire order, after movement (M3 section 6)."""
+def _target_of(t: Turn, ship, order: Order):
+    """(target, weapon, count, problem text) for a fire order, after movement (M3 section 6)."""
     try:
         spec = parse_fire(order.args)
     except CommandError as e:
@@ -275,28 +307,37 @@ def _target_of(t: Turn, ship: Ship, order: Order) -> tuple[Ship | None, str, int
     return target, spec.weapon, spec.count, None
 
 
-def open_battle(state: StateView, cfg: GameConfig, attacker: Ship, target: Ship, turn_no: int, rows: list[dict]) -> tuple[Battle, dict]:
-    """CM-01 / CM-08 / D-119 / D-121: the first *accepted* fire of either side opens the battle - the player's at
-    submission, an AI's at TP-01 - so the targeted side holds its cell for the exchange (D-128).  Strength is
-    measured now, once; the opener's FR-06 row goes to ``rows`` (the turn's reputation list).  Returns (battle, event)."""
+def open_battle(state: StateView, cfg: GameConfig, attacker, target, turn_no: int, rows: list[dict]) -> tuple[Battle, dict]:
+    """CM-01 / CM-08 / D-119 / D-121 / D-145: the first *accepted* fire of either side opens the battle - the player's at
+    submission, an AI's or a planet's at TP-01 - so the targeted side holds its cell for the exchange (D-128).  Strength is
+    measured now, once; an opening captain's FR-06 row goes to ``rows`` (planets pay no respect).  Returns (battle, event)."""
     sides = (attacker.captain_id, target.captain_id)
     bt = Battle(state.new_battle_id(), sides, attacker.galaxy, attacker.sector, turn_no, attacker.captain_id,
                 {cid: side_strength(state, cid, attacker.galaxy, attacker.sector, cfg) for cid in sides})
     state.battles[bt.id] = bt
     attacker.target = target.id
-    row = R.start_fight(attacker.captain_id, cfg)
-    rows.append(row.to_dict())
+    if is_planet_id(attacker.captain_id):
+        state.touch_planet(attacker)
+    if is_planet_id(target.captain_id):
+        state.touch_planet(target)
     sa, sb = bt.strength_at_open[sides[0]], bt.strength_at_open[sides[1]]
-    a_name = state.captains[attacker.captain_id].name if attacker.captain_id in state.captains else attacker.captain_id
-    t_name = state.captains[target.captain_id].name if target.captain_id in state.captains else target.captain_id
-    ev = {"phase": "TP-04", "type": "combat", "severity": "alert",
-          "text": f"{a_name}'s {attacker.name} opens fire on {t_name}'s {target.name}: battle {bt.id} begins (strength {sa:g} vs {sb:g}); "
-                  f"starting a fight costs {a_name} {abs(row.respect)} respect (CM-01, FR-06)",
-          "ids": ["CM-01", "FR-06", "CM-08", "OUT-04"]}
+    a_name, t_name = state.side_name(attacker.captain_id), state.side_name(target.captain_id)
+    if is_planet_id(attacker.captain_id):
+        text = (f"{a_name} opens fire on {t_name}'s {target.name}: battle {bt.id} begins (strength {sa:g} vs {sb:g}); "
+                f"a planet attacks a captain of low respect it can beat (EF-05, CM-11)")
+        ids = ["EF-05", "CM-11", "CM-08", "OUT-04", "PR-02"]
+    else:
+        row = R.start_fight(attacker.captain_id, cfg)
+        rows.append(row.to_dict())
+        what = f"the planet {t_name}" if is_planet_id(target.captain_id) else f"{t_name}'s {target.name}"
+        text = (f"{a_name}'s {attacker.name} opens fire on {what}: battle {bt.id} begins (strength {sa:g} vs {sb:g}); "
+                f"starting a fight costs {a_name} {abs(row.respect)} respect (CM-01, FR-06)")
+        ids = ["CM-01", "FR-06", "CM-08", "OUT-04"] + (["CM-11", "PR-02"] if is_planet_id(target.captain_id) else [])
+    ev = {"phase": "TP-04", "type": "combat", "severity": "alert", "text": text, "ids": ids}
     return bt, ev
 
 
-def _open_battles(t: Turn, fires: list[tuple[Ship, Order]]) -> None:
+def _open_battles(t: Turn, fires: list) -> None:
     """Fallback for a fire order whose battle is not open yet (a loaded queue): open it now (CM-01)."""
     st = t.state
     for ship, order in fires:
@@ -316,24 +357,39 @@ def _open_battles(t: Turn, fires: list[tuple[Ship, Order]]) -> None:
             t.events.append(ev)
 
 
-def _offer_from(t: Turn, ship: Ship, order: Order) -> tuple[Battle | None, Captain | None, str, str | None]:
+def _planet_openings(t: Turn) -> None:
+    """C11 / PR-02: a battle opened this turn with a planet on a side records 'attacked' (a captain fired on it) or
+    'opened_fire' (EF-05) once."""
+    for bt in t.touched.values():
+        if bt.opened_turn != t.turn_no:
+            continue
+        for side in bt.sides:
+            if not is_planet_id(side):
+                continue
+            if bt.opened_by == side:
+                planet_event(t.stats, side, "opened_fire", side)
+            else:
+                planet_event(t.stats, side, "attacked", bt.opened_by)
+
+
+def _offer_from(t: Turn, ship, order: Order):
     try:
         spec = parse_peace(order.args)
     except CommandError as e:
         return None, None, "", str(e)
-    cap = find_captain(t.state, spec.captain)
+    cap = find_side(t.state, spec.captain)
     if cap is None:
-        return None, None, spec.action, f"{ship.name}: no captain {spec.captain!r} (CMD-10)"
+        return None, None, spec.action, f"{ship.name}: no captain or planet {spec.captain!r} (CMD-10)"
     bt = open_battle_between(t.state, ship.captain_id, cap.id)
     if bt is None:
         return None, cap, spec.action, f"{ship.name}: no battle with {cap.name} to make peace in (CMD-10)"
     return bt, cap, spec.action, None
 
 
-def _peace(t: Turn, peaces: list[tuple[Ship, Order]]) -> None:
+def _peace(t: Turn, peaces: list) -> None:
     """CM-09 / CB-03 / D-122: offers first (a mutual offer makes peace with no victor), then accepts, then rejects."""
     st = t.state
-    accepts: list[tuple[Ship, Battle, Captain]] = []
+    accepts: list = []
     for ship, order in peaces:
         if not t.alive(ship.id):
             continue
@@ -369,27 +425,57 @@ def _peace(t: Turn, peaces: list[tuple[Ship, Order]]) -> None:
             t.event(bt, "peace", "warning", f"{t.name(me)}: no peace offer from {t.name(other)} stands to accept (CM-09, D-122)", ("CM-09", "D-122"))
 
 
-def _transfer_pct(t: Turn, loser: Captain, victor: Captain, pct: int) -> dict:
-    """D-46 / D-122: X % of the loser's coins and of each item stack, rounded down, moved to the victor."""
+def _transfer_pct(t: Turn, loser: Captain, victor: Captain | None, pct: int) -> dict:
+    """D-46 / D-122: X % of the loser's coins and of each item stack, rounded down, moved to the victor.  With no victor
+    captain (a planet won) the coins are gone and the items go to the planet's stock, D-140 [ASSUMED]."""
     gold = int(loser.gold * pct // 100)
     silver = int(loser.silver * pct // 100)
-    counts: dict[str, int] = {}
-    for item in loser.items:
-        counts[item] = counts.get(item, 0) + 1
     moved: dict[str, int] = {}
-    for element in sorted(counts):
-        n = int(counts[element] * pct // 100)
+    for element in sorted(loser.items):
+        n = int(loser.items[element] * pct // 100)
         if n > 0:
             moved[element] = n
     loser.gold -= gold
     loser.silver -= silver
-    victor.gold += gold
-    victor.silver += silver
     for element, n in moved.items():
-        for _ in range(n):
-            loser.items.remove(element)
-            victor.items.append(element)
+        loser.take_item(element, n)
+    if victor is not None:
+        victor.gold += gold
+        victor.silver += silver
+        for element, n in moved.items():
+            victor.add_item(element, n)
     return {"gold": gold, "silver": silver, "items": moved, "pct": int(pct)}
+
+
+def _transfer_planet_pct(t: Turn, planet: Planet, victor: Captain | None, pct: int) -> dict:
+    """D-145 / PR-02: X % of a planet's food, water and element stacks (planets hold no coins, D-140), rounded down, to the victor."""
+    st, cfg = t.state, t.cfg
+    prev = t.turn_no - 1
+    food, water = planet.stock("food", prev, cfg), planet.stock("water", prev, cfg)
+    f, w = int(food * pct // 100), int(water * pct // 100)
+    moved: dict[str, int] = {}
+    for element in sorted(planet.elements):
+        n = int(planet.elements[element] * pct // 100)
+        if n > 0:
+            moved[element] = n
+    planet.rebase(food - f, water - w, prev)
+    for element, n in moved.items():
+        left = planet.elements.get(element, 0) - n
+        if left > 0:
+            planet.elements[element] = left
+        else:
+            planet.elements.pop(element, None)
+    st.touch_planet(planet)
+    if victor is not None:
+        victor.food += f
+        victor.water += w
+        for element, n in moved.items():
+            victor.add_item(element, n)
+    return {"gold": 0, "silver": 0, "items": moved, "food": f, "water": w, "pct": int(pct)}
+
+
+def _side_shields(t: Turn, side_id: str, bt: Battle) -> float:
+    return sum(s.shield_current for s in ships_of(t.state, side_id, bt.galaxy, bt.sector))
 
 
 def _close_peace(t: Turn, bt: Battle, *, victor: str | None, loser: str | None, note: str | None) -> None:
@@ -399,31 +485,41 @@ def _close_peace(t: Turn, bt: Battle, *, victor: str | None, loser: str | None, 
     if victor is None or loser is None:
         bt.victor, bt.transfer = None, {"gold": 0, "silver": 0, "items": {}, "pct": 0}
         t.event(bt, "peace", "highlight", f"Peace in battle {bt.id}: {note} (CB-03, OUT-05)", ("CB-03", "OUT-05", "D-122"))
+        for side in bt.sides:
+            if is_planet_id(side):
+                planet_event(t.stats, side, "peace", side)
         return
-    vcap, lcap = st.captains.get(victor), st.captains.get(loser)
-    v_shields = sum(s.shield_current for s in ships_of(st, victor, bt.galaxy, bt.sector))
-    l_shields = sum(s.shield_current for s in ships_of(st, loser, bt.galaxy, bt.sector))
+    vside, lside = st.side(victor), st.side(loser)
+    v_shields, l_shields = _side_shields(t, victor, bt), _side_shields(t, loser, bt)
     pct = peace_pct(v_shields, l_shields, t.cfg)
     bt.victor = victor
-    if vcap is not None and lcap is not None:
-        bt.transfer = _transfer_pct(t, lcap, vcap, pct)
+    vcap = vside if isinstance(vside, Captain) else None
+    if isinstance(lside, Captain):
+        bt.transfer = _transfer_pct(t, lside, vcap, pct)
+    elif isinstance(lside, Planet):
+        bt.transfer = _transfer_planet_pct(t, lside, vcap, pct)
     else:
         bt.transfer = {"gold": 0, "silver": 0, "items": {}, "pct": pct}
     tr = bt.transfer
     items = ", ".join(f"{n} {e}" for e, n in tr["items"].items()) or "no items"
+    supplies = f", {tr['food']} food, {tr['water']} water" if "food" in tr else ""
     t.event(bt, "peace", "highlight",
             f"Peace between {t.name(victor)} and {t.name(loser)}: {t.name(loser)} offered, so {t.name(victor)} is the victor - "
             f"X = max(0, ({v_shields:g} - {l_shields:g}) / {v_shields:g}) x {t.cfg.peace_loot_max} = {pct} % transferred (CB-03, D-46)",
             ("CB-03", "D-46", "OUT-05"))
-    t.event(bt, "loot", "highlight", f"Loot from {t.name(loser)}: {tr['gold']} gold, {tr['silver']} silver, {items} ({pct} % of each stack, OUT-06)", ("OUT-06", "CB-03"))
+    t.event(bt, "loot", "highlight", f"Loot from {t.name(loser)}: {tr['gold']} gold, {tr['silver']} silver, {items}{supplies} ({pct} % of each stack, OUT-06)",
+            ("OUT-06", "CB-03"))
+    for side in bt.sides:
+        if is_planet_id(side):
+            planet_event(t.stats, side, "peace", loser)
     _reputation_for(t, bt, victor, loser)
 
 
-def _surrenders(t: Turn, surrenders: list[tuple[Ship, Order]]) -> None:
+def _surrenders(t: Turn, surrenders: list) -> None:
     """EF-02 / FL-02 / D-124: a weaker AI captain hands its ship to the player; the ship joins the fleet in place."""
     st = t.state
     for ship, order in surrenders:
-        if not t.alive(ship.id) or not order.args:
+        if not t.alive(ship.id) or not order.args or not isinstance(ship, Ship):
             continue
         to = st.captains.get(order.args[0])
         giver = st.captains.get(ship.captain_id)
@@ -451,16 +547,16 @@ def _surrenders(t: Turn, surrenders: list[tuple[Ship, Order]]) -> None:
             _end_battles_of(t, giver.id, exclude=bt.id)
 
 
-def _end_battles_of(t: Turn, captain_id: str, exclude: str | None = None) -> None:
-    """D-105 / M3 section 6: a captain that leaves the game ends its other open battles (no victor)."""
+def _end_battles_of(t: Turn, side_id: str, exclude: str | None = None) -> None:
+    """D-105 / M3 section 6: a captain (or planet) that leaves the game ends its other open battles (no victor)."""
     for bt in t.state.battles.values():
-        if bt.open and bt.involves(captain_id) and bt.id != exclude:
+        if bt.open and bt.involves(side_id) and bt.id != exclude:
             bt.ended, bt.ended_turn, bt.victor, bt.transfer = "destroyed", t.turn_no, None, None
             t.record(bt)
 
 
 def _escapes(t: Turn, escapes: set[str]) -> None:
-    """CB-02 / D-119 / D-123: a battle with no pair of ships in range after TP-02 ends by escape, for everyone at once."""
+    """CB-02 / D-119 / D-123: a battle with no pair of combatants in range after TP-02 ends by escape, for everyone at once."""
     st = t.state
     for bid in sorted(st.battles):
         bt = st.battles[bid]
@@ -499,11 +595,11 @@ def _escapes(t: Turn, escapes: set[str]) -> None:
                         ("CB-02", "CMD-11", "OUT-05"))
 
 
-def _exchange(t: Turn, fires: list[tuple[Ship, Order]]) -> None:
-    """CM-06 / D-120: all torpedoes of both sides, then all phasers; attacker ship-id order; HZ-09 after each landing hit."""
+def _exchange(t: Turn, fires: list) -> None:
+    """CM-06 / D-120: all torpedoes of both sides, then all phasers; attacker id order; HZ-09 after each landing hit."""
     st = t.state
-    alive_at_start = {sid for sid in st.ships if t.alive(sid)}
-    plans: list[tuple[int, Ship, Ship, str, int, Battle]] = []
+    alive_at_start = {cid for cid in list(st.ships) + [p.id for p in st.world.planets.values() if not p.destroyed] if t.alive(cid)}
+    plans: list = []
     for ship, order in sorted(fires, key=lambda so: so[0].id):
         if ship.id not in alive_at_start:
             continue
@@ -527,7 +623,7 @@ def _exchange(t: Turn, fires: list[tuple[Ship, Order]]) -> None:
             _phaser_volley(t, bt, attacker, target)
 
 
-def _land(t: Turn, bt: Battle, attacker: Ship, defender: Ship, weapon: str, distance: int, hit: bool, damage: float) -> None:
+def _land(t: Turn, bt: Battle, attacker, defender, weapon: str, distance: int, hit: bool, damage: float) -> None:
     """Apply one shot: shields floor at 0; a hit landing on 0 shields destroys (HZ-09, D-15)."""
     destroyed = False
     if hit:
@@ -536,6 +632,8 @@ def _land(t: Turn, bt: Battle, attacker: Ship, defender: Ship, weapon: str, dist
             t.dead[defender.id] = attacker.id
         else:
             defender.shield_current = max(0.0, defender.shield_current - damage)
+        if isinstance(defender, Planet):
+            t.state.touch_planet(defender)
     row = exchange_row(attacker, defender, weapon, distance, hit, damage if hit else 0.0, defender.shield_current)
     t.exchanges.setdefault(bt.id, []).append(row)
     verb = ("hit" if hit else "miss")
@@ -545,7 +643,7 @@ def _land(t: Turn, bt: Battle, attacker: Ship, defender: Ship, weapon: str, dist
             ("OUT-04", "CM-03" if weapon == TORPEDO else "CM-04", "HZ-09"))
 
 
-def _torpedo_volley(t: Turn, bt: Battle, attacker: Ship, target: Ship, count: int) -> None:
+def _torpedo_volley(t: Turn, bt: Battle, attacker, target, count: int) -> None:
     """CM-03: each torpedo rolls p = base - evade x target engine from the engine RNG (D-67); the rest of a volley at a dead target is held."""
     d = chebyshev(attacker.cell, target.cell)
     p = torpedo_hit_p(target.engine, t.cfg)
@@ -558,11 +656,13 @@ def _torpedo_volley(t: Turn, bt: Battle, attacker: Ship, target: Ship, count: in
         fired += 1
         hit = t.rng.random() < p
         _land(t, bt, attacker, target, TORPEDO, d, hit, float(t.cfg.torpedo_damage))
+    if isinstance(attacker, Planet) and fired:
+        t.state.touch_planet(attacker)
     if fired < n:
         t.event(bt, "combat", "muted", f"{attacker.name} holds {n - fired} torpedo(es): {target.name} is already destroyed", ("HZ-09", "D-120"))
 
 
-def _phaser_volley(t: Turn, bt: Battle, attacker: Ship, target: Ship) -> None:
+def _phaser_volley(t: Turn, bt: Battle, attacker, target) -> None:
     """CM-04: phasers always hit; damage = phasers x per_unit x (1 - d/3)."""
     if not t.alive(target.id):
         t.event(bt, "combat", "muted", f"{attacker.name} holds its phasers: {target.name} is already destroyed", ("HZ-09", "D-120"))
@@ -571,26 +671,45 @@ def _phaser_volley(t: Turn, bt: Battle, attacker: Ship, target: Ship) -> None:
     _land(t, bt, attacker, target, PHASER, d, True, round(phaser_damage(attacker.phasers, t.cfg.phaser_damage_per_unit, d), 6))
 
 
+def _loot_planet(t: Turn, planet: Planet, taker: Captain | None) -> dict:
+    """CM-11 / PR-02 / D-140: a destroyed planet hands all its food, water and elements (its torpedoes went with the stat loot)."""
+    cfg = t.cfg
+    prev = t.turn_no - 1
+    food, water = planet.stock("food", prev, cfg), planet.stock("water", prev, cfg)
+    items = {k: int(v) for k, v in sorted(planet.elements.items()) if int(v) > 0}
+    if taker is not None:
+        taker.food += food
+        taker.water += water
+        for element, n in items.items():
+            taker.add_item(element, n)
+    planet.rebase(0, 0, prev)
+    planet.elements = {}
+    return {"gold": 0, "silver": 0, "items": items, "food": food, "water": water, "pct": 100}
+
+
 def _outcomes(t: Turn) -> None:
-    """CB-01 / CB-04 / FL-04 / D-105 / D-123: kills, stat loot to the killer, coins to the side that wiped the other, game over."""
+    """CB-01 / CB-04 / CM-11 / FL-04 / D-105 / D-123: kills, stat loot to the killer, coins (or a planet's stock) to the side that
+    wiped the other, game over, planets removed."""
     st, cfg = t.state, t.cfg
     killers: dict[str, str] = dict(t.dead)
     # stat loot per kill (to a surviving killer)
     for victim_id, killer_id in killers.items():
-        victim, killer = st.ships.get(victim_id), st.ships.get(killer_id)
-        if victim is None or killer is None or killer_id in t.dead:
+        victim, killer = t.combatant(victim_id), t.combatant(killer_id)
+        if victim is None or killer is None or killer_id in t.dead or isinstance(killer, Planet):
             continue
         before = (killer.torpedoes, killer.phasers, killer.engine, killer.warp)
         killer.torpedoes += int(victim.torpedoes)
         killer.phasers = min(float(cfg.phaser_max), max(killer.phasers, victim.phasers))
         killer.engine = min(float(cfg.impulse_max), max(killer.engine, victim.engine))
         killer.warp = min(float(cfg.warp_max), max(killer.warp, victim.warp))
+        if isinstance(victim, Planet):
+            victim.torpedoes = 0
         bt = open_battle_between(st, killer.captain_id, victim.captain_id)
         t.event(bt, "loot", "highlight",
                 f"{killer.name} strips the {victim.name}: torpedoes {before[0]} -> {killer.torpedoes}, phasers {before[1]:g} -> {killer.phasers:g}, "
                 f"engine {before[2]:g} -> {killer.engine:g}, warp {before[3]:g} -> {killer.warp:g} (max of own and victim, capped; shields untouched; CB-01, OUT-06)",
                 ("CB-01", "OUT-06", "D-130"))
-    # which battles ended by destruction, and who takes the coins
+    # which battles ended by destruction, and who takes the coins / the stock
     for bid in sorted(st.battles):
         bt = st.battles[bid]
         if not bt.open:
@@ -606,29 +725,46 @@ def _outcomes(t: Turn) -> None:
             t.event(bt, "combat", "alert", f"Battle {bt.id}: both sides destroyed in the same exchange - nothing transfers (CB-01, D-123)", ("CB-01", "D-123"))
             continue
         loser, victor = (a, b) if not left_a else (b, a)
-        last_kill = next((vid for vid in reversed(list(killers)) if st.ships.get(vid) is not None and st.ships[vid].captain_id == loser), None)
-        killer_ship = st.ships.get(killers[last_kill]) if last_kill is not None else None
+        last_kill = next((vid for vid in reversed(list(killers)) if t.combatant(vid) is not None and t.combatant(vid).captain_id == loser), None)
+        killer_ship = t.combatant(killers[last_kill]) if last_kill is not None else None
         taker_id = killer_ship.captain_id if killer_ship is not None else victor
         bt.victor = victor
-        vcap, lcap = st.captains.get(taker_id), st.captains.get(loser)
-        if vcap is not None and lcap is not None and taker_id != loser:
-            bt.transfer = _transfer_pct(t, lcap, vcap, 100)
+        taker = st.captains.get(taker_id)
+        lside = st.side(loser)
+        if isinstance(lside, Captain) and taker is not None and taker_id != loser:
+            bt.transfer = _transfer_pct(t, lside, taker, 100)
             items = ", ".join(f"{n} {e}" for e, n in bt.transfer["items"].items()) or "no items"
-            t.event(bt, "loot", "highlight", f"Loot from {lcap.name}: {bt.transfer['gold']} gold, {bt.transfer['silver']} silver, {items} - all of it (CB-01, OUT-06)",
+            t.event(bt, "loot", "highlight", f"Loot from {lside.name}: {bt.transfer['gold']} gold, {bt.transfer['silver']} silver, {items} - all of it (CB-01, OUT-06)",
                     ("CB-01", "OUT-06", "D-123"))
+        elif isinstance(lside, Planet):
+            bt.transfer = _loot_planet(t, lside, taker)
+            tr = bt.transfer
+            items = ", ".join(f"{n} {e}" for e, n in tr["items"].items()) or "no elements"
+            t.event(bt, "loot", "highlight", f"{lside.name} destroyed - looted {tr['food']} food, {tr['water']} water, {items} and its torpedoes (CM-11, PR-02, OUT-06)",
+                    ("CM-11", "PR-02", "OUT-06", "D-140"))
         else:
             bt.transfer = None
         _reputation_for(t, bt, victor, loser)
     # remove the dead, announce, game over
     for victim_id, killer_id in killers.items():
-        victim = st.ships.get(victim_id)
+        victim = t.combatant(victim_id)
         if victim is None:
             continue
-        killer = st.ships.get(killer_id)
+        killer = t.combatant(killer_id)
+        kname = f"the {killer.name} ({t.name(killer.captain_id)})" if killer is not None else "an enemy ship"
+        if isinstance(victim, Planet):
+            by = killer.captain_id if killer is not None else killer_id
+            st.destroy_planet(victim)
+            planet_event(t.stats, victim.id, "destroyed", by)
+            t.stats["planets_destroyed"] = t.stats.get("planets_destroyed", 0) + 1
+            bt = next((x for x in t.touched.values() if x.involves(victim.id)), None)
+            t.event(bt, "planet", "alert", f"The planet {victim.name} was destroyed by {kname} and leaves the map - its cell is Void now (CM-11, PR-02)",
+                    ("CM-11", "PR-02", "OUT-11", "D-145"))
+            _end_battles_of(t, victim.id)
+            continue
         cap_name = t.name(victim.captain_id)
         cell = victim.cell
         where = f"sector {victim.galaxy[0]},{victim.galaxy[1]}/{victim.sector[0]},{victim.sector[1]}"
-        kname = f"the {killer.name} ({t.name(killer.captain_id)})" if killer is not None else "an enemy ship"
         t.stats["destroyed"].append({"ship": victim.id, "captain": victim.captain_id, "cause": "combat", "by": killer_id, "cell": [cell[0], cell[1]]})
         lost = {"ship_class": victim.cls, "position": [[victim.galaxy[0], victim.galaxy[1]], [victim.sector[0], victim.sector[1]], [cell[0], cell[1]]],
                 "shield_current": victim.shield_current, "shield_max": victim.shield_max, "hazard": None, "name": victim.name}
@@ -652,7 +788,7 @@ def _outcomes(t: Turn) -> None:
 
 
 def _reputation_for(t: Turn, bt: Battle, victor: str, loser: str) -> None:
-    """FR-01...05 for the victor, FR-02 for an AI loser (D-121), from the strengths at the open."""
+    """FR-01...05 for a victor captain, FR-02 for an AI loser (D-121), from the strengths at the open; planets have no levels."""
     st = t.state
     sv, sl = float(bt.strength_at_open.get(victor, 0.0)), float(bt.strength_at_open.get(loser, 0.0))
     if victor in st.captains:
@@ -673,7 +809,7 @@ def _finish(t: Turn) -> None:
         records.append(bt.to_dict(t.exchanges.get(bid, [])))
     t.stats["battles"] = records
     t.stats["exchanges"] = sum(len(v) for v in t.exchanges.values())
-    # CM-05: a ship that was in a battle this turn (open or ended now) does not recharge this turn
+    # CM-05: a combatant that was in a battle this turn (open or ended now) does not recharge this turn
     t.stats["battled"] = sorted({s.id for bt in t.touched.values() for cid in bt.sides for s in ships_of(st, cid, bt.galaxy, bt.sector)})
     for bid in list(st.battles):
         if not st.battles[bid].open:
@@ -681,5 +817,5 @@ def _finish(t: Turn) -> None:
     open_now = len(st.battles)
     kills = len(t.dead)
     t.events.append({"phase": "TP-04", "type": "combat", "severity": "muted",
-                     "text": f"Combat: {len(records)} battle(s) this turn, {t.stats['exchanges']} shot(s), {kills} ship(s) destroyed; {open_now} battle(s) still open",
+                     "text": f"Combat: {len(records)} battle(s) this turn, {t.stats['exchanges']} shot(s), {kills} destroyed; {open_now} battle(s) still open",
                      "ids": ["TP-04", "CM-07"]})

@@ -44,13 +44,31 @@ def test_every_m3_syntax_parses(text: str, name: str) -> None:
     assert order.command == name and order.kind == QUEUED
 
 
-@pytest.mark.parametrize("text, cmd_id", [
-    ("trade x give y for z", "CMD-12"), ("upgrade engine with moonstone", "CMD-13"),
-    ("pickup i-1", "CMD-15"), ("buy food 3", "CMD-20"), ("sell food 3", "CMD-20"),
+@pytest.mark.parametrize("text, name", [
+    ("fire s-017", "fire"), ("fire p-00012", "fire"),
+    ("trade p-00012 give iridium:1 for food:5", "trade"), ("trade c-004 give iridium:1,food:2 for silver:20", "trade"),
+    ("upgrade engine with moonstone", "upgrade"), ("upgrade shields with star-iron", "upgrade"),
+    ("pickup iridium", "pickup"), ("buy food 3", "buy"), ("buy ship kestrel", "buy"), ("sell torpedoes 2", "sell"),
 ])
-def test_later_milestone_commands_rejected_by_id(text: str, cmd_id: str) -> None:
-    with pytest.raises(CommandError, match=cmd_id):
-        parse(text)
+def test_every_m4_syntax_parses(text: str, name: str) -> None:
+    """CMD-08 (D-137), CMD-12, CMD-13, CMD-15, CMD-20: the M4 orders are queued orders from M4."""
+    order = parse(text, "s-000")
+    assert order.command == name and order.kind == QUEUED
+
+
+def test_m4_helpers() -> None:
+    from starbour.commands.parse import BOTH, parse_buy, parse_bundle, parse_pickup, parse_sell, parse_trade, parse_upgrade
+    assert parse_fire(["s-017"]).weapon == BOTH and parse_fire(["torpedo", "s-017", "2"]).count == 2
+    assert parse_buy(["ship", "Kestrel"]).cls == "kestrel" and parse_buy(["torpedoes", "4"]).item == "torpedo"
+    assert parse_sell(["Iridium", "1"]).item == "iridium"
+    assert parse_bundle("iridium:1,food:5,iridium:2") == {"iridium": 3, "food": 5}
+    t = parse_trade(["p-00012", "give", "iridium:1", "for", "food:5"])
+    assert t.counterparty == "p-00012" and t.give == {"iridium": 1} and t.want == {"food": 5}
+    assert parse_upgrade(["warpcore", "with", "aetherite"]).component == "warp" and parse_pickup(["Star-Iron"]) == "star_iron"
+    for bad, cmd_id in (("fire", "CMD-08"), ("fire s-017 2", "CMD-08"), ("trade p-1 give for food:5", "CMD-12"), ("trade p-1 give iridium for food:5", "CMD-12"),
+                        ("upgrade hull with iridium", "CMD-13"), ("pickup", "CMD-15"), ("buy food", "CMD-20"), ("buy food 0", "CMD-20"), ("sell food x", "CMD-20")):
+        with pytest.raises(CommandError, match=cmd_id):
+            parse(bad)
 
 
 @pytest.mark.parametrize("text, cmd_id", [
@@ -124,14 +142,13 @@ def test_warp_and_stop_helpers() -> None:
 def test_catalogue_covers_cmd_01_to_21() -> None:
     ids = {c.id for c in COMMANDS.values()}
     assert ids == {f"CMD-{n:02d}" for n in range(1, 22)}
-    for name in ("move", "warp", "stop", "shields", "fire", "peace", "escape"):
+    for name in ("move", "warp", "stop", "shields", "fire", "peace", "escape", "trade", "upgrade", "pickup", "buy", "sell"):
         assert name in available_names(), name
-    assert "trade" not in available_names()
     assert lookup("?") is COMMANDS["help"] and lookup("nope") is None
     lines = help_lines(shield_recharge=5)
-    assert any("move" in ln for ln in lines) and any("M4+" in ln for ln in lines)
+    assert any("move" in ln for ln in lines) and not any("M4+" in ln for ln in lines), "every M4 command is available (CMD-12/13/15/20)"
     assert lines[-1] == "Shields recharge 5 a turn outside hazards and battle (CM-05); planet cells are safe (HZ-07).", "D-127 footer"
-    assert help_lines("trade")[0].endswith("(not available until M4)")
+    assert not help_lines("trade")[0].endswith("(not available until M4)"), "trade is available at M4 (CMD-12)"
     assert not help_lines("fire")[0].endswith("(not available until M3)")
     assert "persists" in help_lines("move")[1], "CMD-06 help text says the move persists (D-98)"
     assert any("recharge 5 a turn outside hazards and battle" in ln for ln in help_lines("shields", 5)), "help shields names the recharge (CM-05, D-127)"

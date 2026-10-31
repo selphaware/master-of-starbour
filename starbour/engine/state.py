@@ -1,4 +1,4 @@
-"""GameState, snapshot(), from_snapshot(), snapshot_hash() - BUS-04, BUS-07, C3, C6, C9, C10, D-67, D-87.
+"""GameState, snapshot(), from_snapshot(), snapshot_hash() - BUS-04, BUS-07, C3, C6, C9, C10, C11, D-67, D-87.
 
 The engine is the only owner of this object (BUS-04).  ``snapshot()`` is the full
 dynamic state plus the terrain and items of every sector the player has visited; the
@@ -7,6 +7,10 @@ emitted in sorted order so the canonical JSON, and therefore the hash, is stable
 M2 adds per-ship ``hazard`` and ``move_remaining`` (derived, C9) and ``game_over``; M3 adds
 open ``battles``, per-ship ``in_battle`` / ``target`` and per-captain ``visible_reputation``
 (C10), the debug ``--spawn`` placement (D-126) and the mutiny placement rule (D-115, D-129).
+M4 adds ``planets`` (C11): the records of every planet whose dynamic state no longer
+follows the seed (``touched``), every planet in an open battle and the planet in the
+player's active ship's cell - the rest regenerate from the seed (D-150 [ASSUMED]) - plus the
+debug ``--give`` / ``--coins`` / ``--respect`` / ``--fear`` setters.
 """
 from __future__ import annotations
 
@@ -21,8 +25,9 @@ from starbour.commands.parse import Order
 from starbour.config import GameConfig
 from starbour.engine import hazards as H
 from starbour.entities.battle import Battle
-from starbour.entities.captain import Captain
+from starbour.entities.captain import Captain, clamp_level
 from starbour.entities.item import Item
+from starbour.entities.planet import Planet
 from starbour.entities.ship import Position, Ship
 from starbour.world import names
 from starbour.world.generate import Sector, World, galaxy_key, generate_world, populate, sector_key
@@ -49,6 +54,10 @@ def spawn_rng(seed: int, n: int) -> random.Random:
     return random.Random(f"starbour-spawn-{seed}-{n}")
 
 
+def is_planet_id(text: str) -> bool:
+    return isinstance(text, str) and text.startswith("p-")
+
+
 @dataclass(slots=True)
 class GameState:
     """Everything the engine knows.  Only ``starbour.engine`` mutates it."""
@@ -72,6 +81,7 @@ class GameState:
     player_mutinies: int = 0                         # for the game.over summary (C9)
     spawned: list[dict] = field(default_factory=list)   # C10: the ships --spawn created (D-126)
     pending_reputation: list[dict] = field(default_factory=list)   # FR-06 rows from fires accepted between turns, applied at the next TP-07
+    touched_planets: set[str] = field(default_factory=set)         # C11: planets whose dynamic state left the seed (D-150)
     hazard_note_sector: Coord | None = None          # D-127: 'planet cells are safe' once per sector entry (not saved)
     last_stats: dict = field(default_factory=dict)   # the last resolved turn's counters (not part of the snapshot)
 
@@ -91,10 +101,10 @@ class GameState:
             return None
         return self.ships.get(cap.active_ship)
 
-    def sector_of(self, ship: Ship) -> Sector | None:
+    def sector_of(self, ship) -> Sector | None:
         return self.world.sector(ship.galaxy, ship.sector)
 
-    def terrain_of(self, ship: Ship) -> list:
+    def terrain_of(self, ship) -> list:
         sector = self.sector_of(ship)
         return sector.terrain() if sector is not None else []
 
@@ -133,9 +143,83 @@ class GameState:
             out.setdefault((s.galaxy, s.sector), []).append(s)
         return out
 
+    # ---- planets (C11, CM-11, D-140, D-145)
+    def planet(self, planet_id: str) -> Planet | None:
+        return self.world.planets.get(planet_id)
+
+    def live_planet(self, planet_id: str) -> Planet | None:
+        p = self.world.planets.get(planet_id)
+        return p if p is not None and not p.destroyed else None
+
+    def planet_at(self, galaxy: Coord, sector: Coord, cell: Coord) -> Planet | None:
+        s = self.world.sector(galaxy, sector)
+        return s.planet_at(cell) if s is not None else None
+
+    def planets_in(self, galaxy: Coord, sector: Coord) -> list[Planet]:
+        s = self.world.sector(galaxy, sector)
+        return s.planets() if s is not None else []
+
+    def find_planet(self, text: str, galaxy: Coord | None = None, sector: Coord | None = None) -> Planet | None:
+        """A live planet by id (D-148 (6)) or exact name, optionally only in one sector."""
+        wanted = text.strip().lower()
+        p = self.world.planets.get(text.strip())
+        if p is None:
+            pool = self.planets_in(galaxy, sector) if galaxy is not None and sector is not None else self.world.planets.values()
+            p = next((x for x in pool if not x.destroyed and x.name.lower() == wanted), None)
+        if p is None or p.destroyed:
+            return None
+        if galaxy is not None and (p.galaxy != galaxy or p.sector != sector):
+            return None
+        return p
+
+    def touch_planet(self, planet: Planet) -> None:
+        self.touched_planets.add(planet.id)
+
+    def destroy_planet(self, planet: Planet) -> None:
+        """CM-11 / D-145: the planet leaves the map (its cell becomes Void) and every index; the record stays with destroyed = true."""
+        planet.destroyed = True
+        planet.shield_current = 0.0
+        sector = self.world.sector(planet.galaxy, planet.sector)
+        if sector is not None and sector.grid.get(planet.cell[0], planet.cell[1]) is planet:
+            sector.grid.remove(planet.cell[0], planet.cell[1])
+        self.touched_planets.add(planet.id)
+        for cap in self.captains.values():
+            if cap.restock_target == planet.id:
+                cap.restock_target = None
+
+    def combatant(self, text: str):
+        """A ship or a live planet by id (CM-11: planets fight with the ship rules)."""
+        s = self.ships.get(text)
+        if s is not None:
+            return s
+        return self.live_planet(text)
+
+    def side(self, side_id: str):
+        """The holder behind a battle side: a Captain or a Planet (None when gone)."""
+        cap = self.captains.get(side_id)
+        if cap is not None:
+            return cap
+        return self.world.planets.get(side_id)
+
+    def side_name(self, side_id: str) -> str:
+        holder = self.side(side_id)
+        return holder.name if holder is not None else side_id
+
+    def trades_with_player(self, planet: Planet) -> bool:
+        """EF-04 / PR-05 / TR-10 for the player's current respect."""
+        cap = self.player
+        return not planet.destroyed and (bool(cap.is_master) or int(cap.respect) >= int(self.cfg.planet_refuse_respect))
+
+    def docked_planet(self) -> Planet | None:
+        """The live planet in the player's active ship's cell (PR-04; the T4 panel and heartbeat)."""
+        ship = self.active_ship()
+        if ship is None:
+            return None
+        return self.planet_at(ship.galaxy, ship.sector, ship.cell)
+
     # ---- battles (C10)
-    def battle_of_ship(self, ship: Ship) -> Battle | None:
-        """The open battle the ship's captain is in within the ship's sector (``ships[*].in_battle``)."""
+    def battle_of_ship(self, ship) -> Battle | None:
+        """The open battle the ship's (or planet's) side is in within its sector (``ships[*].in_battle``)."""
         for bid in sorted(self.battles):
             bt = self.battles[bid]
             if bt.open and bt.involves(ship.captain_id) and bt.galaxy == ship.galaxy and bt.sector == ship.sector:
@@ -203,6 +287,7 @@ class GameState:
             del self.captains[cap.id]
         return cap, was_active
 
+    # ---- debug affordances before turn 1 (C9, C10, C11)
     def teleport(self, position: Position) -> Ship:
         """D-104 debug: place the player's active ship before turn 1 (C9 ``--teleport``); a terrain cell is allowed."""
         ship = self.active_ship()
@@ -243,6 +328,26 @@ class GameState:
                              "sector": [sector[0], sector[1]], "cell": [cell[0], cell[1]], "fear": cap.fear, "respect": cap.respect})
         return cap, ship
 
+    def give(self, items: dict[str, int]) -> None:
+        """C11 debug ``--give``: set the player's element stacks before turn 1 (adds to what is held)."""
+        for element, units in items.items():
+            if element not in self.cfg.elements:
+                raise ValueError(f"--give: unknown element {element!r}; known: {sorted(self.cfg.elements)} (CFG-42)")
+            self.player.add_item(element, int(units))
+
+    def set_coins(self, gold: int, silver: int) -> None:
+        """C11 debug ``--coins``."""
+        if gold < 0 or silver < 0:
+            raise ValueError("--coins: gold and silver cannot be negative (TR-01)")
+        self.player.gold, self.player.silver = int(gold), int(silver)
+
+    def set_levels(self, respect: int | None = None, fear: int | None = None) -> None:
+        """C11 debug ``--respect`` / ``--fear`` (clamped 0...100, LV-01)."""
+        if respect is not None:
+            self.player.respect = clamp_level(respect)
+        if fear is not None:
+            self.player.fear = clamp_level(fear)
+
     def mutiny_cell(self, ship: Ship, new_engine: float) -> Coord:
         """SUP-04b / D-115 / D-129: where a demoted captain's new ship appears.
 
@@ -271,7 +376,27 @@ class GameState:
         anchor = hz.cell if hz is not None else here
         return max(free, key=lambda c: (chebyshev(c, anchor), manhattan(c, anchor), -c[0], -c[1]))
 
-    # ---- snapshot (C3, C9, C10)
+    # ---- snapshot (C3, C9, C10, C11)
+    def planet_records(self) -> dict[str, dict]:
+        """C11 ``planets``: the touched planets, every planet in an open battle, and the planet under the player's active ship (D-150)."""
+        ids = set(self.touched_planets)
+        for bt in self.battles.values():
+            if bt.open:
+                ids.update(s for s in bt.sides if is_planet_id(s))
+        docked = self.docked_planet()
+        if docked is not None:
+            ids.add(docked.id)
+        player = self.player
+        disp = int(round(2 * player.respect - 100))
+        out: dict[str, dict] = {}
+        for pid in sorted(ids):
+            p = self.world.planets.get(pid)
+            if p is None:
+                continue
+            bt = self.battle_of_ship(p) if not p.destroyed else None
+            out[pid] = p.record(self.cfg, self.turn_no, disposition=disp, trades=self.trades_with_player(p), in_battle=bt.id if bt else None)
+        return out
+
     def snapshot(self) -> dict:
         """The C3 snapshot: full dynamic state plus visited sectors' terrain and items (D-87)."""
         galaxies: dict[str, dict] = {}
@@ -305,6 +430,7 @@ class GameState:
             "universe": {"galaxies": [[c[0], c[1]] for c in self.world.galaxy_coords()]},
             "galaxies": galaxies,
             "sectors": sectors,
+            "planets": self.planet_records(),
             "fog_of_war": self.cfg.fog_of_war,
             "view": dict(self.view),
             "counters": {"captain": self.next_captain_no, "ship": self.next_ship_no, "battle": self.next_battle_no},
@@ -348,6 +474,7 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
     """Rebuild a state whose ``snapshot()`` equals ``snap`` - C6 round trip (tests/test_save.py)."""
     seed = int(snap["seed"])
     world = generate_world(seed, cfg)
+    turn_no = int(snap["turn_no"])
     captains = {cid: Captain.from_dict(cid, d) for cid, d in sorted(snap["captains"].items())}
     ships = {sid: Ship.from_dict(sid, d) for sid, d in sorted(snap["ships"].items())}
     queues: dict[str, list[Order]] = {}
@@ -364,7 +491,28 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
         gtext, stext = key.split("/")
         sector = world.sector(_parse_coord(gtext), _parse_coord(stext))
         if sector is not None:
-            sector.items = [Item.from_dict(i) for i in sec.get("items") or []]
+            # C11 / D-141: the saved list says which stacks remain and which are revealed; element and units come from the seed
+            saved = {str(i.get("id")): i for i in (sec.get("items") or []) if isinstance(i, dict)}
+            by_id = {i.id: i for i in sector.items}
+            merged: list[Item] = []
+            for iid, raw in saved.items():
+                item = by_id.get(iid)
+                if item is None:
+                    item = Item.from_dict(raw)
+                item.revealed = bool(raw.get("revealed", False))
+                merged.append(item)
+            sector.items = merged
+    touched: set[str] = set()
+    for pid, rec in sorted((snap.get("planets") or {}).items()):
+        planet = world.planets.get(pid)
+        if planet is None or not isinstance(rec, dict):
+            continue
+        planet.apply_record(rec, turn_no)
+        touched.add(pid)
+        if planet.destroyed:
+            sector = world.sector(planet.galaxy, planet.sector)
+            if sector is not None and sector.grid.get(planet.cell[0], planet.cell[1]) is planet:
+                sector.grid.remove(planet.cell[0], planet.cell[1])
     counters = snap.get("counters") or {}
     battles = {}
     for b in snap.get("battles") or []:
@@ -372,11 +520,11 @@ def from_snapshot(snap: dict, cfg: GameConfig) -> GameState:
         battles[bt.id] = bt
     return GameState(
         cfg, seed, world, captains, ships, str(snap["player_id"]),
-        turn_no=int(snap["turn_no"]), visited=visited, view=dict(snap.get("view") or {"level": "follow"}),
+        turn_no=turn_no, visited=visited, view=dict(snap.get("view") or {"level": "follow"}),
         next_captain_no=int(counters.get("captain") or (len(captains) + 1)),
         next_ship_no=int(counters.get("ship") or (len(ships) + 1)),
         next_battle_no=int(counters.get("battle") or (len(battles) + 1)),
         queues=queues, battles=battles, game_over_turn=snap.get("game_over_turn"), mastery_turn=snap.get("mastery_turn"),
         player_mutinies=int(snap.get("player_mutinies") or 0), spawned=[dict(s) for s in snap.get("spawned") or []],
-        pending_reputation=[dict(r) for r in snap.get("pending_reputation") or []],
+        pending_reputation=[dict(r) for r in snap.get("pending_reputation") or []], touched_planets=touched,
     )

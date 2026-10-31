@@ -51,7 +51,8 @@ def test_sim_script_teleport_and_game_over(small_cfg: GameConfig, tmp_path: Path
     script.write_text("\n" * (n + 3), encoding="utf-8")
     report = tmp_path / "report.json"
     rc = run_sim(small_cfg, seed=99, turns=n + 3, ai_player=True, report_path=report, save_dir=tmp_path / "saves",
-                 teleport=(tuple(star["galaxy"]), tuple(star["sector"]), tuple(star["cell"])), script_path=script, with_world_index=True)
+                 teleport=(tuple(star["galaxy"]), tuple(star["sector"]), tuple(star["cell"])), script_path=script, with_world_index=True,
+                 respect=small_cfg.planet_attack_respect_max)   # M4: a planet orbiting the star would otherwise open on a respect-10 Kestrel (EF-05)
     assert rc == 0
     doc = json.loads(report.read_text(encoding="utf-8"))
     assert doc["outcome"] == "game_over" and doc["turns_completed"] == n == doc["final"]["game_over_turn"] == len(doc["per_turn"])
@@ -98,7 +99,7 @@ def test_engine_game_over_state_machine_in_process(small_cfg: GameConfig, tmp_pa
     n = H.countdown_turns(H.pull(float(star["mass"]), 0, small_cfg.k_g, small_cfg.falloff), small_cfg.pull_turns_scale)
     save = tmp_path / "game.json"
     eng = Engine(small_cfg, seed=99, save_path=save, bus=False, resume=False,
-                 teleport=(tuple(star["galaxy"]), tuple(star["sector"]), tuple(star["cell"])))
+                 teleport=(tuple(star["galaxy"]), tuple(star["sector"]), tuple(star["cell"])), respect=small_cfg.planet_attack_respect_max)
     eng.start()
     assert save.exists()
     for _ in range(n):

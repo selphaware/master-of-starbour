@@ -75,7 +75,7 @@ def test_binary_stars_are_adjacent_when_multi() -> None:
     seen_multi = False
     for _ in range(40):
         sector = Sector((0, 0), (0, 0), GeneralGrid(24, 24))
-        _fill_sector(sector, rng, cfg, set())
+        _fill_sector(sector, rng, cfg, set(), [0, 0], [])
         stars = [t.cell for t in sector.terrain() if t.kind == STAR]
         if len(stars) >= 2:
             seen_multi = True

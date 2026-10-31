@@ -44,7 +44,8 @@ STYLES: dict[str, str] = {
     "neutron_star": "magenta",
     "black_hole": "bold bright_red",
     "wormhole": "medium_purple",
-    "planet": "green",
+    "planet": "green",                   # SYM-08: a planet that trades with you
+    "planet_refuses": "bold orange_red1",   # SYM-08 (M4): a planet that refuses trade (EF-04) or is in battle with you
     "item": "yellow",
     "item_special": "bold bright_yellow",
     "ship_active": "bold bright_cyan",
@@ -53,6 +54,7 @@ STYLES: dict[str, str] = {
     "ship_ai_battle": "bold red",        # SYM-12: an AI ship in battle with you
     "target": "bold bright_yellow",      # GRD-08 target marker
     "battle_panel": "bold red",          # PNL-06 border while in battle
+    "planet_panel": "green",             # the planet-in-cell panel border (C11)
     "title": "bold bright_cyan",
     "subtitle": "bright_cyan",
     "label": "grey70",
@@ -131,7 +133,7 @@ def bar(value: float, maximum: float, width: int = 20, style: str = "cyan", empt
     maximum = max(1.0, float(maximum))
     filled = int(round(max(0.0, min(value, maximum)) / maximum * width))
     t = Text()
-    t.append("█" * filled if True else "#" * filled, style=style)
+    t.append("█" * filled, style=style)
     t.append("░" * (width - filled), style=empty_style)
     return t
 

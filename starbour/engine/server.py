@@ -1,4 +1,4 @@
-"""The engine process loop - T0, BUS-01...07, MSG-01...09, D-57, D-70, D-83, D-104, D-105, D-125, D-126.
+"""The engine process loop - T0, BUS-01...07, MSG-01...09, D-57, D-70, D-83, D-104, D-105, D-125, D-126, C11.
 
 Binds PUB and PULL, polls PULL, applies orders, resolves a turn on ``turn.end`` and
 publishes ``turn.resolved`` with the full snapshot, autosaves, publishes ``state.hello``
@@ -10,9 +10,10 @@ save is deleted *before* ``game.over`` is published; afterwards every order exce
 and ``quit`` is rejected and ``turn.end`` resolves nothing.  The in-process sim stops there
 (D-106); the bus engine stays up until ``new`` or a shutdown (D-107).
 
-Debug affordances (C10): ``--spawn "<class> gx gy sx sy cx cy [fear] [respect]"`` places an
-AI captain before turn 1 (D-126) and ``--ai passive`` keeps every AI captain from opening a
-battle (D-125).  Both are logged as WARNING and ignored on a resumed game.
+Debug affordances (C10, C11): ``--spawn "<class> gx gy sx sy cx cy [fear] [respect]"`` places an
+AI captain before turn 1 (D-126), ``--ai passive`` keeps every AI captain from opening a
+battle (D-125), ``--give``, ``--coins``, ``--respect`` and ``--fear`` set the player's cargo,
+wealth and standing before turn 1 (C11).  All are logged as WARNING and ignored on a resumed game.
 """
 from __future__ import annotations
 
@@ -81,6 +82,44 @@ def parse_spawn(text: str) -> tuple[str, Position, int | None, int | None]:
     return parts[0].lower(), ((nums[0], nums[1]), (nums[2], nums[3]), (nums[4], nums[5])), fear, respect
 
 
+def parse_give(text: str) -> dict[str, int]:
+    """C11: ``--give "<element>:<units>[,<element>:<units>]"`` -> {element: units}."""
+    out: dict[str, int] = {}
+    for part in str(text).split(","):
+        part = part.strip()
+        if not part:
+            continue
+        name, sep, n = part.partition(":")
+        if sep != ":" or not name.strip():
+            raise ValueError(f'--give needs "<element>:<units>[,...]", got {text!r} (C11)')
+        try:
+            units = int(n.strip())
+        except ValueError:
+            raise ValueError(f"--give: units for {name.strip()!r} must be a whole number, got {n.strip()!r} (C11)") from None
+        if units < 1:
+            raise ValueError(f"--give: units for {name.strip()!r} count from 1 (C11)")
+        key = name.strip().lower().replace("-", "_")
+        out[key] = out.get(key, 0) + units
+    if not out:
+        raise ValueError(f'--give needs at least one "<element>:<units>", got {text!r} (C11)')
+    return out
+
+
+def parse_coins(values: list | tuple | None) -> tuple[int, int] | None:
+    """C11: ``--coins <gold> <silver>``."""
+    if values is None:
+        return None
+    if len(values) != 2:
+        raise ValueError(f"--coins needs <gold> <silver>, got {values!r} (C11)")
+    try:
+        gold, silver = int(values[0]), int(values[1])
+    except (TypeError, ValueError):
+        raise ValueError(f"--coins needs two whole numbers, got {values!r} (C11)") from None
+    if gold < 0 or silver < 0:
+        raise ValueError("--coins: gold and silver cannot be negative (TR-01)")
+    return gold, silver
+
+
 class Engine:
     """One game, one engine (BUS-04)."""
 
@@ -88,7 +127,8 @@ class Engine:
                  pull_port: int = 0, bus: bool = True, ai_player: bool = False, max_turns: int | None = None,
                  recorder: Any = None, resume: bool = True, launcher_pid: int | None = None,
                  teleport: Position | None = None, spawns: list[str] | None = None, ai_passive: bool = False,
-                 log_dir: Path | None = None) -> None:
+                 log_dir: Path | None = None, give: dict[str, int] | None = None, coins: tuple[int, int] | None = None,
+                 respect: int | None = None, fear: int | None = None) -> None:
         self.cfg = cfg
         self.save_path = Path(save_path) if save_path else None
         self.log_dir = Path(log_dir) if log_dir else None     # gameplay logs (gamelog.py); None = write none
@@ -125,6 +165,7 @@ class Engine:
             self.apply_teleport(teleport)
         for text in spawns or []:
             self.apply_spawn(text)
+        self.apply_debug(give=give, coins=coins, respect=respect, fear=fear)
         if ai_passive:
             log.warning("DEBUG --ai passive (D-125): AI captains never open a battle this game")
 
@@ -161,6 +202,25 @@ class Engine:
         self._hello_bytes = None
         log.warning("DEBUG spawn (D-126): %s (%s) in the %s (%s, %s) at galaxy %s sector %s cell %s, fear %d respect %d",
                     cap.name, cap.id, ship.name, ship.id, ship.cls, ship.galaxy, ship.sector, ship.cell, cap.fear, cap.respect)
+
+    def apply_debug(self, *, give: dict[str, int] | None = None, coins: tuple[int, int] | None = None, respect: int | None = None,
+                    fear: int | None = None) -> None:
+        """C11 debug affordances: the player's cargo, wealth and levels before turn 1; ignored on a resumed game."""
+        if give is None and coins is None and respect is None and fear is None:
+            return
+        if self.state.turn_no != 0:
+            log.warning("--give / --coins / --respect / --fear ignored: the game resumed at turn %d (C11: before turn 1)", self.state.turn_no)
+            return
+        if give:
+            self.state.give(give)
+            log.warning("DEBUG give (C11): the player holds %s", self.state.player.items)
+        if coins is not None:
+            self.state.set_coins(coins[0], coins[1])
+            log.warning("DEBUG coins (C11): %d gold, %d silver", coins[0], coins[1])
+        if respect is not None or fear is not None:
+            self.state.set_levels(respect=respect, fear=fear)
+            log.warning("DEBUG levels (C11): respect %d, fear %d", self.state.player.respect, self.state.player.fear)
+        self._hello_bytes = None
 
     def start(self) -> None:
         """Bind the sockets (bus mode), save the opening state, say hello."""
@@ -419,14 +479,16 @@ def _pid_exists(pid: int) -> bool:
 
 def run_engine_process(cfg: GameConfig, *, seed: int | None, pub_port: int, pull_port: int, save_path: Path,
                        resume: bool = True, teleport: Position | None = None, spawns: list[str] | None = None,
-                       ai_passive: bool = False, log_dir: Path | None = None) -> int:
-    """``python -m starbour --role engine`` (C1); ``--teleport`` / ``--spawn`` / ``--ai`` are the debug affordances (D-110, D-125, D-126).
-    The gameplay logs go to ``logs/`` next to the exe / repo root unless ``log_dir`` says otherwise (D-61, D-135)."""
+                       ai_passive: bool = False, log_dir: Path | None = None, give: dict[str, int] | None = None,
+                       coins: tuple[int, int] | None = None, respect: int | None = None, fear: int | None = None) -> int:
+    """``python -m starbour --role engine`` (C1); ``--teleport`` / ``--spawn`` / ``--ai`` / ``--give`` / ``--coins`` / ``--respect`` /
+    ``--fear`` are the debug affordances (D-110, D-125, D-126, C11).  The gameplay logs go to ``logs/`` next to the exe / repo root
+    unless ``log_dir`` says otherwise (D-61, D-135)."""
     from starbour import paths, runtime
     try:
         engine = Engine(cfg, seed=seed, save_path=save_path, pub_port=pub_port, pull_port=pull_port, resume=resume,
                         launcher_pid=runtime.launcher_pid(), teleport=teleport, spawns=spawns, ai_passive=ai_passive,
-                        log_dir=log_dir if log_dir is not None else paths.logs_dir())
+                        log_dir=log_dir if log_dir is not None else paths.logs_dir(), give=give, coins=coins, respect=respect, fear=fear)
         engine.start()
     except Exception as e:   # noqa: BLE001 - a port in use or a bad debug flag is the usual cause
         log.error("engine could not start: %s", e)

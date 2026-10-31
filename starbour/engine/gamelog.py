@@ -1,10 +1,13 @@
-"""Gameplay logs - M3 step 2 (no rule changes; D-135).
+"""Gameplay logs - M3 step 2 (no rule changes; D-135), with the CFG-74 filter (D-139, OB-05).
 
 ``logs/game-<seed>.log``    plain text: one line per event in phase order (TP-01...08) with the turn
                             number and the T3 text untruncated, plus one line per AI decision with its
-                            reason and rule IDs.
+                            reason and rule IDs - filtered by ``[logging] ai_trace``: ``sector`` (AI in the
+                            player's sector, plus every battle and roam), ``battle`` (battles and roams only),
+                            ``all``, ``off``.
 ``logs/turns-<seed>.jsonl`` one JSON line per resolved turn in the C2 ``per_turn`` shape (CONTRACTS C2, C9,
-                            C10), plus ``event_records`` (the full MSG-03 event dicts) and ``ai_decisions``.
+                            C10, C11), plus ``event_records`` (the full MSG-03 event dicts) and ``ai_decisions``
+                            (every decision, unfiltered).
 
 Both are appended to each turn, started afresh on ``new`` and never read by the game.  The formatters are
 pure functions of their inputs; ``GameLogs`` is the thin file shell around them and never raises - a log
@@ -22,6 +25,7 @@ from starbour.engine.state import GameState
 log = logging.getLogger("starbour.gamelog")
 
 UNKNOWN_PHASE = len(PHASE_ORDER)
+BATTLE_KINDS = ("battle", "roam", "attack")
 
 
 def log_names(seed: int) -> tuple[str, str]:
@@ -53,15 +57,32 @@ def decision_line(turn_no: int, decision: dict) -> str:
     return f"T{turn_no} {decision.get('captain', '?')} {decision.get('name', '?')}: {one_line(decision.get('text', ''))}{tail}"
 
 
-def turn_lines(turn_no: int, events: list[dict], decisions: list[dict]) -> list[str]:
+def keep_decision(decision: dict, mode: str, watched: list | None) -> bool:
+    """CFG-74 / D-139: which decision lines the text log keeps."""
+    mode = str(mode or "all").lower()
+    if mode == "off":
+        return False
+    if mode == "all":
+        return True
+    kind = str(decision.get("kind") or "")
+    if kind in BATTLE_KINDS:
+        return True
+    if mode == "sector" and watched is not None:
+        sector = decision.get("sector")
+        return sector is not None and [list(sector[0]), list(sector[1])] == [list(watched[0]), list(watched[1])]
+    return False
+
+
+def turn_lines(turn_no: int, events: list[dict], decisions: list[dict], mode: str = "all", watched: list | None = None) -> list[str]:
     """The turn's lines in phase order.  AI decisions are made in TP-01, so they lead that phase; events keep
     their order within a phase (the sort is stable)."""
     ordered = sorted(events, key=lambda e: PHASE_ORDER.get(str(e.get("phase")), UNKNOWN_PHASE))
-    return [decision_line(turn_no, d) for d in decisions] + [event_line(turn_no, e) for e in ordered]
+    kept = [d for d in decisions if keep_decision(d, mode, watched)]
+    return [decision_line(turn_no, d) for d in kept] + [event_line(turn_no, e) for e in ordered]
 
 
 def turn_row(state: GameState, events: list[dict], stats: dict, notes: list[str] | tuple[str, ...] = ()) -> dict:
-    """The C2 ``per_turn`` row (with the C9 and C10 fields) for the turn just resolved.
+    """The C2 ``per_turn`` row (with the C9, C10 and C11 fields) for the turn just resolved.
 
     ``events`` holds the strings of the T3 texts, preceded by ``notes`` (the sim's script replies).
     """
@@ -80,7 +101,9 @@ def turn_row(state: GameState, events: list[dict], stats: dict, notes: list[str]
                   "shield_current": lost.get("shield_current"), "shield_max": lost.get("shield_max"),
                   "hazard": lost.get("hazard"), "move_remaining": None}
     player.update({"food": cap.food, "water": cap.water, "fear": cap.fear, "respect": cap.respect, "gold": cap.gold, "silver": cap.silver,
-                   "in_battle": state.player_in_battle(), "ships": len([s for s in cap.ships if s in state.ships])})
+                   "in_battle": state.player_in_battle(), "ships": len([s for s in cap.ships if s in state.ships]),
+                   "items": {k: int(v) for k, v in sorted(cap.items.items()) if int(v) > 0}})
+    econ = dict(stats.get("ai_economy") or {})
     return {
         "turn_no": state.turn_no,
         "orders_executed": dict(stats.get("orders_executed") or {"player": 0, "ai": 0}),
@@ -96,6 +119,12 @@ def turn_row(state: GameState, events: list[dict], stats: dict, notes: list[str]
         "battles": list(stats.get("battles") or []),
         "reputation": list(stats.get("reputation") or []),
         "captures": list(stats.get("captures") or []),
+        "trades": list(stats.get("trades") or []),
+        "pickups": list(stats.get("pickups") or []),
+        "upgrades": list(stats.get("upgrades") or []),
+        "planet_events": list(stats.get("planet_events") or []),
+        "ai_economy": {"purchases": int(econ.get("purchases", 0)), "sales": int(econ.get("sales", 0)), "restock_trips": int(econ.get("restock_trips", 0)),
+                       "docked": int(econ.get("docked", 0))},
     }
 
 
@@ -140,8 +169,10 @@ class GameLogs:
         if self.broken:
             return
         decisions = decisions_of(stats)
+        ship = state.active_ship()
+        watched = [list(ship.galaxy), list(ship.sector)] if ship is not None else None
         try:
-            lines = turn_lines(state.turn_no, events, decisions)
+            lines = turn_lines(state.turn_no, events, decisions, getattr(state.cfg, "ai_trace", "all"), watched)
             with self.text_path.open("a", encoding="utf-8", newline="\n") as f:
                 f.write("\n".join(lines) + "\n")
             with self.jsonl_path.open("a", encoding="utf-8", newline="\n") as f:

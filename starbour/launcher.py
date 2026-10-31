@@ -49,11 +49,12 @@ def interpreter() -> tuple[list[str], dict[str, str]]:
 
 def role_command(role: str, cfg: GameConfig, pub_port: int, pull_port: int, log_level: str,
                  seed: int | None = None, new_game: bool = False, save_dir: Path | None = None,
-                 teleport: str | None = None, spawns: list[str] | None = None, ai: str | None = None) -> list[str]:
+                 teleport: str | None = None, spawns: list[str] | None = None, ai: str | None = None,
+                 give: str | None = None, coins: list | tuple | None = None, respect: int | None = None, fear: int | None = None) -> list[str]:
     """C1: ``python -m starbour --role <r>`` in dev, ``starbour.exe --role <r>`` when frozen (BR-15).
 
-    ``--seed``, ``--new``, ``--save-dir`` and the debug ``--teleport`` / ``--spawn`` / ``--ai`` (C9, C10, D-104, D-110,
-    D-125, D-126) go to the engine only."""
+    ``--seed``, ``--new``, ``--save-dir`` and the debug ``--teleport`` / ``--spawn`` / ``--ai`` / ``--give`` / ``--coins`` /
+    ``--respect`` / ``--fear`` (C9, C10, C11, D-104, D-110, D-125, D-126, D-148 (13)) go to the engine only."""
     cmd = list(interpreter()[0])
     cmd += ["--role", role, "--config", str(cfg.path), "--pub-port", str(pub_port), "--pull-port", str(pull_port),
             "--log-level", log_level]
@@ -70,13 +71,22 @@ def role_command(role: str, cfg: GameConfig, pub_port: int, pull_port: int, log_
             cmd += ["--spawn", s]
         if ai is not None:
             cmd += ["--ai", ai]
+        if give is not None:
+            cmd += ["--give", give]
+        if coins is not None:
+            cmd += ["--coins", str(coins[0]), str(coins[1])]
+        if respect is not None:
+            cmd += ["--respect", str(respect)]
+        if fear is not None:
+            cmd += ["--fear", str(fear)]
     return cmd
 
 
 class Launcher:
     def __init__(self, cfg: GameConfig, *, pub_port: int, pull_port: int, log_level: str = "INFO", seed: int | None = None,
                  new_game: bool = False, save_dir: Path | None = None, teleport: str | None = None,
-                 spawns: list[str] | None = None, ai: str | None = None) -> None:
+                 spawns: list[str] | None = None, ai: str | None = None, give: str | None = None, coins: list | tuple | None = None,
+                 respect: int | None = None, fear: int | None = None) -> None:
         self.cfg = cfg
         self.pub_port, self.pull_port = pub_port, pull_port
         self.log_level = log_level
@@ -86,6 +96,7 @@ class Launcher:
         self.teleport = teleport
         self.spawns = list(spawns or [])
         self.ai = ai
+        self.give, self.coins, self.respect, self.fear = give, coins, respect, fear
         self.children: dict[str, subprocess.Popen] = {}
         self.respawns: dict[str, list[float]] = {r: [] for r in ROLES}
         self.headless = runtime.headless()
@@ -120,7 +131,7 @@ class Launcher:
     # ---- spawning
     def spawn(self, role: str) -> subprocess.Popen:
         cmd = role_command(role, self.cfg, self.pub_port, self.pull_port, self.log_level, self.seed, self.new_game, self.save_dir,
-                           self.teleport, self.spawns, self.ai)
+                           self.teleport, self.spawns, self.ai, self.give, self.coins, self.respect, self.fear)
         if role == "engine" or self.headless:
             flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
             out = open(self.logs / f"{role}.stderr.log", "a", encoding="utf-8")
@@ -253,7 +264,8 @@ class Launcher:
 
 
 def main(cfg: GameConfig, *, pub_port: int, pull_port: int, log_level: str, seed: int | None, new_game: bool = False,
-         save_dir: Path | None = None, teleport: str | None = None, spawns: list[str] | None = None, ai: str | None = None) -> int:
-    """``python -m starbour`` with no role (C1); ``--teleport``, ``--spawn`` and ``--ai`` are forwarded to the engine (C9, C10)."""
+         save_dir: Path | None = None, teleport: str | None = None, spawns: list[str] | None = None, ai: str | None = None,
+         give: str | None = None, coins: list | tuple | None = None, respect: int | None = None, fear: int | None = None) -> int:
+    """``python -m starbour`` with no role (C1); the debug flags are forwarded to the engine (C9, C10, C11)."""
     return Launcher(cfg, pub_port=pub_port, pull_port=pull_port, log_level=log_level, seed=seed, new_game=new_game,
-                    save_dir=save_dir, teleport=teleport, spawns=spawns, ai=ai).run()
+                    save_dir=save_dir, teleport=teleport, spawns=spawns, ai=ai, give=give, coins=coins, respect=respect, fear=fear).run()

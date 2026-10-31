@@ -455,7 +455,8 @@ def test_ai_never_ends_on_terrain_and_never_dies_by_a_star(small_cfg: GameConfig
         state, _ = resolve_turn(state, busy, rng, ai_player=True)
         for sid, ship in state.ships.items():
             sector = state.sector_of(ship)
-            assert sector.terrain_at(ship.cell) is None, f"turn {state.turn_no}: {sid} ended on terrain at {ship.cell}"
+            here = sector.terrain_at(ship.cell)
+            assert here is None or here.kind == "planet", f"turn {state.turn_no}: {sid} ended on terrain at {ship.cell}"   # M4: docking at a planet is allowed (PR-04, D-144)
         assert all(d["cause"] != "star" for d in state.last_stats["destroyed"])
         assert state.last_stats["orders_executed"]["ai"] >= 1
     snap = state.snapshot()

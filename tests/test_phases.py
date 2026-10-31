@@ -35,7 +35,7 @@ def test_turn_no_increments_and_phases_named(small_state: GameState, small_cfg: 
     assert any(t.startswith("Hazards:") for t in texts(events, "TP-03")), "TP-03 resolves hazards from M2"
     assert any(t.startswith("Combat:") for t in texts(events, "TP-04")), "TP-04 resolves combat from M3"
     assert any(t.startswith("Reputation:") for t in texts(events, "TP-07")), "TP-07 applies reputation from M3"
-    assert any("skipped (M4)" in t for t in texts(events, "TP-05"))
+    assert any(t.startswith("Trade & pickup:") for t in texts(events, "TP-05")), "TP-05 resolves trade from M4"
     state, _ = run_turns(state, small_cfg, 2)
     assert state.turn_no == 3
 
@@ -177,6 +177,7 @@ def test_two_runs_same_seed_identical(small_cfg: GameConfig) -> None:
 
 def test_ai_player_drives_the_player(small_state: GameState, small_cfg: GameConfig) -> None:
     ship = small_state.active_ship()
+    small_state.player.respect = small_cfg.planet_attack_respect_max   # M4: at the default start a planet in range opens on the player and holds it (EF-05, D-132)
     before = ship.cell
     state, _ = run_turns(small_state, small_cfg, 1, ai_player=True, passive=False)
     assert state.last_stats["orders_executed"]["player"] >= 1

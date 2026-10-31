@@ -8,23 +8,28 @@ wormhole crossings (TP-03), upkeep, mutiny and shield recharge (TP-06).  M3 adds
 (TP-04, ``starbour.engine.combat``), reputation (TP-07, ``starbour.engine.reputation``),
 fleet movement (MV-06), the wormhole exit distance (D-114), the mutiny placement
 (D-115, D-129) and the AI's battle, roaming and yielding rules (``starbour.engine.ai``).
-Trade is a named phase that logs ``skipped (M4)`` so it is never silently absent.  No
-I/O, no clocks.
+M4 adds trade, upgrades and pickups at TP-05 (``starbour.engine.economy``,
+``starbour.engine.items``), planets as combatants (TP-01 decisions, EF-05), the AI economy
+(restock trips, docking, automatic pickups; D-144) and AI supplies at TP-06 (D-60 lifted).
+No I/O, no clocks.
 """
 from __future__ import annotations
 
 import random
 
-from starbour.commands.parse import CommandError, Order, parse_escape, parse_move, parse_warp
+from starbour.commands.parse import CommandError, Order, parse_buy, parse_escape, parse_move, parse_pickup, parse_sell, parse_trade, parse_upgrade, parse_warp
 from starbour.config import GameConfig
 from starbour.engine import ai
 from starbour.engine import combat as CB
+from starbour.engine import economy as E
 from starbour.engine import hazards as H
+from starbour.engine import items as I
 from starbour.engine import movement as MV
 from starbour.engine import reputation as R
-from starbour.engine.orders import take_all, warp_factor
+from starbour.engine.orders import _counterparty, take_all, warp_factor
 from starbour.engine.state import GameState
 from starbour.entities.captain import Captain
+from starbour.entities.planet import Planet
 from starbour.entities.ship import Ship
 from starbour.world import names
 from starbour.world.generate import flatten_cell
@@ -37,9 +42,9 @@ PHASES: tuple[tuple[str, str], ...] = (
 )
 PHASE_ORDER = {code: i for i, (code, _) in enumerate(PHASES)}
 PHASE_TITLES = dict(PHASES)
-
 SEVERITIES = ("muted", "info", "warning", "alert", "error", "highlight")
 COMBAT_ORDERS = ("fire", "peace", CB.SURRENDER)    # resolved in TP-04, not TP-02
+ECONOMY_ORDERS = ("buy", "sell", "trade", "upgrade", "pickup")   # resolved in TP-05
 
 # re-exported for the M1 tests and callers (the rules live in starbour.engine.movement)
 impulse_cells = MV.impulse_cells
@@ -64,13 +69,16 @@ def sector_text(galaxy: Coord, sector: Coord) -> str:
 
 def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: list[dict], stats: dict,
                  ai_player: bool, ai_passive: bool = False) -> dict[str, list[Order]]:
-    """TP-01: the player's queued orders (persisting moves included, D-98) plus every AI captain's decisions (OV-10, D-125)."""
+    """TP-01: the player's queued orders (persisting moves included, D-98) plus every AI captain's decisions (OV-10, D-125)
+    and every planet's (EF-05, CM-11, D-145)."""
     by_ship: dict[str, list[Order]] = take_all(state)
     player_count = sum(len(q) for q in by_ship.values())
     index = state.ships_by_sector()
     trace: list[ai.Decision] = stats.setdefault("ai_decisions", [])   # the gameplay log reads these (M3 step 2)
+    roamers: set[str] = stats.setdefault("roamers", set())
+    econ = stats["ai_economy"]
     if ai_player and not state.game_over:
-        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index, trace=trace):
+        for order in ai.decide(state.player, state, rng, cfg, passive=ai_passive, index=index, trace=trace, roamers=roamers, stats=econ):
             if order.ship_id not in by_ship:
                 by_ship[order.ship_id] = [order]
                 player_count += 1
@@ -83,23 +91,46 @@ def phase_orders(state: GameState, cfg: GameConfig, rng: random.Random, events: 
         cap = state.captains[cid]
         if cap.is_player:
             continue
-        for order in ai.decide(cap, state, rng, cfg, passive=ai_passive, index=index, trace=trace):
+        for order in ai.decide(cap, state, rng, cfg, passive=ai_passive, index=index, trace=trace, roamers=roamers, stats=econ):
             by_ship.setdefault(order.ship_id, []).append(order)
             ai_count += 1
             if order.command == "fire":
                 open_ai_battle(state, cfg, order, by_ship, events, stats, watched, ai_player)
+    for (g, s), here in sorted(index.items()):
+        for planet in state.planets_in(g, s):
+            orders, opens_on = ai.planet_orders(planet, state, cfg, here, passive=ai_passive, trace=trace)
+            if not orders:
+                continue
+            by_ship.setdefault(planet.id, []).extend(orders)
+            if opens_on is not None:
+                open_planet_battle(state, cfg, planet, opens_on, by_ship, events, stats, watched, ai_player)
     stats["orders_executed"] = {"player": player_count, "ai": ai_count}
     events.append(event("TP-01", "orders", "muted", f"Orders: {player_count} from you, {ai_count} from AI captains", ["TP-01"]))
     return by_ship
 
 
+def _hold_target(state: GameState, bt, target_captain: str, by_ship: dict[str, list[Order]], stats: dict, ai_player: bool) -> None:
+    """D-132: an AI-decided move or warp of the captain targeted at TP-01 is dropped - its ships are in a battle now.  The human
+    player's own queued moves stand."""
+    if target_captain == state.player_id and not ai_player:
+        return
+    tcap = state.captains.get(target_captain)
+    for sid in (tcap.ships if tcap else []):
+        s = state.ships.get(sid)
+        if s is None or s.galaxy != bt.galaxy or s.sector != bt.sector or sid not in by_ship:
+            continue
+        kept = [o for o in by_ship[sid] if o.command not in ("move", "warp")]
+        if len(kept) != len(by_ship[sid]):
+            by_ship[sid] = kept
+            stats["held_for_battle"] = stats.get("held_for_battle", 0) + 1
+
+
 def open_ai_battle(state: GameState, cfg: GameConfig, order: Order, by_ship: dict[str, list[Order]], events: list[dict], stats: dict,
                    watched: tuple[Coord, Coord] | None, ai_player: bool) -> None:
     """CM-01 / D-119 / D-128 / D-132: an AI's fire opens its battle when the order is accepted (TP-01), so the target holds its
-    cell - an AI-decided move or warp the targeted captain already planned this turn is dropped (its ships are in a battle now).
-    The human player's own queued moves stand."""
+    cell - an AI-decided move or warp the targeted captain already planned this turn is dropped (its ships are in a battle now)."""
     ship = state.ships.get(order.ship_id)
-    target = state.ships.get(order.args[1]) if len(order.args) > 1 else None
+    target = state.combatant(order.args[1]) if len(order.args) > 1 else None
     if ship is None or target is None or target.captain_id == ship.captain_id:
         return
     if CB.open_battle_between(state, ship.captain_id, target.captain_id) is not None:
@@ -108,16 +139,19 @@ def open_ai_battle(state: GameState, cfg: GameConfig, order: Order, by_ship: dic
     stats["battles_opened"] = stats.get("battles_opened", 0) + 1
     if state.player_id not in bt.sides:
         stats["ai_vs_ai_opened"] = stats.get("ai_vs_ai_opened", 0) + 1
-    if target.captain_id != state.player_id or ai_player:
-        tcap = state.captains.get(target.captain_id)
-        for sid in (tcap.ships if tcap else []):
-            s = state.ships.get(sid)
-            if s is None or s.galaxy != bt.galaxy or s.sector != bt.sector or sid not in by_ship:
-                continue
-            kept = [o for o in by_ship[sid] if o.command not in ("move", "warp")]
-            if len(kept) != len(by_ship[sid]):
-                by_ship[sid] = kept
-                stats["held_for_battle"] = stats.get("held_for_battle", 0) + 1
+    _hold_target(state, bt, target.captain_id, by_ship, stats, ai_player)
+    if state.player_id in bt.sides or (watched is not None and (bt.galaxy, bt.sector) == watched):
+        events.append(dict(ev, phase="TP-01"))
+
+
+def open_planet_battle(state: GameState, cfg: GameConfig, planet: Planet, target: Ship, by_ship: dict[str, list[Order]], events: list[dict],
+                       stats: dict, watched: tuple[Coord, Coord] | None, ai_player: bool) -> None:
+    """EF-05 / D-145: a planet opens on a low-respect weaker ship in range at TP-01 (no FR-06: planets have no respect)."""
+    if CB.open_battle_between(state, planet.id, target.captain_id) is not None:
+        return
+    bt, ev = CB.open_battle(state, cfg, planet, target, state.turn_no, stats["reputation"])
+    stats["battles_opened"] = stats.get("battles_opened", 0) + 1
+    _hold_target(state, bt, target.captain_id, by_ship, stats, ai_player)
     if state.player_id in bt.sides or (watched is not None and (bt.galaxy, bt.sector) == watched):
         events.append(dict(ev, phase="TP-01"))
 
@@ -218,8 +252,8 @@ def resolve_warp(state: GameState, cfg: GameConfig, ship: Ship, order: Order, ev
     ship.hazard_key = None
     if ship.captain_id == state.player_id:
         state.mark_visited(dest_g, dest_s)
-    else:
-        stats["roams"] = stats.get("roams", 0) + 1     # C10: AI warps are roams (CFG-73, D-125)
+    if ship.id in stats.get("roamers", ()):
+        stats["roams"] = stats.get("roams", 0) + 1     # C10: AI roams (CFG-73, D-125); a restock warp is not a roam (D-144)
     stats["warps"].append({"ship": ship.id, "captain": ship.captain_id, "from": [[old_g[0], old_g[1]], [old_s[0], old_s[1]]],
                            "to": [[dest_g[0], dest_g[1]], [dest_s[0], dest_s[1]]], "factor": float(factor), "effective": round(eff, 3)})
     if visible:
@@ -273,7 +307,7 @@ def phase_movement(state: GameState, cfg: GameConfig, by_ship: dict[str, list[Or
         warp = next((o for o in orders if o.command == "warp"), None)
         moves = [o for o in orders if o.command in ("move", "escape")]
         for o in orders:
-            if o.command not in ("move", "escape", "warp") and o.command not in COMBAT_ORDERS:
+            if o.command not in ("move", "escape", "warp") and o.command not in COMBAT_ORDERS and o.command not in ECONOMY_ORDERS:
                 events.append(event("TP-02", "system", "muted", f"{ship.name}: {o.command} orders resolve in a later milestone", ["OV-02b"]))
         moved = False
         if warp is not None:
@@ -405,6 +439,146 @@ def phase_combat(state: GameState, cfg: GameConfig, rng: random.Random, by_ship:
     CB.phase_combat(state, cfg, rng, by_ship, events, stats, _watched(state))
 
 
+# --------------------------------------------------------------------------- TP-05 trade, upgrades & pickup
+
+def _visible(state: GameState, ship, watched: tuple[Coord, Coord] | None) -> bool:
+    return ship.captain_id == state.player_id or (watched is not None and (ship.galaxy, ship.sector) == watched)
+
+
+def _record_trade(state: GameState, res: E.TradeResult, ship, events: list[dict], stats: dict, watched: tuple[Coord, Coord] | None, type_: str) -> None:
+    """A resolved buy / sell / barter: the C11 row, the OUT-07 line (player and watched sector), the FR-07 rows."""
+    stats["trades"].append(res.row)
+    stats["reputation"].extend(res.rep)
+    if _visible(state, ship, watched):
+        events.append(event("TP-05", type_, "info" if res.ok else "warning", res.text, res.ids))
+    with_ = res.row.get("with")
+    if not res.ok and with_ and state.planet(with_) is not None and "EF-04" in str(res.row.get("reason") or ""):
+        CB.planet_event(stats, with_, "refused_trade", res.row.get("captain", ""))
+
+
+def resolve_economy_order(state: GameState, cfg: GameConfig, rng: random.Random, cap: Captain, ship: Ship, order: Order, events: list[dict], stats: dict,
+                          watched: tuple[Coord, Coord] | None) -> None:
+    """One queued economy order at TP-05 (CMD-12, CMD-13, CMD-15, CMD-20); every refusal names its rule (M4 section 6)."""
+    turn_no = state.turn_no
+    planet = state.planet_at(ship.galaxy, ship.sector, ship.cell)
+    if order.command == "buy":
+        spec = parse_buy(order.args)
+        if spec.item == "ship":
+            res = E.resolve_buy(cap, ship, planet, "ship", 1, cfg, turn_no, cls=spec.cls, new_ship_id="pending", ship_name="pending")
+            if res.ok:
+                cls_spec = cfg.ships[spec.cls]
+                sid = state.new_ship_id()
+                name = names.unique(names.ship_name, rng, {s.name for s in state.ships.values()})
+                new = Ship.of_class(sid, name, cls_spec, cap.id, ship.position)
+                state.ships[sid] = new
+                cap.ships = [s for s in cap.ships if s != "pending"] + [sid]
+                res.row["received"] = {"ship": spec.cls, "id": sid}
+                res.text = (f"Bought a {cls_spec.name.capitalize()}, the {name} ({sid}), from {planet.name} for {cfg.prices[f'ship_{spec.cls}']} gold; "
+                            f"it joins your fleet here (OUT-07, PRC-05, FL-02)")
+                state.touch_planet(planet)
+            _record_trade(state, res, ship, events, stats, watched, "trade")
+            return
+        res = E.resolve_buy(cap, ship, planet, spec.item, spec.count, cfg, turn_no)
+        if res.ok and planet is not None:
+            state.touch_planet(planet)
+        _record_trade(state, res, ship, events, stats, watched, "trade")
+    elif order.command == "sell":
+        spec = parse_sell(order.args)
+        res = E.resolve_sell(cap, ship, planet, spec.item, spec.count, cfg, turn_no)
+        if res.ok and planet is not None:
+            state.touch_planet(planet)
+        _record_trade(state, res, ship, events, stats, watched, "trade")
+    elif order.command == "trade":
+        spec = parse_trade(order.args)
+        holder, their_ship, reason = _counterparty(state, ship, spec.counterparty)
+        if reason:
+            res = E.TradeResult(False, E.trade_row(cap.id, spec.counterparty, "barter", spec.give, spec.want, accepted=False, reason=reason),
+                                f"trade rejected: {reason}", ids=("OUT-07", "CMD-12"))
+        else:
+            res = E.resolve_barter(cap, ship, holder, their_ship, spec.give, spec.want, cfg, turn_no)
+            if res.ok and isinstance(holder, Planet):
+                state.touch_planet(holder)
+        _record_trade(state, res, ship, events, stats, watched, "trade")
+    elif order.command == "upgrade":
+        spec = parse_upgrade(order.args)
+        res = E.resolve_upgrade(cap, ship, spec.component, spec.element, cfg)
+        if res.ok:
+            stats["upgrades"].append(res.row)
+        if _visible(state, ship, watched):
+            events.append(event("TP-05", "upgrade", "info" if res.ok else "warning", res.text, res.ids))
+    elif order.command == "pickup":
+        element = parse_pickup(order.args)
+        sector = state.sector_of(ship)
+        stack = I.revealed_stack(sector, ship.cell, element) if sector is not None else None
+        if stack is None:
+            if _visible(state, ship, watched):
+                events.append(event("TP-05", "pickup", "warning", f"pickup rejected: no scanned {element} in cell {ship.cell[0]},{ship.cell[1]} (IT-04, CMD-15)",
+                                    ["OUT-10", "CMD-15", "IT-04"]))
+            return
+        row, rep = I.pickup(sector, cap, stack, cfg)
+        stats["pickups"].append(row)
+        if rep is not None:
+            stats["reputation"].append(rep)
+        if _visible(state, ship, watched):
+            bonus = f"; a special item: respect +{cfg.respect_special_item_delta} (FR-08)" if rep else ""
+            events.append(event("TP-05", "pickup", "highlight", f"Picked up {stack.units} {stack.element} ({stack.rarity}){bonus} (OUT-10, CMD-15)",
+                                ["OUT-10", "CMD-15", "IT-04"] + (["FR-08"] if rep else [])))
+
+
+def ai_pickups(state: GameState, cfg: GameConfig, cap: Captain, ship: Ship, stats: dict) -> None:
+    """D-144 [ASSUMED]: an AI ship scans its cell and picks up every stack lying there."""
+    sector = state.sector_of(ship)
+    if sector is None:
+        return
+    for item in I.reveal(sector, ship.cell):
+        row, rep = I.pickup(sector, cap, item, cfg)
+        stats["pickups"].append(row)
+        if rep is not None:
+            stats["reputation"].append(rep)
+
+
+def phase_trade(state: GameState, cfg: GameConfig, rng: random.Random, by_ship: dict[str, list[Order]], events: list[dict], stats: dict,
+                ai_passive: bool) -> None:
+    """TP-05 / CMD-12/13/15/20 / D-144: the queued economy orders (ship-id order), then every AI captain's docking economy and
+    automatic pickups.  ``--ai passive`` keeps the AI out of the economy as it keeps it out of everything else (D-125, D-132)."""
+    watched = _watched(state)
+    for sid in sorted(by_ship):
+        ship = state.ships.get(sid)
+        if ship is None:
+            continue
+        cap = state.captains.get(ship.captain_id)
+        if cap is None:
+            continue
+        for o in by_ship[sid]:
+            if o.command in ECONOMY_ORDERS:
+                try:
+                    resolve_economy_order(state, cfg, rng, cap, ship, o, events, stats, watched)
+                except CommandError as e:
+                    events.append(event("TP-05", "trade", "error", f"{ship.name}: {o.text()} rejected: {e}", ["OUT-13"]))
+    if not ai_passive:
+        for cid in sorted(state.captains):
+            cap = state.captains[cid]
+            if cap.is_player:
+                continue
+            for sid in list(cap.ships):
+                ship = state.ships.get(sid)
+                if ship is None:
+                    continue
+                ai_pickups(state, cfg, cap, ship, stats)
+                if sid != cap.active_ship:
+                    continue
+                planet = ai.docked_at(ship, cap, state, cfg)       # D-150: docked = a trading planet in the cell or next to it (orbit)
+                if planet is not None:
+                    stats["reputation"].extend(E.ai_dock(cap, ship, planet, cfg, state.turn_no, stats))
+                    state.touch_planet(planet)
+    econ = stats["ai_economy"]
+    accepted = sum(1 for r in stats["trades"] if r.get("accepted"))
+    events.append(event("TP-05", "trade", "muted",
+                        f"Trade & pickup: {accepted} trade(s) accepted, {len(stats['pickups'])} pickup(s), {len(stats['upgrades'])} upgrade(s); "
+                        f"AI: {econ.get('docked', 0)} docked, {econ.get('purchases', 0)} purchase(s), {econ.get('sales', 0)} sale(s), "
+                        f"{econ.get('restock_trips', 0)} restock trip(s) started", ["TP-05", "D-144"]))
+
+
 # --------------------------------------------------------------------------- TP-06 upkeep, mutiny & recharge
 
 def mutiny(state: GameState, cap: Captain, cfg: GameConfig, rng: random.Random, stats: dict) -> list[dict]:
@@ -422,6 +596,7 @@ def mutiny(state: GameState, cap: Captain, cfg: GameConfig, rng: random.Random, 
     old_ship.target = None
     state.captains[mid] = mutineers
     state.queues.pop(old_ship.id, None)
+    cap.restock_target = None
     if others:
         here = flatten_cell(old_ship.position, cfg)
         nearest = min(others, key=lambda s: (chebyshev(flatten_cell(state.ships[s].position, cfg), here), s))
@@ -452,31 +627,55 @@ def mutiny(state: GameState, cap: Captain, cfg: GameConfig, rng: random.Random, 
     return out
 
 
-def phase_upkeep(state: GameState, cfg: GameConfig, rng: random.Random, events: list[dict], stats: dict) -> None:
-    """TP-06 / SUP-01 / SUP-02 / D-60 / D-76: player-only consumption, warning, zero counter, mutiny."""
-    cap = state.player
+def _consume(cap: Captain) -> None:
     cap.food = max(0, cap.food - 1)
     cap.water = max(0, cap.water - 1)
-    events.append(event("TP-06", "upkeep", "info", f"Upkeep: food {cap.food}, water {cap.water}", ["SUP-01", "CP-07"]))
     if cap.food == 0 or cap.water == 0:
         cap.zero_turns += 1
     else:
         cap.zero_turns = 0
+
+
+def phase_upkeep(state: GameState, cfg: GameConfig, rng: random.Random, events: list[dict], stats: dict, ai_passive: bool = False) -> None:
+    """TP-06 / SUP-01 / SUP-02 / SUP-03 / D-76 / D-144: consumption, warning, zero counter and mutiny for the player and (D-60 lifted)
+    every AI captain; ``--ai passive`` keeps the AI on D-60 (no consumption) so a parked opponent never starves [ASSUMED D-150]."""
+    cap = state.player
+    _consume(cap)
+    events.append(event("TP-06", "upkeep", "info", f"Upkeep: food {cap.food}, water {cap.water}", ["SUP-01", "CP-07"]))
     if cap.zero_turns > cfg.mutiny_turns_at_zero and cap.active_ship in state.ships:
         events.extend(mutiny(state, cap, cfg, rng, stats))
+    else:
+        low = min(cap.food, cap.water)
+        if low <= cfg.warn_turns:
+            if low > 0:
+                text = f"Supplies warning: food {cap.food}, water {cap.water} - {low} turn(s) before they run out"
+            else:
+                text = (f"Supplies warning: food {cap.food}, water {cap.water} - the crew mutiny in "
+                        f"{cap.mutiny_countdown(cfg)} turn(s) unless you buy supplies")
+            events.append(event("TP-06", "supplies", "warning", text, ["SUP-02", "OUT-17"]))
+    if ai_passive:
         return
-    low = min(cap.food, cap.water)
-    if low <= cfg.warn_turns:
-        if low > 0:
-            text = f"Supplies warning: food {cap.food}, water {cap.water} - {low} turn(s) before they run out"
-        else:
-            text = (f"Supplies warning: food {cap.food}, water {cap.water} - the crew mutiny in "
-                    f"{cap.mutiny_countdown(cfg)} turn(s) unless you buy supplies")
-        events.append(event("TP-06", "supplies", "warning", text, ["SUP-02", "OUT-17"]))
+    watched = _watched(state)
+    starving = 0
+    for cid in sorted(state.captains):
+        other = state.captains.get(cid)
+        if other is None or other.is_player:
+            continue
+        _consume(other)
+        if other.zero_turns > cfg.mutiny_turns_at_zero and other.active_ship in state.ships:
+            ship = state.ships[other.active_ship]
+            rows = mutiny(state, other, cfg, rng, stats)
+            if watched is not None and (ship.galaxy, ship.sector) == watched:
+                events.extend(rows)
+        elif other.zero_turns > 0:
+            starving += 1
+    if starving:
+        events.append(event("TP-06", "upkeep", "muted", f"Upkeep: {starving} AI captain(s) out of food or water (SUP-03, D-144)", ["SUP-03", "D-144"]))
 
 
 def phase_recharge(state: GameState, cfg: GameConfig, events: list[dict], stats: dict) -> None:
-    """TP-06 / CM-05 / SH-03 / CFG-27: shields recharge outside any hazard and outside battle, capped at shield_max."""
+    """TP-06 / CM-05 / SH-03 / CFG-27: shields recharge outside any hazard and outside battle, capped at shield_max - ships and
+    damaged planets alike (CM-11)."""
     player_ship = state.active_ship()
     battled = set(stats.get("battled") or ())
     for sid in sorted(state.ships):
@@ -494,12 +693,17 @@ def phase_recharge(state: GameState, cfg: GameConfig, events: list[dict], stats:
             events.append(event("TP-06", "shields", "info",
                                 f"Shields recharge {before:g} -> {ship.shield_current:g} / {ship.shield_max:g} (+{cfg.shield_recharge:g} outside hazards and battle, CM-05)",
                                 ["CM-05", "SH-03", "CFG-27"]))
+    for pid in sorted(state.touched_planets):
+        p = state.world.planets.get(pid)
+        if p is None or p.destroyed or p.shield_current >= p.shield_max or pid in battled or state.battle_of_ship(p) is not None:
+            continue
+        p.shield_current = H.recharge(p.shield_current, p.shield_max, cfg.shield_recharge)
 
 
 # --------------------------------------------------------------------------- TP-07 reputation
 
 def phase_reputation(state: GameState, cfg: GameConfig, events: list[dict], stats: dict) -> None:
-    """TP-07 / FR-01...10 / LV-01 / LV-05 / OUT-09: apply the rows TP-04 collected; ints clamped 0...100."""
+    """TP-07 / FR-01...10 / LV-01 / LV-05 / OUT-09: apply the rows TP-04 and TP-05 collected; ints clamped 0...100."""
     rows = stats.get("reputation") or []
     applied = 0
     for row in rows:
@@ -514,7 +718,7 @@ def phase_reputation(state: GameState, cfg: GameConfig, events: list[dict], stat
             events.append(event("TP-07", "reputation", "info",
                                 f"{delta.rule}: fear {delta.fear:+d}, respect {delta.respect:+d} -> fear {cap.fear}, respect {cap.respect}{scaled}",
                                 ["OUT-09", delta.rule, "LV-03"]))
-    events.append(event("TP-07", "reputation", "muted", f"Reputation: {applied} change(s) applied" + ("" if applied else " (FR-10: nothing moves without a battle)"),
+    events.append(event("TP-07", "reputation", "muted", f"Reputation: {applied} change(s) applied" + ("" if applied else " (FR-10: nothing moves without a battle or a trade)"),
                         ["TP-07", "FR-10"]))
 
 
@@ -528,14 +732,16 @@ def resolve_turn(state: GameState, cfg: GameConfig, rng: random.Random, *, ai_pl
     stats: dict = {"turn_no": state.turn_no, "orders_executed": {"player": 0, "ai": 0}, "ai_ships_moved": 0,
                    "mutinies": [], "player_moved": False, "warps": [], "destroyed": [], "game_over": None, "player_lost": None,
                    "wormhole_crossings": 0, "battles": [], "reputation": list(state.pending_reputation), "captures": [], "roams": 0,
-                   "battles_opened": 0, "ai_vs_ai_opened": 0, "exchanges": 0}
+                   "battles_opened": 0, "ai_vs_ai_opened": 0, "exchanges": 0,
+                   "trades": [], "pickups": [], "upgrades": [], "planet_events": [], "planets_destroyed": 0,
+                   "ai_economy": {"purchases": 0, "sales": 0, "restock_trips": 0, "docked": 0}, "roamers": set()}
     state.pending_reputation = []
     by_ship = phase_orders(state, cfg, rng, events, stats, ai_player, ai_passive)
     phase_movement(state, cfg, by_ship, events, stats)
     phase_hazards(state, cfg, events, stats)
     phase_combat(state, cfg, rng, by_ship, events, stats)
-    events.append(event("TP-05", "system", "muted", "Trade & pickup: skipped (M4)", ["TP-05"]))
-    phase_upkeep(state, cfg, rng, events, stats)
+    phase_trade(state, cfg, rng, by_ship, events, stats, ai_passive)
+    phase_upkeep(state, cfg, rng, events, stats, ai_passive)
     phase_recharge(state, cfg, events, stats)
     phase_reputation(state, cfg, events, stats)
     oe = stats["orders_executed"]
