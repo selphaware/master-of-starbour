@@ -1,20 +1,29 @@
-"""T1 Command renderer - pure: the prompt and the immediate command outputs (C4, UX-01, UX-09, CMD-01/02/04).
+"""T1 Command renderer - pure: the prompt, the immediate command outputs and the structured help (C4, UX-01, UX-09, CMD-01/02/04, D-154).
 
 ``render(snapshot, view, cfg, width)`` returns the coloured prompt ``[T<turn> . <ship> . <n> orders] >``.
-``help_text('fire', cfg)`` carries the live combat numbers from the ini (UX-09, D-138, D-148 (9)).
-The process module turns it into prompt_toolkit input; nothing here touches a socket or stdin.
+``render_help(topic, width, cfg, snapshot)`` draws the D-154 help: one Rich table per group (Command · When · What),
+``help <group>`` one table, ``help <command>`` a panel (Syntax · Does · When · Example · Numbers · IDs) - wrapping on, every line
+within ``width`` (min 80), never the 200-column buffer.  ``help fire`` carries the live combat numbers from the ini (UX-09, D-138,
+D-148 (9)); ``help_text`` keeps the M4 plain-line form for scripts and tests.  The process module turns it into prompt_toolkit
+input; nothing here touches a socket or stdin.
 """
 from __future__ import annotations
 
-from rich.console import RenderableType
+import io
+
+from rich import box
+from rich.console import Console, Group, RenderableType
+from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from starbour.commands.catalogue import help_lines
+from starbour.commands import catalogue as CAT
+from starbour.commands.catalogue import GROUPS, GROUP_TITLES, CommandSpec, commands_in, fire_numbers_line, lookup, shields_footer
 from starbour.config import GameConfig
 from starbour.terminals import palette as P
 
 SEP = " · "
+HELP_MIN_WIDTH = 80   # D-154: help renders at the live console width, never narrower than this
 
 
 def _player(snapshot: dict) -> tuple[dict, dict | None]:
@@ -157,25 +166,109 @@ def fire_numbers(cfg: GameConfig, target_engine: float | None = None, phasers: f
             "target": "the target" if target_engine is not None else f"a {start.name.capitalize()}"}
 
 
-def help_text(name: str | None = None, cfg: GameConfig | None = None, snapshot: dict | None = None) -> list[Text]:
-    """CMD-01 from the catalogue; the footer names the shield recharge from the config (CM-05, D-127); ``help fire`` prints the
-    live numbers (UX-09, D-138): against the starting class, or against the ship's last target when the snapshot shows one."""
-    numbers = None
-    if cfg is not None:
-        engine = phasers = None
-        if snapshot:
-            cap, ship = _player(snapshot)
-            if ship:
-                phasers = float(ship.get("phasers", 0) or 0)
-                target = (snapshot.get("ships") or {}).get(ship.get("target"))
-                if isinstance(target, dict):
-                    engine = float(target.get("engine", 0) or 0)
-        numbers = fire_numbers(cfg, engine, phasers)
-    out = []
-    for line in help_lines(name, cfg.shield_recharge if cfg is not None else None, numbers):
-        style = P.STYLES["title"] if not line.startswith(" ") else P.STYLES["value"]
-        out.append(Text(line, style=style, no_wrap=True))
+def _live_fire_numbers(cfg: GameConfig | None, snapshot: dict | None) -> dict | None:
+    """UX-09 / D-138: the fire numbers against the starting class, or against the ship's last target when the snapshot shows one."""
+    if cfg is None:
+        return None
+    engine = phasers = None
+    if snapshot:
+        cap, ship = _player(snapshot)
+        if ship:
+            phasers = float(ship.get("phasers", 0) or 0)
+            target = (snapshot.get("ships") or {}).get(ship.get("target"))
+            if isinstance(target, dict):
+                engine = float(target.get("engine", 0) or 0)
+    return fire_numbers(cfg, engine, phasers)
+
+
+def help_numbers(spec: CommandSpec, cfg: GameConfig | None, snapshot: dict | None) -> str | None:
+    """UX-09: the live numbers a command's help panel shows, from the ini - fire (D-138), shields (CM-05), warp (MV-02), move (MV-01)."""
+    if cfg is None:
+        return None
+    start = cfg.ships[cfg.starting_class]
+    if spec.name == "fire":
+        numbers = _live_fire_numbers(cfg, snapshot)
+        return fire_numbers_line(numbers) if numbers else None
+    if spec.name == "shields":
+        return shields_footer(cfg.shield_recharge)
+    if spec.name == "warp":
+        from starbour.engine.movement import warp_reach   # a pure formula; no sockets
+        reach = warp_reach(start.warp, cfg.warp_curve_base, cfg.warp_curve_exponent)
+        far = "anywhere" if reach == float("inf") else f"{reach:.2f} sectors"
+        return (f"a {start.name.capitalize()} at full factor {start.warp:g} reaches {far}; factor {cfg.warp_max:g} reaches anywhere "
+                f"(reach = w x {cfg.warp_curve_base:g}^((w/10)^{cfg.warp_curve_exponent:g}), MV-02); the pull at departure is subtracted from the factor (HZ-10)")
+    if spec.name == "move":
+        return f"a {start.name.capitalize()} moves floor({start.engine:g} - pull) cells a turn at full power; impulse_max {cfg.impulse_max:g} (MV-01, CFG-22)"
+    return None
+
+
+def _help_table(group: str, width: int) -> Table:
+    """D-154: one group as Command · When · What, wrapping (never cropping) inside ``width``."""
+    t = Table(box=box.SQUARE, show_header=True, header_style=P.STYLES["label"], border_style=P.STYLES["rule"], width=width, expand=True,
+              padding=(0, 1), show_edge=True)
+    t.add_column("Command", no_wrap=True, overflow="fold", style=P.STYLES["title"], min_width=7)
+    t.add_column("When", no_wrap=True, overflow="fold", style=P.STYLES["accent"], min_width=6)
+    t.add_column("What", overflow="fold", style=P.STYLES["value"], ratio=1)
+    for c in commands_in(group):
+        when = c.when if c.available else f"{c.since}+"
+        t.add_row(Text(c.name), Text(when), Text(f"{c.syntax} - {c.summary}"))     # Text, not str: '[n]' and '[speed]' are not Rich markup
+    return t
+
+
+def _help_footer(cfg: GameConfig | None) -> list[Text]:
+    out = [Text("Coordinates are zero-based x y as shown on the Grid (GRD-01). 'help <group>' shows one group, 'help <command>' one command in full.",
+                style=P.STYLES["label"])]
+    out.append(Text(shields_footer(cfg.shield_recharge if cfg is not None else None), style=P.STYLES["label"]))
     return out
+
+
+def _help_panel(spec: CommandSpec, width: int, cfg: GameConfig | None, snapshot: dict | None) -> Panel:
+    """D-154: Syntax · Does · When · Example · Numbers (UX-09, where they exist) · IDs for one command."""
+    t = Table.grid(padding=(0, 1))
+    t.add_column(no_wrap=True, style=P.STYLES["label"])
+    t.add_column(overflow="fold", style=P.STYLES["value"], ratio=1)
+    when = "now - an immediate command" if spec.kind == CAT.IMMEDIATE else "at end - a queued order; it resolves when you type 'end' (OV-02b)"
+    if not spec.available:
+        when += f" (not available until {spec.since})"
+    t.add_row("Syntax", Text(spec.syntax, style=P.STYLES["title"]))
+    t.add_row("Does", Text(spec.summary))
+    t.add_row("When", Text(when))
+    t.add_row("Example", Text(spec.example or spec.syntax, style=P.STYLES["accent"]))
+    numbers = help_numbers(spec, cfg, snapshot)
+    if numbers:
+        t.add_row("Numbers", Text(numbers))
+    t.add_row("IDs", Text(", ".join(spec.all_ids)))
+    return Panel(t, title=f"help {spec.name} ({GROUP_TITLES.get(spec.group, spec.group)})", title_align="left", border_style=P.STYLES["accent"], width=width)
+
+
+def render_help(topic: str | None, width: int, cfg: GameConfig | None, snapshot: dict | None = None) -> RenderableType:
+    """CMD-01 / D-154 / C12: ``help`` (topic None) = every group as a table; ``help <group>`` = one table; ``help <command>`` = a panel.
+    ``width`` is the live console width (at least HELP_MIN_WIDTH); no line is longer than it and nothing is cropped."""
+    width = max(HELP_MIN_WIDTH, int(width))
+    key = (topic or "").strip().lower()
+    if not key:
+        parts: list[RenderableType] = [Text("Commands by group - When says whether a command acts now or resolves at 'end' (OV-02b):", style=P.STYLES["label"])]
+        for group, title in GROUPS:
+            parts.append(Text(title, style=P.STYLES["title"]))
+            parts.append(_help_table(group, width))
+        parts.extend(_help_footer(cfg))
+        return Group(*parts)
+    if key in GROUP_TITLES:
+        return Group(Text(GROUP_TITLES[key], style=P.STYLES["title"]), _help_table(key, width))
+    spec = lookup(key)
+    if spec is None:
+        groups = ", ".join(g for g, _ in GROUPS)
+        return Text(f"unknown command or group {key!r} - 'help' lists every command; groups: {groups} (CMD-01)", style=P.STYLES["command_error"])
+    return _help_panel(spec, width, cfg, snapshot)
+
+
+def help_text(name: str | None = None, cfg: GameConfig | None = None, snapshot: dict | None = None, width: int = 120) -> list[Text]:
+    """CMD-01: the help as plain lines (the M4 helper the gate's render probe and the tests call; D-148 (9)) - ``render_help`` printed
+    by a Console of ``width`` columns, one Text per line.  ``help fire`` carries the live numbers (UX-09, D-138)."""
+    con = Console(file=io.StringIO(), width=max(HELP_MIN_WIDTH, int(width)), record=True, force_terminal=False, color_system=None, legacy_windows=False,
+                  highlight=False)
+    con.print(render_help(name, width, cfg, snapshot))
+    return [Text(line, no_wrap=True) for line in con.export_text(styles=False).splitlines()]
 
 
 def battle_with(snapshot: dict, target_text: str) -> tuple[dict | None, dict | None, bool]:

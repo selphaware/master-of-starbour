@@ -21,7 +21,7 @@ from rich.console import Console
 from starbour import runtime
 from starbour.bus import messages as M
 from starbour.bus.zmq_io import Pusher, Subscriber
-from starbour.commands.catalogue import available_names
+from starbour.commands.catalogue import available_names, group_names
 from starbour.commands.parse import WEAPON_WORDS, CommandError, parse, parse_help, parse_view
 from starbour.config import GameConfig
 from starbour.terminals import palette as P
@@ -258,7 +258,7 @@ class CommandTerminal:
         session: PromptSession = PromptSession(history=FileHistory(str(history_path)))
 
         def completer() -> WordCompleter:
-            words = available_names() + ["universe", "galaxy", "sector", "follow", "cancel", "all", "status", "offer", "accept", "reject"] + self.ship_names()
+            words = available_names() + group_names() + ["universe", "galaxy", "sector", "follow", "cancel", "all", "status", "offer", "accept", "reject"] + self.ship_names()
             return WordCompleter(words, ignore_case=True)
 
         while not self.listener.shutdown.is_set():
@@ -298,8 +298,8 @@ class CommandTerminal:
         snap, _ = self.listener.current()
         snap = snap or {}
         if cmd == "help":
-            for t in RC.help_text(parse_help(args), self.cfg, snap):
-                self.console.print(t)
+            # D-154: structured help at the live console width (never the 200-column prompt buffer)
+            self.console.print(RC.render_help(parse_help(args), self.console.width, self.cfg, snap))
         elif cmd == "fire":
             # CM-01 / UX-04: firing on a captain or planet you are not yet in battle with starts a fight - confirm first (D-137: fire <target>)
             target_text = args[1] if args and args[0].lower() in WEAPON_WORDS and len(args) > 1 else (args[0] if args else "")
