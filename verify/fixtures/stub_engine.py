@@ -22,6 +22,11 @@ Modes:
                    events (OUT-04) and the player's shields drop (M3 § 4 live/09)
   battle_leaky     accepts `fire` but opens nothing: no combat event, in_battle stays null, no
                    battles[] (the broken counterpart)
+  market           as good, plus a trading planet in the player's cell (C11 snapshot.planets, respect 50):
+                   an accepted `buy food n` resolves at the next turn.end — food + n, silver − the
+                   factored price, a type 'trade' event (OUT-07), the planet's stock − n (M4 § 4 live/10)
+  market_leaky     accepts `buy` but nothing happens: no trade event, food and coins unchanged (the
+                   broken counterpart)
 
 Runs as a thread (StubEngine) or as a script (prints the bound ports as JSON on stdout).
 Opens no window.
@@ -31,6 +36,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import sys
 import threading
 import time
@@ -41,14 +47,17 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 from _checks import chebyshev, flat_sector, signed, warp_reach  # noqa: E402
 
-MODES = ("good", "stuck_turn", "same_snapshot", "reject_no_id", "no_reply", "no_hello", "game_over", "game_over_leaky", "battle", "battle_leaky")
+MODES = ("good", "stuck_turn", "same_snapshot", "reject_no_id", "no_reply", "no_hello", "game_over", "game_over_leaky", "battle", "battle_leaky", "market", "market_leaky")
 BATTLE_MODES = ("battle", "battle_leaky")
+MARKET_MODES = ("market", "market_leaky")
 ENGINE, WARP, GALAXY_SIZE, UNIVERSE_SIZE = 4, 3.0, (16, 16), (8, 8)
 HOME = ((3, 4), (7, 9))
 SPAWN_SHIP, SPAWN_CAPTAIN = "s-900", "c-900"
+PLANET_ID, PLANET_NAME = "p-900", "Halvenmoor"
+FOOD_BUY, PRICE_BAND, PLANET_RESPECT = 2, 20, 50          # the default ini's PRC-01 / CFG-43; factor 0.9 at respect 50 (D-142)
 
 
-def default_snapshot(spawn: bool = False) -> dict:
+def default_snapshot(spawn: bool = False, planet: bool = False) -> dict:
     doc = json.loads((HERE / "snapshot_good.json").read_text(encoding="utf-8"))
     doc["turn_no"] = 0
     doc["game_over"] = False
@@ -71,6 +80,18 @@ def default_snapshot(spawn: bool = False) -> dict:
         doc["ships"][SPAWN_SHIP] = {"name": "Cinder Lark", "class": "kestrel", "captain": SPAWN_CAPTAIN, "torpedoes": 6, "phasers": 3.0, "shield_max": 60.0,
                                     "shield_current": 60.0, "engine": 4.0, "warp": 3.0, "position": [[gx, gy], [sx, sy], [cx + 1, cy]], "orders_queued": 0,
                                     "orders": [], "hazard": None, "move_remaining": None, "in_battle": None, "target": None}
+    if planet:                                     # C11: a trading planet in the player's cell (--teleport onto it, --respect 50; live/10)
+        pid = doc["player_id"]
+        cap = doc["captains"][pid]
+        sid = cap["active_ship"]
+        (gx, gy), (sx, sy), (cx, cy) = doc["ships"][sid]["position"]
+        cap["respect"], cap["items"] = PLANET_RESPECT, {}
+        key = f"{gx},{gy}/{sx},{sy}"
+        doc["planets"] = {PLANET_ID: {"name": PLANET_NAME, "president": "Ysolde Marrick", "cell": [cx, cy], "sector": key, "shields": 80.0, "shield_max": 80.0,
+                                      "torpedoes": 10, "phasers": 4.0, "stock": {"food": 100, "water": 100, "elements": {"iridium": 3}},
+                                      "disposition_to_player": 2 * PLANET_RESPECT - 100, "trades_with_player": True, "in_battle": None, "destroyed": False}}
+        sector = doc.setdefault("sectors", {}).setdefault(key, {"terrain": [], "items": []})
+        sector["terrain"] = [t for t in sector.get("terrain") or [] if list(t.get("cell") or []) != [cx, cy]] + [{"kind": "planet", "cell": [cx, cy], "name": PLANET_NAME}]
     return doc
 
 
@@ -86,7 +107,7 @@ class StubEngine(threading.Thread):
             raise ValueError(f"mode must be one of {MODES}")
         self.mode = mode
         self.hello_interval = hello_interval
-        self.snapshot = copy.deepcopy(snapshot) if snapshot else default_snapshot(spawn=mode in BATTLE_MODES)
+        self.snapshot = copy.deepcopy(snapshot) if snapshot else default_snapshot(spawn=mode in BATTLE_MODES, planet=mode in MARKET_MODES)
         self.battle: dict | None = None          # the open battle record (battle mode)
         self.turn_no = int(self.snapshot.get("turn_no", 0))
         self.seed = int(self.snapshot.get("seed", 1234))
@@ -131,6 +152,8 @@ class StubEngine(threading.Thread):
             if ship.get("move_remaining"):
                 tx, ty = cx + ship["move_remaining"][0], cy + ship["move_remaining"][1]
             else:
+                if self.mode in MARKET_MODES:
+                    return                                                        # a docked ship stays on its planet (live/10); the trade changes the snapshot
                 ship["position"] = [[gx, gy], [sx, sy], [(cx + 1) % w, cy]]      # the M1 stub's drift keeps hashes changing
                 return
         else:
@@ -171,6 +194,20 @@ class StubEngine(threading.Thread):
             for other_sid, other in self.snapshot["ships"].items():
                 if other_sid != sid:
                     self.queued.pop(other_sid, None)
+            if self.mode in MARKET_MODES:                                 # TP-05: the queued buys resolve (CMD-20, PRC-01, D-142)
+                buys = [o for o in self.queued.get(sid, []) if o["command"] == "buy"]
+                self.queued[sid] = [o for o in self.queued.get(sid, []) if o["command"] != "buy"]
+                ship["orders"] = [{"command": o["command"], "args": list(o["args"])} for o in self.queued[sid]]
+                ship["orders_queued"] = len(ship["orders"])
+                for o in buys:
+                    n = int(o["args"][1])
+                    cost = int(math.floor(n * FOOD_BUY * (1 - PRICE_BAND / 100 * cap["respect"] / 100) + 1e-9))
+                    if self.mode == "market" and cap["silver"] >= cost and o["args"][0] == "food":
+                        cap["silver"] -= cost
+                        cap["food"] += n
+                        self.snapshot["planets"][PLANET_ID]["stock"]["food"] -= n
+                        events.append({"phase": "TP-05", "type": "trade", "severity": "info", "ids": ["OUT-07"],
+                                       "text": f"Bought {n} food from {PLANET_NAME} for {cost} silver"})
             if self.mode == "battle" and self.battle is not None:        # TP-04: one phaser exchange each way at distance 1 (CM-04: 3 × 5 × 2/3 = 10)
                 enemy = self.snapshot["ships"][SPAWN_SHIP]
                 for attacker, defender in ((ship, enemy), (enemy, ship)):
@@ -200,6 +237,15 @@ class StubEngine(threading.Thread):
         sid, ship = self._player()
         if self.game_over and self.mode == "game_over" and command not in ("new", "quit"):
             return "order.rejected", {"order": order, "reason": "game over — type new to start again (CMD-19)"}
+        if command == "buy":
+            if self.mode not in MARKET_MODES or PLANET_ID not in (self.snapshot.get("planets") or {}):
+                return "order.rejected", {"order": order, "reason": "no planet in this cell (PR-04, CMD-20)"}
+            if len(args) < 2 or args[0] not in ("food", "water", "torpedo") or not args[1].isdigit():
+                return "order.rejected", {"order": order, "reason": "buy needs <food|water|torpedo> <n> (CMD-20)"}
+            self.queued.setdefault(sid, []).append({"command": "buy", "args": args[:2]})
+            ship["orders"] = [{"command": o["command"], "args": list(o["args"])} for o in self.queued[sid]]
+            ship["orders_queued"] = len(ship["orders"])
+            return "order.accepted", {"order": order, "queue_position": len(self.queued[sid]), "queued": len(self.queued[sid]), "text": f"buy {args[0]} {args[1]} queued"}
         if command == "fire":
             weapon = args[0] if args else ""
             target = args[1] if len(args) > 1 else ""
@@ -216,7 +262,7 @@ class StubEngine(threading.Thread):
             return "order.accepted", {"order": order, "queue_position": 1, "queued": 1, "text": f"fire {weapon} at {target} queued"}
         if command == "new":
             self.seed += 1
-            self.snapshot = default_snapshot(spawn=self.mode in BATTLE_MODES)
+            self.snapshot = default_snapshot(spawn=self.mode in BATTLE_MODES, planet=self.mode in MARKET_MODES)
             self.snapshot["seed"] = self.seed
             self.turn_no = 0
             self.game_over = False

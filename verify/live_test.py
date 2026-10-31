@@ -3,9 +3,9 @@
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py .            milestone gate (≤ 3 min)
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py --selftest   stub launcher; opens no window
 
-Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2, live/08 per specs/M2.md § 3 and live/09 per
-specs/M3.md § 4 against docs/CONTRACTS.md (C1 command lines, C3 bus, C5 heartbeats, C6 save,
-C9 M2 additions, C10 M3 additions).
+Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2, live/08 per specs/M2.md § 3, live/09 per
+specs/M3.md § 4 and live/10 per specs/M4.md § 4 against docs/CONTRACTS.md (C1 command lines,
+C3 bus, C5 heartbeats, C6 save, C9 M2 additions, C10 M3 additions, C11 M4 additions).
 Windows open and close on the desktop.  Not run by the hook.  Any existing saves\\game.json
 is moved aside first and restored afterwards; the gate's own save is deleted.  On any exit
 every process the gate started is killed.  Exit 0 pass, 1 fail, 3 HARNESS ERROR.
@@ -32,6 +32,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import _checks as C  # noqa: E402
 import _combat as CB  # noqa: E402
+import _economy as E  # noqa: E402
 
 BUDGET_S = 180.0
 LAUNCH_WAIT_S = 15.0
@@ -424,8 +425,112 @@ def l08(ctx: Ctx) -> list[str]:
 
 def status_in_battle(hb_dir: Path) -> Any:
     """The status window's heartbeat `in_battle` field (C10 / live/09, [ASSUMED] C5 addition), '<missing>' when absent."""
+    return status_field(hb_dir, "in_battle")
+
+
+def status_field(hb_dir: Path, key: str) -> Any:
+    """A field of the status window's heartbeat (C5; `in_battle` from M3, `docked` / `items` from M4), '<missing>' when absent."""
     doc, _ = C.load_json(hb_dir / "status.json")
-    return doc.get("in_battle", "<missing>") if isinstance(doc, dict) else "<no heartbeat>"
+    return doc.get(key, "<missing>") if isinstance(doc, dict) else "<no heartbeat>"
+
+
+def world_index_for(ctx: Ctx, code: str, purpose: str) -> tuple[dict | None, list[str]]:
+    """One `sim --world-index` turn for the live rows that pick a cell from it (C9, D-104)."""
+    report, save_dir = ctx.art / f"world_{LIVE_SEED}.json", ctx.art / f"saves_world_{LIVE_SEED}"
+    if save_dir.exists():
+        shutil.rmtree(save_dir, ignore_errors=True)
+    what = f"sim --seed {LIVE_SEED} --turns 1 --ai-player --world-index"
+    res = C.run_cmd([ctx.py, "-m", "starbour", "sim", "--seed", str(LIVE_SEED), "--turns", "1", "--ai-player", "--world-index",
+                     "--report", str(report), "--save-dir", str(save_dir)], ctx.root, 40.0)
+    if res.timed_out or res.returncode != 0:
+        return None, [f"{what} exited {res.returncode}: {res.tail(8)} — {code} needs world_index to pick {purpose} (C9, D-104)"]
+    doc, err = C.load_json(report)
+    index = doc.get("world_index") if isinstance(doc, dict) else None
+    errs = C.world_index_shape_errors(index)
+    if errs:
+        return None, [f"{what}: " + "; ".join(errs[:4])]
+    return index, []
+
+
+def l10(ctx: Ctx) -> list[str]:
+    """live/10 — (M4) end-to-end trade: launch on a planet cell with --respect and --coins, push `buy food 5` then turn.end →
+    a type 'trade' event with food up and coins down by the factored price, every window at the current turn, T4's heartbeat
+    says docked, closing T1 leaves nothing (CMD-20, OUT-07, BUS-06, C11)."""
+    if ctx.pkg_missing:
+        raise C.Blocked(ctx.pkg_missing)
+    if C.role_processes(ctx.root):
+        stop_everything(ctx)
+    cp = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=None)
+    cp.read(ctx.root / "controls_config.ini", encoding="utf-8")
+    try:
+        food_buy, band, spg = cp.getfloat("prices", "food_buy"), cp.getfloat("economy", "planet_price_band"), cp.getint("economy", "silver_per_gold")
+        refuse, attack = cp.getint("economy", "planet_refuse_respect"), cp.getint("ai", "planet_attack_respect_max")
+        coins = (cp.getint("captain", "gold_start"), cp.getint("captain", "silver_start"))
+    except (configparser.Error, ValueError) as e:
+        return [f"the gate cannot read an M4 key from controls_config.ini: {e} (CFG-31, 32, 38, 43; D-53)"]
+    respect = min(90, max(refuse, attack) + 30)                 # trades, and EF-05 never fires on the docked ship (D-148 (7))
+    index, problems = world_index_for(ctx, "live/10", "a planet cell")
+    if problems:
+        return problems
+    holes = CB.hole_sectors(index)
+    planet = next((p for p in index.get("planets") or [] if isinstance(p, dict) and isinstance(p.get("cell"), list)
+                   and (tuple(int(x) for x in p["galaxy"]), tuple(int(x) for x in p["sector"])) not in holes), None)
+    if planet is None:
+        return [f"world_index for seed {LIVE_SEED} lists no planet outside a hole sector among {len(index.get('planets') or [])} planets (C9, SP-05)"]
+    cell = C.teleport_arg(planet["galaxy"], planet["sector"], planet["cell"])
+    save = ctx.root / "saves" / "game.json"
+    if save.exists():
+        shutil.copy2(save, ctx.art / "game.json.before-live10")
+        save.unlink()
+    problems = launch(ctx, [ctx.py, "-m", "starbour", "--seed", str(LIVE_SEED), "--teleport", cell, "--respect", str(respect), "--coins", str(coins[0]), str(coins[1])], "market")
+    if problems:
+        problems.append("the launcher must accept --respect and --coins and pass them to the engine role, as it does --seed, --teleport and --spawn (C11 C1 additions, D-148 (13))")
+        stop_everything(ctx)
+        return problems
+    view_pids = {r: ctx.pids[r] for r in C.VIEW_ROLES if r in ctx.pids}
+
+    def after_first(obs: dict) -> dict:
+        n = obs["resolved"]["turn_no"]
+        seen = windows_at_turn(ctx.hb_dir, n, view_pids)
+        C.wait_until(lambda: isinstance(status_field(ctx.hb_dir, "docked"), str) and status_field(ctx.hb_dir, "docked") not in ("<missing>", "<no heartbeat>"), HB_WAIT_S, 0.1)
+        seen["docked"], seen["items"] = status_field(ctx.hb_dir, "docked"), status_field(ctx.hb_dir, "items")
+        return seen
+    n_food = 5
+    obs = E.drive_market(ctx.pub_port, ctx.pull_port, planet_cell=planet["cell"], n=n_food, hello_timeout=15.0, turn_timeout=10.0, after_first=after_first)
+    cost = E.price_options(food_buy, n_food, E.price_factor(respect, band, selling=False))
+    problems = E.check_market_bus(obs, n=n_food, cost_options=cost, spg=spg)
+    seen = obs.get("after_first") or {}
+    if seen:
+        hb = list(seen.get("problems") or [])
+        if hb:
+            hb[-1] += f" — waited {seen.get('waited_s', 0.0):.1f} s of {seen.get('wait_s', HB_WAIT_S):.0f} s after the turn.resolved (BUS-05, C5)"
+        problems += hb
+        want = (obs.get("planet") or {}).get("id")
+        if not isinstance(seen.get("docked"), str) or seen["docked"] in ("<missing>", "<no heartbeat>") or (want and seen["docked"] != want):
+            problems.append(f"T4's heartbeat docked = {seen.get('docked')!r}, expected the planet id {want or '(the planets record in the player’s cell)'} while the ship "
+                            f"stands in its cell (status.json carries docked; C11 C5 addition, D-148 (13))")
+        if not isinstance(seen.get("items"), int) or isinstance(seen.get("items"), bool):
+            problems.append(f"T4's heartbeat items = {seen.get('items')!r}, expected the count of cargo stacks (C11 C5 addition)")
+    kill_role(ctx, "command")
+    waited = C.wait_until(lambda: ctx.launcher.poll() is not None and not C.role_processes(ctx.root), SHUTDOWN_WAIT_S, 0.2)
+    if ctx.launcher.poll() is None:
+        problems.append(f"the launcher is still running {SHUTDOWN_WAIT_S:.0f} s after T1 was killed while docked — closing T1 must end the game (TL, BUS-06)")
+    problems += C.check_all_gone([(pid, role) for pid, role, _ in C.role_processes(ctx.root)],
+                                 f"{SHUTDOWN_WAIT_S:.0f} s after T1 was killed while docked (orphans; BUS-06, D-59)")
+    if problems:
+        killed = stop_everything(ctx)
+        if killed:
+            problems.append("the gate had to kill: " + ", ".join(killed))
+        tail = launcher_log_tail(ctx)
+        if tail.strip():
+            problems.append("launcher log tail:\n" + textwrap.indent(tail, " " * 10))
+    else:
+        res = obs.get("resolved") or {}
+        print(f"         planet {planet.get('name')!r} ({(obs.get('planet') or {}).get('id')}) at {planet['galaxy']}/{planet['sector']} {planet['cell']}; buy food {n_food} accepted; "
+              f"turn {res.get('turn_no')} events {res.get('types')}; food {C._get(obs, 'before', 'food')} → {C._get(obs, 'after', 'food')}, silver {C._get(obs, 'before', 'silver')} → "
+              f"{C._get(obs, 'after', 'silver')} (cost {sorted(cost)}); windows at the turn after {seen.get('waited_s')} s, T4 docked {seen.get('docked')}; everything gone "
+              f"{waited:.1f} s after killing T1")
+    return problems
 
 
 def l09(ctx: Ctx) -> list[str]:
@@ -515,6 +620,7 @@ CHECKS = [
     C.Check("live/06", "terminating the launcher leaves no children", "BUS-06, D-59", l06),
     C.Check("live/08", "end-to-end game over: teleport into a star, game.over, save deleted, new", "OV-09b, MSG-09, OUT-16, C9", l08, since="M2"),
     C.Check("live/09", "end-to-end combat: spawn, fire, combat events, T4 in_battle, close T1", "CM-01, OUT-04, BUS-06, C10", l09, since="M3"),
+    C.Check("live/10", "end-to-end trade: launch on a planet, buy food, trade event, T4 docked, close T1", "CMD-20, OUT-07, BUS-06, C11", l10, since="M4"),
     C.Check("live/07", "starbour.exe launches and stays up", "BR-14, BR-15", l07, since="M5"),
 ]
 
@@ -769,6 +875,50 @@ def selftest(root: Path) -> int:
     t("gating: live/09 SKIPs at MILESTONE M2 and runs (here FAILs) at M3", gate_status("live/09", "M2") == C.SKIP and gate_status("live/09", "M3") == C.FAIL,
       (gate_status("live/09", "M2"), gate_status("live/09", "M3")))
     t("spawn_arg formats C10's --spawn string", CB.spawn_arg("kestrel", [3, 4], [7, 9], [13, 11], 0, 10) == "kestrel 3 4 7 9 13 11 0 10")
+
+    # ---------------------------------------------------------------- M4: live/10 (specs/M4.md § 4, C11)
+    print("-- M4 --")
+    from stub_engine import PLANET_ID  # noqa: E402
+    with tempfile.TemporaryDirectory() as td:
+        hb_dir = Path(td) / "hb"
+        hb_dir.mkdir()
+        my_pids = {r: os.getpid() for r in C.VIEW_ROLES}
+        for mode, expect in (("market", None), ("market_leaky", ("trade",))):
+            eng = StubEngine(mode)
+            eng.start()
+            eng.ready.wait(5)
+            win = StubWindows(eng.pub_port, hb_dir)
+            win.start()
+            win.ready.wait(5)
+            planet_cell = eng.snapshot["planets"][PLANET_ID]["cell"]
+
+            def read_windows(obs: dict) -> dict:
+                n = obs["resolved"]["turn_no"]
+                seen = windows_at_turn(hb_dir, n, my_pids, wait_s=3.0)
+                C.wait_until(lambda: isinstance(status_field(hb_dir, "docked"), str) and status_field(hb_dir, "docked") not in ("<missing>", "<no heartbeat>"), 2.0, 0.05)
+                seen["docked"], seen["items"] = status_field(hb_dir, "docked"), status_field(hb_dir, "items")
+                return seen
+            try:
+                obs = E.drive_market(eng.pub_port, eng.pull_port, planet_cell=planet_cell, n=5, hello_timeout=10.0, reply_timeout=2.0, turn_timeout=2.0, after_first=read_windows)
+            finally:
+                win.stop()
+                eng.stop()
+            problems = E.check_market_bus(obs, n=5, cost_options=E.price_options(2, 5, 0.9), spg=20)
+            seen = obs.get("after_first") or {}
+            problems += list(seen.get("problems") or [])
+            if seen.get("docked") != PLANET_ID:
+                problems.append(f"T4's heartbeat docked = {seen.get('docked')!r}, expected {PLANET_ID}")
+            if not isinstance(seen.get("items"), int):
+                problems.append(f"T4's heartbeat items = {seen.get('items')!r}, expected an int")
+            if expect is None:
+                t(f"live/10 driver: stub engine 'market' passes (buy accepted, food {C._get(obs, 'before', 'food')} → {C._get(obs, 'after', 'food')}, silver "
+                  f"{C._get(obs, 'before', 'silver')} → {C._get(obs, 'after', 'silver')}, events {C._get(obs, 'resolved', 'types')}, windows at the turn, T4 docked {seen.get('docked')})",
+                  not problems, problems)
+            else:
+                t(f"live/10 driver: stub engine 'market_leaky' fails naming {expect}", all(any(w in m for m in problems) for w in expect), problems)
+    t("gating: live/10 SKIPs at MILESTONE M3 and runs (here FAILs) at M4", gate_status("live/10", "M3") == C.SKIP and gate_status("live/10", "M4") == C.FAIL,
+      (gate_status("live/10", "M3"), gate_status("live/10", "M4")))
+    t("price_options: 5 food at factor 0.9 costs 9 (total floor) or 5 (per-unit floor)", E.price_options(2, 5, 0.9) == {9, 5})
 
     bad = [n for ok, n in results if not ok]
     print(f"== live selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")

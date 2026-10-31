@@ -31,12 +31,15 @@ class StubWindows(threading.Thread):
         self._halt.set()
         self.join(5)
 
-    def _write(self, role: str, turn_no: int, in_battle: bool | None = None) -> None:
+    def _write(self, role: str, turn_no: int, in_battle: bool | None = None, economy: dict | None = None) -> None:
         """C5 record, written atomically; retried when the gate holds the file open (Windows os.replace).
-        The status window adds `in_battle` (C10 / live/09, [ASSUMED] C5 addition)."""
+        The status window adds `in_battle` (C10 / live/09, [ASSUMED] C5 addition) and, when the snapshot carries
+        C11 planets, `docked` (planet id or null) and `items` (count of stacks) (C11 C5 addition, live/10)."""
         doc = {"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": 1}
         if role == "status" and in_battle is not None:
             doc["in_battle"] = in_battle
+        if role == "status" and economy is not None:
+            doc.update(economy)
         tmp = self.hb_dir / f"{role}.json.tmp"
         tmp.write_text(json.dumps(doc), encoding="utf-8")
         for attempt in range(5):
@@ -49,15 +52,23 @@ class StubWindows(threading.Thread):
     def _draw(self, topic: str, turn_no: int, snapshot: dict | None = None) -> None:
         t0 = time.perf_counter()
         in_battle: bool | None = None
+        economy: dict | None = None
         if isinstance(snapshot, dict):
             try:
                 cap = snapshot["captains"][snapshot["player_id"]]
                 ship = snapshot["ships"][cap["active_ship"]]
                 in_battle = bool(ship.get("in_battle"))
+                planets = snapshot.get("planets")
+                if isinstance(planets, dict):
+                    pos = ship.get("position") or [[0, 0], [0, 0], [0, 0]]
+                    key = f"{pos[0][0]},{pos[0][1]}/{pos[1][0]},{pos[1][1]}"
+                    docked = next((pid for pid, p in planets.items() if isinstance(p, dict) and str(p.get("sector")) == key
+                                   and list(p.get("cell") or []) == list(pos[2])), None)
+                    economy = {"docked": docked, "items": len(cap.get("items") or {})}
             except (KeyError, TypeError):
                 in_battle = None
         for r in self.roles:
-            self._write(r, turn_no, in_battle)
+            self._write(r, turn_no, in_battle, economy)
         self.drawn.append((t0, topic, turn_no))
 
     def run(self) -> None:

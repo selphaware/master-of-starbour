@@ -1,0 +1,644 @@
+{
+ "check": "upgrades",
+ "args": [
+  "report",
+  "snapshot"
+ ],
+ "kwargs": {
+  "pairs": [
+   {
+    "turn": 1,
+    "component": "torpedoes",
+    "element": "iridium",
+    "amount": 400.0
+   },
+   {
+    "turn": 2,
+    "component": "phasers",
+    "element": "adamantine",
+    "amount": 20.0
+   },
+   {
+    "turn": 3,
+    "component": "shields",
+    "element": "orichalcum",
+    "amount": 200.0
+   },
+   {
+    "turn": 4,
+    "component": "engine",
+    "element": "moonstone",
+    "amount": 20.0
+   },
+   {
+    "turn": 5,
+    "component": "warp",
+    "element": "aetherite",
+    "amount": 20.0
+   }
+  ],
+  "caps": {
+   "torpedoes": null,
+   "phasers": 10.0,
+   "shields": 100.0,
+   "engine": 10.0,
+   "warp": 10.0
+  },
+  "base": {
+   "torpedoes": 6.0,
+   "phasers": 3.0,
+   "shield_max": 60.0,
+   "engine": 4.0,
+   "warp": 3.0
+  },
+  "wrong": null,
+  "what": "fixture upgrades caps"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 5,
+  "turns_completed": 5,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {
+      "osmium": 1,
+      "rhodium": 1,
+      "sapphire": 1,
+      "moonstone": 1,
+      "sunstone": 1,
+      "antihydrogen": 1,
+      "positronium": 1,
+      "orichalcum": 1,
+      "adamantine": 1,
+      "aetherite": 1,
+      "star_iron": 1
+     }
+    },
+    "captains": 193,
+    "events": [
+     "Torpedoes upgraded with iridium: 6 → 406 (OUT-08)"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [
+     {
+      "component": "torpedoes",
+      "element": "iridium",
+      "before": 6.0,
+      "after": 406.0,
+      "capped": false
+     }
+    ],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    }
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {
+      "osmium": 1,
+      "rhodium": 1,
+      "sapphire": 1,
+      "moonstone": 1,
+      "sunstone": 1,
+      "antihydrogen": 1,
+      "positronium": 1,
+      "orichalcum": 1,
+      "aetherite": 1,
+      "star_iron": 1
+     }
+    },
+    "captains": 193,
+    "events": [
+     "Phasers upgraded with adamantine: 3 → 10 (capped) (OUT-08)"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [
+     {
+      "component": "phasers",
+      "element": "adamantine",
+      "before": 3.0,
+      "after": 10.0,
+      "capped": true
+     }
+    ],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    }
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {
+      "osmium": 1,
+      "rhodium": 1,
+      "sapphire": 1,
+      "moonstone": 1,
+      "sunstone": 1,
+      "antihydrogen": 1,
+      "positronium": 1,
+      "aetherite": 1,
+      "star_iron": 1
+     }
+    },
+    "captains": 193,
+    "events": [
+     "Shields upgraded with orichalcum: 60 → 260 (OUT-08)"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [
+     {
+      "component": "shields",
+      "element": "orichalcum",
+      "before": 60.0,
+      "after": 260.0,
+      "capped": false
+     }
+    ],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    }
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {
+      "osmium": 1,
+      "rhodium": 1,
+      "sapphire": 1,
+      "sunstone": 1,
+      "antihydrogen": 1,
+      "positronium": 1,
+      "aetherite": 1,
+      "star_iron": 1
+     }
+    },
+    "captains": 193,
+    "events": [
+     "Engine upgraded with moonstone: 4 → 10 (capped) (OUT-08)"
+    ],
+    "snapshot_hash": "de090cace45944c2ea976e4f6b1533527e2ad85a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [
+     {
+      "component": "engine",
+      "element": "moonstone",
+      "before": 4.0,
+      "after": 10.0,
+      "capped": true
+     }
+    ],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    }
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {
+      "osmium": 1,
+      "rhodium": 1,
+      "sapphire": 1,
+      "sunstone": 1,
+      "antihydrogen": 1,
+      "positronium": 1,
+      "star_iron": 1
+     }
+    },
+    "captains": 193,
+    "events": [
+     "Warp upgraded with aetherite: 3 → 10 (capped) (OUT-08)"
+    ],
+    "snapshot_hash": "3fbe04f954142ea96390ca458cce98b6635d5625",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [
+     {
+      "component": "warp",
+      "element": "aetherite",
+      "before": 3.0,
+      "after": 10.0,
+      "capped": true
+     }
+    ],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    }
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 10,
+   "player_respect": 10,
+   "roams": 0,
+   "trades": 0,
+   "pickups": 0,
+   "upgrades": 5,
+   "planets_destroyed": 0,
+   "ai_purchases": 0,
+   "ai_mutinies": 0,
+   "captains_start": 193,
+   "population_min": 193,
+   "population_max": 193
+  },
+  "spawned": []
+ },
+ "snapshot": {
+  "turn_no": 5,
+  "seed": 1234,
+  "version": "0.1.0",
+  "sizes": {
+   "universe": [
+    8,
+    8
+   ],
+   "galaxy": [
+    16,
+    16
+   ],
+   "sector": [
+    24,
+    24
+   ]
+  },
+  "player_id": "c-000",
+  "captains": {
+   "c-000": {
+    "name": "Harrow Vey",
+    "is_player": true,
+    "gold": 5,
+    "silver": 50,
+    "fear": 10,
+    "respect": 50,
+    "food": 29,
+    "water": 29,
+    "ships": [
+     "s-194"
+    ],
+    "active_ship": "s-194",
+    "items": {
+     "osmium": 1,
+     "rhodium": 1,
+     "sapphire": 1,
+     "sunstone": 1,
+     "antihydrogen": 1,
+     "positronium": 1,
+     "star_iron": 1
+    },
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false
+   }
+  },
+  "ships": {
+   "s-194": {
+    "name": "Lantern",
+    "class": "kestrel",
+    "captain": "c-000",
+    "torpedoes": 406.0,
+    "phasers": 10.0,
+    "shield_max": 260.0,
+    "shield_current": 100.0,
+    "engine": 10.0,
+    "warp": 10.0,
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      12,
+      11
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   }
+  },
+  "universe": {
+   "galaxies": [
+    [
+     3,
+     4
+    ]
+   ]
+  },
+  "galaxies": {
+   "3,4": {
+    "sectors": [
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      9,
+      9
+     ],
+     [
+      10,
+      9
+     ],
+     [
+      7,
+      10
+     ]
+    ],
+    "visited": [
+     [
+      7,
+      9
+     ]
+    ],
+    "hazards": []
+   }
+  },
+  "sectors": {
+   "3,4/7,9": {
+    "terrain": [
+     {
+      "kind": "star",
+      "cell": [
+       5,
+       5
+      ],
+      "colour": "yellow",
+      "bucket": "medium"
+     },
+     {
+      "kind": "planet",
+      "cell": [
+       6,
+       5
+      ],
+      "name": "Oreth"
+     }
+    ],
+    "items": []
+   }
+  },
+  "fog_of_war": true,
+  "view": {
+   "level": "follow"
+  },
+  "game_over": false,
+  "battles": [],
+  "planets": {}
+ }
+}

@@ -1,0 +1,202 @@
+{
+ "check": "save_economy",
+ "args": [
+  "snapshot"
+ ],
+ "kwargs": {
+  "destroyed_planet": "p-012",
+  "refused_respect": 12,
+  "upgraded": {
+   "engine": 4.5
+  },
+  "what": "fixture save economy"
+ },
+ "snapshot": {
+  "turn_no": 3,
+  "seed": 1234,
+  "version": "0.1.0",
+  "sizes": {
+   "universe": [
+    8,
+    8
+   ],
+   "galaxy": [
+    16,
+    16
+   ],
+   "sector": [
+    24,
+    24
+   ]
+  },
+  "player_id": "c-000",
+  "captains": {
+   "c-000": {
+    "name": "Harrow Vey",
+    "is_player": true,
+    "gold": 5,
+    "silver": 50,
+    "fear": 10,
+    "respect": 12,
+    "food": 29,
+    "water": 29,
+    "ships": [
+     "s-194"
+    ],
+    "active_ship": "s-194",
+    "items": {},
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false
+   }
+  },
+  "ships": {
+   "s-194": {
+    "name": "Lantern",
+    "class": "kestrel",
+    "captain": "c-000",
+    "torpedoes": 6,
+    "phasers": 3.0,
+    "shield_max": 60.0,
+    "shield_current": 60.0,
+    "engine": 4.5,
+    "warp": 3.0,
+    "position": [
+     [
+      3,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      6,
+      5
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   }
+  },
+  "universe": {
+   "galaxies": [
+    [
+     3,
+     4
+    ]
+   ]
+  },
+  "galaxies": {
+   "3,4": {
+    "sectors": [
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      9,
+      9
+     ],
+     [
+      10,
+      9
+     ],
+     [
+      7,
+      10
+     ]
+    ],
+    "visited": [
+     [
+      7,
+      9
+     ]
+    ],
+    "hazards": []
+   }
+  },
+  "sectors": {
+   "3,4/7,9": {
+    "terrain": [
+     {
+      "kind": "star",
+      "cell": [
+       5,
+       5
+      ],
+      "colour": "yellow",
+      "bucket": "medium"
+     }
+    ],
+    "items": []
+   }
+  },
+  "fog_of_war": true,
+  "view": {
+   "level": "follow"
+  },
+  "game_over": false,
+  "battles": [],
+  "planets": {
+   "p-013": {
+    "name": "Calder",
+    "president": "Maren Ostrel",
+    "cell": [
+     22,
+     5
+    ],
+    "sector": "3,4/7,10",
+    "shields": 80.0,
+    "shield_max": 80.0,
+    "torpedoes": 10,
+    "phasers": 4.0,
+    "stock": {
+     "food": 100,
+     "water": 100,
+     "elements": {
+      "iridium": 3,
+      "rhodium": 2
+     }
+    },
+    "disposition_to_player": -76,
+    "trades_with_player": false,
+    "in_battle": null,
+    "destroyed": false
+   },
+   "p-012": {
+    "name": "Oreth",
+    "president": "Maren Ostrel",
+    "cell": [
+     6,
+     5
+    ],
+    "sector": "3,4/7,9",
+    "shields": 80.0,
+    "shield_max": 80.0,
+    "torpedoes": 10,
+    "phasers": 4.0,
+    "stock": {
+     "food": 100,
+     "water": 100,
+     "elements": {
+      "iridium": 3,
+      "rhodium": 2
+     }
+    },
+    "disposition_to_player": -76,
+    "trades_with_player": false,
+    "in_battle": null,
+    "destroyed": false
+   }
+  }
+ }
+}

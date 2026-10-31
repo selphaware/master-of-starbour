@@ -1022,7 +1022,9 @@ def port_holder(port: int) -> int | None:
     except psutil.AccessDenied:
         conns = []
     for c in conns:
-        if c.laddr and c.laddr.port == port and c.status == psutil.CONN_LISTEN:
+        # psutil 7.x on Windows 11 reports a listening socket as status NONE with no remote address (seen 2026-10-31, M4-gates);
+        # a bound TCP socket without a peer is a listener either way
+        if c.laddr and c.laddr.port == port and (c.status == psutil.CONN_LISTEN or (c.status == psutil.CONN_NONE and not c.raddr)):
             return c.pid or -1
     # fall back to a bind attempt (AccessDenied or pid hidden)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

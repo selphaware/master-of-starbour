@@ -561,7 +561,15 @@ def main() -> int:
     lr = M3.long_run()
     write(HERE / "sim_m3_long_run.json", lr)
     write(HERE / "sim_long_run_no_battles.json", M3.long_run_broken(lr))
-    print(f"wrote fixtures to {HERE} (final hash {good['per_turn'][-1]['snapshot_hash'][:8]}…; {len(scen)} M2 scenarios; {len(m3_good)} M3 scenarios)")
+    # M4 (specs/M4.md § 4, C11)
+    import make_fixtures_m4 as M4  # noqa: E402
+    m4_good = M4.good_m4()
+    write(HERE / "sim_m4_scenarios.json", m4_good)
+    for name, doc in M4.broken_m4(m4_good).items():
+        write(HERE / f"{name}.json", doc)
+    write(HERE / "sim_m4_long_run.json", M4.long_run())
+    print(f"wrote fixtures to {HERE} (final hash {good['per_turn'][-1]['snapshot_hash'][:8]}…; {len(scen)} M2 scenarios; {len(m3_good)} M3 scenarios; "
+          f"{len(m4_good)} M4 scenarios)")
     return 0
 
 

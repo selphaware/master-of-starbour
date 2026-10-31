@@ -4,21 +4,24 @@
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\smoke_test.py . --quick    hook  (≤ 15 s)
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\smoke_test.py --selftest   prove the checkers discriminate
 
-Checks smoke/00…12 per docs/BOOTSTRAP.md § Gate 1, smoke/13…22 per specs/M2.md § 3 and
-smoke/23…36 per specs/M3.md § 4, driving only the interfaces in docs/CONTRACTS.md (C2 sim +
-report, C3 bus, C4 render, C6 save, C9 M2 additions, C10 M3 additions).  Exit 0 pass, 1 fail,
-3 HARNESS ERROR (environment, not code).  Checks a milestone has not reached print SKIP;
-checks whose prerequisite failed print BLOCKED.  Output goes to verify/artifacts/smoke/.
+Checks smoke/00…12 per docs/BOOTSTRAP.md § Gate 1, smoke/13…22 per specs/M2.md § 3, smoke/23…36
+per specs/M3.md § 4 and smoke/37…48 per specs/M4.md § 4, driving only the interfaces in
+docs/CONTRACTS.md (C2 sim + report, C3 bus, C4 render, C6 save, C9 M2 additions, C10 M3
+additions, C11 M4 additions).  Exit 0 pass, 1 fail, 3 HARNESS ERROR (environment, not code).
+Checks a milestone has not reached print SKIP; checks whose prerequisite failed print BLOCKED.
+Output goes to verify/artifacts/smoke/.
 
-M2 and M3 rows build their scenarios from `world_index` (C9) and the ini — never from
+M2, M3 and M4 rows build their scenarios from `world_index` (C9, C11) and the ini — never from
 hard-coded coordinates — trying the seeds in SEEDS in order when a seed lacks a feature
 (M2 § 5).  Independent rows run concurrently (D-128): `--workers N` (default cores − 1, at
-most 6; 1 = serial); bus rows always run alone.  M3 checkers live in verify/_combat.py.
+most 6; 1 = serial); bus rows always run alone.  M3 checkers live in verify/_combat.py, M4
+checkers in verify/_economy.py.
 """
 from __future__ import annotations
 
 import argparse
 import configparser
+import copy
 import importlib
 import io
 import json
@@ -42,19 +45,22 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import _checks as C  # noqa: E402
 import _combat as CB  # noqa: E402
+import _economy as E  # noqa: E402
 
 QUICK_BUDGET_S = 15.0
-FULL_BUDGET_S = 90.0
+FULL_BUDGET_S = 150.0         # D-147 (D-82 amended): still a WARN; per-check bounds stay hard
 SIM_BOUND_S = 20.0            # C2: 30 turns at default sizes
 LONG_RUN_BOUND_S = 120.0      # smoke/12
 AI_RUN_TURNS = 60             # smoke/20, smoke/29 (c), smoke/34
+AI_RUN_TURNS_M4 = 200         # smoke/37 (e), smoke/44, smoke/45 — one shared AI-only run (M4 § 4)
 QUICK_CODES = {"smoke/00", "smoke/01", "smoke/02", "smoke/03", "smoke/04", "smoke/10"}
 M2_CODES = {f"smoke/{n}" for n in range(13, 23)}
 M3_CODES = {f"smoke/{n}" for n in range(23, 37)}
+M4_CODES = {f"smoke/{n}" for n in range(37, 49)}
 SEEDS = (1234, 7, 42, 99, 2026)   # scenario seeds, tried in order (gate logic, M2 § 5)
 RENDER_ROLES = ("grid", "output", "status", "command")
 CONFIG_LOADERS = ("load_config", "load", "GameConfig.load", "GameConfig.from_ini", "GameConfig.from_file", "GameConfig.from_path")
-PRE_BUILD_TAGS = {"M2": "m1-game", "M3": "m2-game"}   # the game before each milestone's build, for the selftest's gate-level proof
+PRE_BUILD_TAGS = {"M2": "m1-game", "M3": "m2-game", "M4": "m3-game"}   # the game before each milestone's build, for the selftest's gate-level proof
 TORPEDO_RATE_TURNS = 10        # smoke/25: 60 shots a turn × 10 turns (D-128: 60 shots alone fail a correct build ~20 % of seeds)
 
 
@@ -171,6 +177,7 @@ def m3_values(cp: configparser.ConfigParser) -> dict:
             "torpedo_hit_base": cp.getfloat("battle", "torpedo_hit_base"), "torpedo_evade": cp.getfloat("battle", "torpedo_evade_per_engine"),
             "torpedo_damage": cp.getfloat("battle", "torpedo_damage"), "phaser_per_unit": cp.getfloat("battle", "phaser_damage_per_unit"),
             "shield_recharge": cp.getfloat("battle", "shield_recharge"), "peace_loot_max": cp.getfloat("battle", "peace_loot_max"),
+            "phaser_max": cp.getfloat("battle", "phaser_max"),       # D-130 / CFG-76: the cap CB-01 loot respects (a literal 10 in smoke/26 until D-147)
             "attack_ratio_min": cp.getfloat("ai", "attack_ratio_min"), "attack_fear_max": cp.getint("ai", "attack_fear_max"),
             "peace_shield_pct": cp.getfloat("ai", "peace_shield_pct"), "escape_shield_pct": cp.getfloat("ai", "escape_shield_pct"),
             "yield_fear_min": cp.getint("ai", "yield_fear_min"), "peace_pct_at_fear100": cp.getfloat("ai", "peace_shield_pct_at_fear100"),
@@ -209,8 +216,58 @@ def m3(ctx: Ctx) -> dict:
             try:
                 ctx.values["m3"] = m3_values(ctx.cfg)
             except (configparser.Error, ValueError) as e:
-                raise ScenarioError(f"the gate cannot read an M3 key from controls_config.ini: {e} (CFG-01…11, 24…30, 44, 61, 62, 72, 73; D-53)")
+                raise ScenarioError(f"the gate cannot read an M3 key from controls_config.ini: {e} (CFG-01…11, 24…30, 44, 61, 62, 72, 73, 76; D-53)")
     return ctx.values["m3"]
+
+
+def m4_values(cp: configparser.ConfigParser) -> dict:
+    """M4 numbers (specs/M4.md § 2; CFG-08, 09, 31…43, 56, 74…82).  Read lazily by m4(ctx): a pre-M4 ini lacks some keys and
+    the M4 rows then fail naming the key instead of crashing the gate."""
+    elements: dict[str, dict] = {}
+    for name, line in cp.items("elements"):
+        cat, value, rarity = [x.strip() for x in line.split(",")]
+        elements[name.strip().lower()] = {"category": cat, "value": float(value), "rarity": rarity.lower()}
+    upgrades: dict[str, dict[str, float]] = {}
+    for comp in ("torpedoes", "phasers", "shields", "engine", "warp"):
+        pairs: dict[str, float] = {}
+        for part in cp.get("upgrades", comp).split(","):
+            if not part.strip():
+                continue
+            el, amt = part.split(":")
+            pairs[el.strip().lower()] = float(amt)
+        upgrades[comp] = pairs
+    return {
+        "elements": elements, "upgrades": upgrades,
+        "food_buy": cp.getfloat("prices", "food_buy"), "food_sell": cp.getfloat("prices", "food_sell"),
+        "water_buy": cp.getfloat("prices", "water_buy"), "water_sell": cp.getfloat("prices", "water_sell"),
+        "torpedo_buy": cp.getfloat("prices", "torpedo_buy"), "torpedo_sell": cp.getfloat("prices", "torpedo_sell"),
+        "element_sell_pct": cp.getfloat("prices", "element_sell_pct"),
+        "ship_prices": {opt[len("ship_"):]: cp.getint("prices", opt) for opt in cp.options("prices") if opt.startswith("ship_")},
+        "silver_per_gold": cp.getint("economy", "silver_per_gold"), "planet_refuse_respect": cp.getint("economy", "planet_refuse_respect"),
+        "planet_price_band": cp.getfloat("economy", "planet_price_band"), "respect_price_band": cp.getfloat("economy", "respect_price_band"),
+        "trade_delta": cp.getint("respect", "trade_accepted_delta"), "special_delta": cp.getint("respect", "special_item_delta"),
+        "planet_attack_respect_max": cp.getint("ai", "planet_attack_respect_max"),
+        "buy_supplies_below": cp.getint("ai", "buy_supplies_below"), "docking_income_silver": cp.getint("ai", "docking_income_silver"),
+        "planet": {"shield_max": cp.getfloat("planets", "shield_max"), "torpedoes": cp.getfloat("planets", "torpedoes"), "phasers": cp.getfloat("planets", "phasers")},
+        "food_stock_start": cp.getint("planets", "food_stock_start"), "water_stock_start": cp.getint("planets", "water_stock_start"),
+        "stock_regen": cp.getint("planets", "stock_regen"), "stock_cap": cp.getint("planets", "stock_cap"),
+        "item_units_min": cp.getint("world", "item_units_min"), "item_units_max": cp.getint("world", "item_units_max"),
+        "special_items_per_galaxy": cp.getint("world", "special_items_per_galaxy"), "normal_items_per_galaxy": cp.getint("world", "normal_items_per_galaxy"),
+        "phaser_max": cp.getfloat("battle", "phaser_max"), "shield_cap": cp.getfloat("battle", "shield_cap"),
+        "ai_trace": cp.get("logging", "ai_trace").strip().lower(), "ai_class_mix": cp.get("world", "ai_class_mix").strip(),
+    }
+
+
+def m4(ctx: Ctx) -> dict:
+    """The M4 ini numbers; a missing key is the row's FAIL (CFG-*, D-53), never a crash."""
+    ensure_values(ctx)
+    with ctx.lock:
+        if "m4" not in ctx.values:
+            try:
+                ctx.values["m4"] = m4_values(ctx.cfg)
+            except (configparser.Error, ValueError) as e:
+                raise ScenarioError(f"the gate cannot read an M4 key from controls_config.ini: {e} (CFG-08, 09, 31…43, 56, 74…82; D-53)")
+    return ctx.values["m4"]
 
 
 def require_pkg(ctx: Ctx) -> None:
@@ -225,7 +282,8 @@ def at_least(ctx: Ctx, milestone: str) -> bool:
 
 def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool = True,
             config: Path | None = None, timeout: float, script: Path | None = None, teleport: str | None = None,
-            world_index: bool = False, spawn: list[str] | None = None, ai: str | None = None) -> C.CmdResult:
+            world_index: bool = False, spawn: list[str] | None = None, ai: str | None = None, give: str | None = None,
+            coins: tuple[int, int] | None = None, respect: int | None = None, fear: int | None = None) -> C.CmdResult:
     if save_dir.exists():
         shutil.rmtree(save_dir, ignore_errors=True)
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -247,6 +305,14 @@ def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai
         args += ["--spawn", s]
     if ai is not None:                          # C10: --ai passive (D-125)
         args += ["--ai", ai]
+    if give is not None:                        # C11: --give "<element>:<units>[,…]"
+        args += ["--give", give]
+    if coins is not None:                       # C11: --coins <gold> <silver>
+        args += ["--coins", str(coins[0]), str(coins[1])]
+    if respect is not None:                     # C11: --respect N
+        args += ["--respect", str(respect)]
+    if fear is not None:                        # C11: --fear N
+        args += ["--fear", str(fear)]
     return C.run_cmd(args, ctx.root, timeout)
 
 
@@ -428,11 +494,19 @@ def run_scenario_full(ctx: Ctx, name: str, scn: dict, *, seed: int, config: Path
         what += f" --spawn \"{s}\""
     if scn.get("ai"):
         what += f" --ai {scn['ai']}"
+    if scn.get("give") is not None:
+        what += f" --give \"{scn['give']}\""
+    if scn.get("coins") is not None:
+        what += f" --coins {scn['coins'][0]} {scn['coins'][1]}"
+    for key in ("respect", "fear"):
+        if scn.get(key) is not None:
+            what += f" --{key} {scn[key]}"
     if config is not None:
         what += f" --config {config.name}"
     timeout = SIM_BOUND_S * 2 + 0.2 * int(scn["turns"])
     res = run_sim(ctx, seed=seed, turns=scn["turns"], report=report, save_dir=save_dir, ai_player=ai_player, config=config,
-                  script=script, teleport=scn.get("teleport"), spawn=scn.get("spawn"), ai=scn.get("ai"), timeout=timeout)
+                  script=script, teleport=scn.get("teleport"), spawn=scn.get("spawn"), ai=scn.get("ai"), give=scn.get("give"), coins=scn.get("coins"),
+                  respect=scn.get("respect"), fear=scn.get("fear"), timeout=timeout)
     problems = sim_problems(res, what, timeout)
     doc, err = C.load_json(report)
     if doc is None:
@@ -490,9 +564,11 @@ def hole_pick(ctx: Ctx, *, wormhole: bool | None, distance: int, path: tuple[int
     return select
 
 
-def render_probe_run(ctx: Ctx, name: str, inputs: dict[str, list], *, styled: bool = False, view: dict | None = None) -> dict:
-    spec = {"root": str(ctx.root), "config_path": str(ctx.root / "controls_config.ini"), "width": 120,
-            "view": view or {"level": "follow"}, "inputs": inputs, "styled": styled}
+def render_probe_run(ctx: Ctx, name: str, inputs: dict[str, list], *, styled: bool = False, view: dict | None = None,
+                     help: list[str] | None = None, config: Path | None = None) -> dict:
+    """Render `inputs` per role in a subprocess; `help` = topics whose T1 help text to capture (UX-09, smoke/46); `config` = a temp ini."""
+    spec = {"root": str(ctx.root), "config_path": str(config or ctx.root / "controls_config.ini"), "width": 120,
+            "view": view or {"level": "follow"}, "inputs": inputs, "styled": styled, "help": list(help or [])}
     in_path, out_path = ctx.art / f"render_in_{name}.json", ctx.art / f"render_out_{name}.json"
     in_path.write_text(json.dumps(spec), encoding="utf-8")
     if out_path.exists():
@@ -510,7 +586,8 @@ def probe_errors(probe: dict) -> list[str]:
     for mod, err in (probe.get("import_errors") or {}).items():
         errs.append(f"import {mod} failed: {err.strip().splitlines()[-1] if err.strip() else err} (C4)")
     for role, err in (probe.get("errors") or {}).items():
-        errs.append(f"render_{role}.render() raised: {err.strip().splitlines()[-1] if err.strip() else err}")
+        where = "render_command.help_text()" if role == "help" else f"render_{role}.render()"
+        errs.append(f"{where} raised: {err.strip().splitlines()[-1] if err.strip() else err}")
     return errs
 
 
@@ -806,6 +883,12 @@ def c11(ctx: Ctx) -> list[str]:
         return [f"{err} (C6)"]
     final_hash = report["per_turn"][-1]["snapshot_hash"]
     problems = C.check_save_document(doc, final_hash)
+    return problems + save_roundtrip_problems(ctx, save, final_hash)
+
+
+def save_roundtrip_problems(ctx: Ctx, save: Path, final_hash: str) -> list[str]:
+    """starbour.engine.save.load(save) in a subprocess: the loaded state's snapshot hash equals the saved one (C6; smoke/11, smoke/48)."""
+    problems: list[str] = []
     code = textwrap.dedent("""
         import sys, json, hashlib
         sys.path.insert(0, sys.argv[1])
@@ -851,7 +934,7 @@ def c12(ctx: Ctx) -> list[str]:
     if res.timed_out:
         return [f"sim --seed 7 --turns 500 did not finish within {LONG_RUN_BOUND_S + 15:.0f} s and was killed (bound {LONG_RUN_BOUND_S:.0f} s)"]
     doc, _ = C.load_json(report)
-    m2_, m3_ = at_least(ctx, "M2"), at_least(ctx, "M3")
+    m2_, m3_, m4_ = at_least(ctx, "M2"), at_least(ctx, "M3"), at_least(ctx, "M4")
     problems = C.check_long_run(doc, res.returncode, res.seconds, LONG_RUN_BOUND_S, res.stderr, 500, expect_hazard_deaths=m2_, expect_battles=m3_)
     if m3_ and isinstance(doc, dict):
         # M3 § 4: captain count == distinct ship owners (D-105) — judged on the final save (per-turn snapshots are not in the report)
@@ -859,10 +942,16 @@ def c12(ctx: Ctx) -> list[str]:
         problems += CB.check_owners(snapshot_from_save(sdoc) if isinstance(sdoc, dict) else None, "smoke/12 final snapshot")
         if doc.get("outcome") == "game_over":
             print("         note: the AI player died, so the save is gone and the owners check had no snapshot (D-106)")
+    if m4_:
+        # M4 § 4: the universe trades and stays bounded (final.trades ≥ 1, population_max ≤ 1.3 × captains_start, planets_destroyed a count; D-144)
+        problems += E.check_long_run_economy(doc, turns=500, what="smoke/12 (M4)")
     if not problems and m2_ and isinstance(doc, dict):
         fin = doc.get("final") or {}
         extra = (f", battles {fin.get('battles')} {fin.get('battles_by_outcome')}, ai_vs_ai {fin.get('ai_vs_ai_battles')}, combat_deaths {fin.get('combat_deaths')}, "
                  f"captures {fin.get('captures')}, roams {fin.get('roams')}, player fear/respect {fin.get('player_fear')}/{fin.get('player_respect')}") if m3_ else ""
+        extra += (f"; population {fin.get('captains_start')} → min {fin.get('population_min')} / max {fin.get('population_max')} / final {fin.get('captains')}, "
+                  f"trades {fin.get('trades')}, pickups {fin.get('pickups')}, upgrades {fin.get('upgrades')}, planets_destroyed {fin.get('planets_destroyed')}, "
+                  f"ai_purchases {fin.get('ai_purchases')}, ai_mutinies {fin.get('ai_mutinies')}") if m4_ else ""
         print(f"         500 turns, outcome {doc.get('outcome')}, turns_completed {doc.get('turns_completed')}, "
               f"final.hazard_deaths {fin.get('hazard_deaths')}, final.ships {fin.get('ships')}{extra}")
     return problems
@@ -1116,7 +1205,7 @@ def c19(ctx: Ctx) -> list[str]:
             raise ScenarioError(f"with blackhole_mass {bh:g} and warp {warp:g} no distance ≥ 1 gives effective ≤ 0 — the failed-warp scenario cannot be built from this ini (HZ-10)")
         for label, dist, require_event in (("neg", d_neg, True), ("pos", d_neg + 1, False)):
             def pick_pull(w_: World, dist_: int = dist) -> Any:
-                for h in C.pick_holes(w_.index, wormhole=None):
+                for h in C.pick_holes(w_.index, wormhole=False):          # a plain hole: a wormhole at distance 1 would carry the ship across (D-147; cf. smoke/17 (b))
                     got = C.cell_at_distance(w_.index, h, dist_, size, diagonal=False) or C.cell_at_distance(w_.index, h, dist_, size)
                     if not got:
                         continue
@@ -1250,6 +1339,8 @@ class Arena:
 
 
 def arena(ctx: Ctx, seed: int = 1234) -> Arena:
+    """The player's start sector when quiet, else the nearest quiet sector: no AI ship at turn 1, no hole, and (from M4, EF-05)
+    the arena cell beyond torpedo_range of every planet, so a planet never opens on the low-respect ship parked there (D-148 (7))."""
     v = m2(ctx)
     w = probe_world(ctx, seed)
     size = v["sector_size"]
@@ -1257,12 +1348,20 @@ def arena(ctx: Ctx, seed: int = 1234) -> Arena:
     snap = w.snapshot
     pid = snap.get("player_id")
     holes = CB.hole_sectors(w.index)
+    try:
+        reach = int(m3(ctx)["torpedo_range"])
+    except ScenarioError:
+        reach = 0
 
     def ships_in(gs: tuple) -> int:
         return sum(1 for s in (snap.get("ships") or {}).values()
                    if isinstance(s, dict) and s.get("captain") != pid and _norm2(s.get("position", [[], []])[:2]) == gs)
+
+    def clear_of_planets(gs: tuple, cell: tuple) -> bool:
+        return all(C.chebyshev(cell, (int(p["cell"][0]), int(p["cell"][1]))) > reach for p in (w.index.get("planets") or [])
+                   if isinstance(p, dict) and isinstance(p.get("cell"), list) and C._gs(p) == gs)
     start = ((gx, gy), (sx, sy))
-    if ships_in(start) == 0 and start not in holes:
+    if ships_in(start) == 0 and start not in holes and clear_of_planets(start, (cx, cy)):
         return Arena(w, start[0], start[1], (cx, cy), None, C.terrain_cells(w.index, start[0], start[1]), size)
     ordered = sorted(w.sectors, key=lambda gs: C.chebyshev(C.flat_sector(gs[0], gs[1], v["galaxy_size"]), C.flat_sector(start[0], start[1], v["galaxy_size"])))
     for gs in ordered:
@@ -1272,10 +1371,12 @@ def arena(ctx: Ctx, seed: int = 1234) -> Arena:
         mid = (size[0] // 2, size[1] // 2)
         for r in range(0, 6):
             cells = [(mid[0] + dx, mid[1] + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1) if max(abs(dx), abs(dy)) == r]
-            free = [c for c in cells if C.in_sector(c, size) and c not in blocked and all((c[0] + ddx, c[1] + ddy) not in blocked for ddx in (-1, 0, 1) for ddy in (-1, 0, 1))]
+            free = [c for c in cells if C.in_sector(c, size) and c not in blocked and clear_of_planets(gs, c)
+                    and all((c[0] + ddx, c[1] + ddy) not in blocked for ddx in (-1, 0, 1) for ddy in (-1, 0, 1))]
             if free:
                 return Arena(w, gs[0], gs[1], free[0], C.teleport_arg(gs[0], gs[1], free[0]), blocked, size)
-    raise ScenarioError(f"seed {seed}: no quiet sector (no AI ship at turn 1, no hole) with a free cell for a combat arena (gate logic, M3 § 4)")
+    raise ScenarioError(f"seed {seed}: no quiet sector (no AI ship at turn 1, no hole) with a free cell beyond torpedo_range {reach} of its planets for a combat arena "
+                        f"(gate logic, M3 § 4, M4 § 4a)")
 
 
 def _norm2(pos: Any) -> tuple:
@@ -1304,11 +1405,12 @@ def spawn_str(a: Arena, cls: str, cell: tuple, fear: int | None = None, respect:
 
 
 def scenario(what: str, ids: str, *, turns: int, script: list[str] | None = None, spawn: list[str] | None = None, ai: str | None = "passive",
-             ini: dict | None = None, teleport: str | None = None) -> dict:
+             ini: dict | None = None, teleport: str | None = None, give: str | None = None, coins: tuple[int, int] | None = None,
+             respect: int | None = None, fear: int | None = None) -> dict:
     script = list(script or [])
     script += [""] * (turns - len(script))
     return {"script": script[:turns], "turns": turns, "spawn": spawn or [], "ai": ai, "ini": ini, "teleport": teleport,
-            "plan": {"what": what, "ids": ids}}
+            "give": give, "coins": coins, "respect": respect, "fear": fear, "plan": {"what": what, "ids": ids}}
 
 
 def class_line(cls: dict) -> str:
@@ -1510,7 +1612,7 @@ def c26(ctx: Ctx) -> list[str]:
         what = f"smoke/26 destroy a Corsair at distance 0 (one volley of {n} torpedoes at p {p:.2f} for {hits_to_zero} hits to 0 shields, then the phasers)"
         scn = scenario(what, "CB-01, HZ-09, D-105, D-120, D-123, C10", turns=turns, script=script, spawn=sp, ini=ini, teleport=a.teleport)
         rep, _, snap = run_scenario_full(ctx, "loot", scn, seed=a.world.seed)
-        caps = {"phasers": 10.0, "engine": k["impulse_max"], "warp": k["warp_max"]}   # phaser cap 10: [upgrades] comment, no CFG key ([ASSUMED], D-128)
+        caps = {"phasers": k["phaser_max"], "engine": k["impulse_max"], "warp": k["warp_max"]}   # [battle] phaser_max (CFG-76, D-130) and [movement] (CFG-22); D-147
         problems = CB.check_destruction(rep, snap, victim=victim, player_before=pf, caps=caps, torpedo_damage=k["torpedo_damage"], what=what)
         # (b) mutual annihilation: both Kestrels at 1 shield and no torpedoes; two phaser exchanges → both land on 0 at turn 2
         ini2 = {("ships", "kestrel"): class_line(dict(k["classes"]["kestrel"], torpedoes=0, shield_max=1)), ("ships", "starting_class"): "kestrel"}
@@ -1999,6 +2101,640 @@ def c36(ctx: Ctx) -> list[str]:
         return [str(e)]
 
 
+# --------------------------------------------------------------------------- checks smoke/37…48 (specs/M4.md § 4, C11)
+#
+# Every row builds on world_index.planets / items (C9, C11), the probe snapshot (planet ids, stock, a spawned captain's
+# coins — same seed, same ids, D-67) and the ini; the C11 debug flags --give / --coins / --respect set the player's
+# cargo, wealth and standing.  Rows that park the ship on a planet use a respect clear of EF-05 and EF-04 (D-148 (7));
+# the conventions the rows settle are listed in M4 § 4a / D-148 and stated in every message that relies on one.
+
+@dataclass
+class Dock:
+    world: World
+    planet: dict                  # the world_index entry
+    key: str                      # "gx,gy/sx,sy"
+    cell: tuple                   # the planet's cell
+    teleport: str                 # onto the planet's cell
+    neighbour: tuple | None       # a free cell at distance 1 (EF-05 rows)
+
+
+def _ships_in(snap: dict, gs: tuple) -> int:
+    pid = snap.get("player_id")
+    return sum(1 for s in (snap.get("ships") or {}).values() if isinstance(s, dict) and s.get("captain") != pid and _norm2(s.get("position", [[], []])[:2]) == gs)
+
+
+def planet_pick(ctx: Ctx, *, quiet: bool = True, neighbour: bool = False) -> Callable[[World], Any]:
+    """A planet (nearest to the start first, C9 order) in a hole-free sector — with no AI ship there at turn 1 when `quiet` —
+    and, when `neighbour`, a free cell at distance 1."""
+    v = m2(ctx)
+
+    def select(w: World) -> Any:
+        holes = CB.hole_sectors(w.index)
+        for p in w.index.get("planets") or []:
+            if not (isinstance(p, dict) and isinstance(p.get("galaxy"), list) and isinstance(p.get("sector"), list) and isinstance(p.get("cell"), list)):
+                continue
+            gs = (tuple(int(x) for x in p["galaxy"]), tuple(int(x) for x in p["sector"]))
+            if gs in holes or (quiet and _ships_in(w.snapshot, gs) > 0):
+                continue
+            nb = None
+            if neighbour:
+                got = C.cell_at_distance(w.index, p, 1, v["sector_size"], diagonal=False) or C.cell_at_distance(w.index, p, 1, v["sector_size"])
+                if not got:
+                    continue
+                nb = (int(got[0][0]), int(got[0][1]))
+            return p, nb
+        return None
+    return select
+
+
+def dock(ctx: Ctx, *, quiet: bool = True, neighbour: bool = False) -> Dock:
+    what = "a planet in a hole-free sector" + (" with no AI ship at turn 1" if quiet else "") + (" and a free neighbouring cell" if neighbour else "")
+    w, (p, nb) = find_world(ctx, what, planet_pick(ctx, quiet=quiet, neighbour=neighbour))
+    cell = (int(p["cell"][0]), int(p["cell"][1]))
+    return Dock(w, p, E.sector_key(p["galaxy"], p["sector"]), cell, C.teleport_arg(p["galaxy"], p["sector"], cell), nb)
+
+
+def safe_respect(k: dict) -> int:
+    """A respect at which a planet trades and never opens fire (EF-04, EF-05; D-148 (7)), with room for FR-07 / FR-08 gains."""
+    return min(90, max(k["planet_refuse_respect"], k["planet_attack_respect_max"]) + 30)
+
+
+def sale_element(k: dict) -> str:
+    """The cheapest normal-rarity element of the catalogue — the gate's trade good (CFG-42)."""
+    normals = [n for n, e in k["elements"].items() if e["rarity"] == "normal"] or sorted(k["elements"])
+    if not normals:
+        raise ScenarioError("[elements] lists no element (CFG-42)")
+    return min(normals, key=lambda n: (k["elements"][n]["value"], n))
+
+
+def dock_probe(ctx: Ctx, d: Dock, k: dict, k3: dict) -> tuple[dict, dict, str, dict]:
+    """One quiet turn on the planet's cell at the safe respect, shared by the planet rows (same seed, same ids — D-67):
+    (report, saved snapshot, the planet's C11 id, its record)."""
+    def make() -> Any:
+        scn = scenario(f"probe {d.planet.get('name')!r} at {d.key} {list(d.cell)}", "C11", turns=1, teleport=d.teleport, respect=safe_respect(k),
+                       coins=(k3["gold_start"], k3["silver_start"]))
+        rep, _, snap = run_scenario_full(ctx, f"probe_dock_{d.world.seed}_{d.cell[0]}_{d.cell[1]}", scn, seed=d.world.seed)
+        if snap is None:
+            raise ScenarioError("planet probe: no save snapshot after one turn (C6)")
+        if not E.planets_of(snap):
+            raise ScenarioError("planet probe: the saved snapshot has no 'planets' records (C11 snapshot additions: planets = {'p-012': {name, president, cell, sector, …}})")
+        got = E.planet_in(snap, d.key, d.cell)
+        if got is None:
+            raise ScenarioError(f"planet probe: no planets[*] record with sector {d.key!r} and cell {list(d.cell)} among {len(E.planets_of(snap))} records; world_index.planets "
+                                f"says {d.planet.get('name')!r} is there (C11)")
+        return rep, snap, got[0], got[1]
+    return shared_run(ctx, f"dock_{d.world.seed}_{d.key}_{d.cell}", make)
+
+
+def item_pick(ctx: Ctx, rarity: str) -> Callable[[World], Any]:
+    """An item stack of `rarity` (world_index.items, C11) in a hole-free sector, preferring one with no AI ship at turn 1."""
+    def select(w: World) -> Any:
+        items = w.index.get("items")
+        if not isinstance(items, list):
+            raise ScenarioError("world_index has no 'items' list — `--world-index` gains items (element, units, rarity, cell) in M4 (C11, D-141)")
+        holes = CB.hole_sectors(w.index)
+        best = None
+        for it in items:
+            if not (isinstance(it, dict) and str(it.get("rarity", "")).lower() == rarity and isinstance(it.get("cell"), list) and isinstance(it.get("element"), str)):
+                continue
+            if not (isinstance(it.get("galaxy"), list) and isinstance(it.get("sector"), list)):
+                raise ScenarioError(f"world_index.items entries carry no galaxy / sector: {C._short(it)} — the gate teleports onto the cell (C11, D-104)")
+            gs = (tuple(int(x) for x in it["galaxy"]), tuple(int(x) for x in it["sector"]))
+            if gs in holes:
+                continue
+            pick = (it, C.teleport_arg(it["galaxy"], it["sector"], it["cell"]))
+            if _ships_in(w.snapshot, gs) == 0:
+                return pick
+            best = best or pick
+        return best
+    return select
+
+
+def ai200(ctx: Ctx) -> dict:
+    """The AI-only run smoke/37 (e), 44 and 45 share (D-128 (1))."""
+    return shared_run(ctx, "ai200", lambda: ai_run(ctx, AI_RUN_TURNS_M4, name="ai200"))
+
+
+def planet_volley(k: dict, k3: dict, cls: dict) -> tuple[int, int, float, dict]:
+    """(volley, hits_to_zero, p, temp ini): one torpedo volley that empties a planet's CFG-77 shields (p at engine 0 — a planet
+    cannot move, CM-11) and a class line that carries it and survives five turns of the planet's return fire (HZ-09, D-120)."""
+    p = CB.torpedo_hit_p(k3["torpedo_hit_base"], k3["torpedo_evade"], 0.0)
+    hits = int(math.ceil(k["planet"]["shield_max"] / k3["torpedo_damage"]))
+    volley = volley_size(hits, p)
+    incoming = 5 * (CB.phaser_damage(k["planet"]["phasers"], k3["phaser_per_unit"], 0) + k3["torpedo_damage"])
+    ini = {("ships", k3["starting_class"]): class_line(dict(cls, torpedoes=max(cls["torpedoes"], volley), shield_max=max(cls["shield_max"], incoming + 1)))}
+    return volley, hits, p, ini
+
+
+def c37(ctx: Ctx) -> list[str]:
+    """smoke/37 — items: hidden until scan, pickup after it, FR-08 once for a special stack, no respawn (SP-03, IT-04, IT-05, CMD-14, CMD-15, FR-08, D-141)."""
+    require_pkg(ctx)
+    try:
+        k = m4(ctx)
+        respect = safe_respect(k)
+        problems: list[str] = []
+        w, (normal, tele) = find_world(ctx, "a normal-rarity item stack in a hole-free sector", item_pick(ctx, "normal"))
+        key = E.sector_key(normal["galaxy"], normal["sector"])
+        el = normal["element"]
+        what_a = f"smoke/37 `pickup {el}` without a scan at {key} {normal['cell']}"
+        scn = scenario(what_a, "IT-04, CMD-15, SYM-09, C11", turns=1, script=[f"pickup {el}"], teleport=tele, respect=respect)
+        rep, _, snap = run_scenario_full(ctx, "item_hidden", scn, seed=w.seed)
+        problems += E.check_item_hidden(rep, snap, item=normal, key=key, what=what_a)
+        what_b = f"smoke/37 `scan` on the cell holding {el} × {normal.get('units')}"
+        scn = scenario(what_b, "CMD-14, OUT-10, SYM-09, C11", turns=1, script=["scan"], teleport=tele, respect=respect)
+        rep, _, snap = run_scenario_full(ctx, "item_scan", scn, seed=w.seed)
+        problems += E.check_item_scan(rep, snap, item=normal, key=key, what=what_b)
+        what_c = f"smoke/37 scan, `pickup {el}`, three more scans (a normal stack: no FR-08, no respawn)"
+        scn = scenario(what_c, "CMD-15, IT-05, FR-08, D-141", turns=5, script=["scan", f"pickup {el}", "scan", "scan", "scan"], teleport=tele, respect=respect)
+        rep, _, snap = run_scenario_full(ctx, "item_pickup", scn, seed=w.seed)
+        problems += E.check_item_pickup(rep, snap, item=normal, key=key, pickup_turn=2, respect_start=respect, special_delta=k["special_delta"], what=what_c)
+        with ctx.lock:
+            ctx.shared["save_pickup"] = (ctx.art / "saves_item_pickup" / "game.json", (rep.get("per_turn") or [{}])[-1].get("snapshot_hash"))
+        w2, (special, tele2) = find_world(ctx, "a special-rarity item stack in a hole-free sector", item_pick(ctx, "special"))
+        key2 = E.sector_key(special["galaxy"], special["sector"])
+        what_d = f"smoke/37 scan and `pickup {special['element']}` (a special stack: FR-08 +{k['special_delta']} once)"
+        scn = scenario(what_d, "FR-08, CFG-09, IT-05, D-141", turns=3, script=["scan", f"pickup {special['element']}", "scan"], teleport=tele2, respect=respect)
+        rep, _, snap = run_scenario_full(ctx, "item_special", scn, seed=w2.seed)
+        problems += E.check_item_pickup(rep, snap, item=special, key=key2, pickup_turn=2, respect_start=respect, special_delta=k["special_delta"], what=what_d)
+        rep_ai = ai200(ctx)
+        problems += E.check_no_respawn(rep_ai, probe_world(ctx, 1234).index, what=f"smoke/37 {AI_RUN_TURNS_M4}-turn AI run")
+        if not problems:
+            print(f"         seed {w.seed}: {el} × {normal.get('units')} at {key} {normal['cell']} hidden, scanned, picked up, gone; special {special['element']} (seed {w2.seed}) "
+                  f"+{k['special_delta']} respect once; the {AI_RUN_TURNS_M4}-turn run picked up {(rep_ai.get('final') or {}).get('pickups')} stack(s)")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c38(ctx: Ctx) -> list[str]:
+    """smoke/38 — buy / sell at a planet: factored prices, stock, OUT-07, the D-49 proof, refusals, buy ship (CMD-20, PRC-01…05, TR-04, PR-04, D-142)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        d = dock(ctx)
+        respect, coins = safe_respect(k), (k3["gold_start"], k3["silver_start"])
+        band, spg = k["planet_price_band"], k["silver_per_gold"]
+        el = sale_element(k)
+        probe_rep, _, pid, prec = dock_probe(ctx, d, k, k3)
+        name = prec.get("name") or pid
+        idx_stock = d.planet.get("stock") if isinstance(d.planet.get("stock"), dict) else {}
+        prec_stock = prec.get("stock") if isinstance(prec.get("stock"), dict) else {}
+        stock_before = idx_stock.get("food") if isinstance(idx_stock.get("food"), int) else (prec_stock["food"] - k["stock_regen"] if isinstance(prec_stock.get("food"), int) else None)
+        what = f"smoke/38 at {name} ({pid}, respect {respect}): buy food 10 · sell {el} 1 · buy food 200"
+        scn = scenario(what, "CMD-20, PRC-01, PRC-04, TR-04, PR-04, EF-04, D-142", turns=3, script=["buy food 10", f"sell {el} 1", "buy food 200"], teleport=d.teleport,
+                       respect=respect, coins=coins, give=f"{el}:1")
+        rep, _, snap = run_scenario_full(ctx, "market", scn, seed=d.world.seed)
+        turns = rep.get("per_turn") or []
+        r1 = respect
+        r2 = int((turns[0].get("player") or {}).get("respect", r1)) if len(turns) > 0 and isinstance(turns[0], dict) else r1
+        r3 = int((turns[1].get("player") or {}).get("respect", r2)) if len(turns) > 1 and isinstance(turns[1], dict) else r2
+        baseline = (probe_rep.get("per_turn") or [None])[0]
+        problems = E.check_buy(rep, snap, planet_id=pid, turn=1, item="food", n=10, unit_price=k["food_buy"], band=band, spg=spg, respect_before=r1, baseline_turn=baseline,
+                               stock_before=stock_before, regen=k["stock_regen"], cap=k["stock_cap"], turns_total=3, coins_before=coins, what=what)
+        problems += E.check_sell(rep, snap, planet_id=pid, turn=2, element=el, n=1, value=k["elements"][el]["value"], pct=k["element_sell_pct"], band=band, spg=spg,
+                                 respect_before=r2, what=what)
+        cost200 = E.price_options(k["food_buy"], 200, E.price_factor(r3, band, selling=False))
+        stock_nums = {200}
+        if isinstance(stock_before, int):
+            stock_nums |= {stock_before, stock_before - 10} | {min(k["stock_cap"], stock_before - 10 + k["stock_regen"] * r) for r in (1, 2, 3)}
+        problems += E.check_buy_rejected(rep, planet_id=pid, turn=3, item="food", n=200, cost_options=cost200, stock_numbers=stock_nums, what=what)
+        alt = k["food_buy"] + 5
+        what_b = f"smoke/38 buy food 10 with [prices] food_buy = {alt:g} in a temp ini (D-49)"
+        scn_b = scenario(what_b, "PRC-01, CFG-38, D-49", turns=1, script=["buy food 10"], teleport=d.teleport, respect=respect, coins=coins, ini={("prices", "food_buy"): f"{alt:g}"})
+        rep_b, _, _ = run_scenario_full(ctx, "market_price", scn_b, seed=d.world.seed)
+        problems += E.check_buy(rep_b, None, planet_id=pid, turn=1, item="food", n=10, unit_price=alt, band=band, spg=spg, respect_before=respect, baseline_turn=None,
+                                stock_before=None, regen=k["stock_regen"], cap=k["stock_cap"], turns_total=1, coins_before=coins, what=what_b)
+        if not k["ship_prices"]:
+            raise ScenarioError("[prices] lists no ship_<class> price (PRC-05, CFG-41)")
+        cls, price = min(k["ship_prices"].items(), key=lambda kv: (kv[1], kv[0]))
+        what_c = f"smoke/38 `buy ship {cls}` with {price} gold (ship_{cls} = {price})"
+        scn_c = scenario(what_c, "PRC-05, FL-02, CMD-20, D-142", turns=1, script=[f"buy ship {cls}"], teleport=d.teleport, respect=respect, coins=(price, 0))
+        rep_c, _, snap_c = run_scenario_full(ctx, "buy_ship", scn_c, seed=d.world.seed)
+        problems += E.check_buy_ship(rep_c, snap_c, planet_id=pid, turn=1, cls=cls, price_gold=price, gold_before=price, what=what_c)
+        poor = price // 4
+        what_d = f"smoke/38 `buy ship {cls}` with {poor} gold"
+        scn_d = scenario(what_d, "PRC-05, CMD-20", turns=1, script=[f"buy ship {cls}"], teleport=d.teleport, respect=respect, coins=(poor, 0))
+        rep_d, _, _ = run_scenario_full(ctx, "buy_ship_poor", scn_d, seed=d.world.seed)
+        problems += E.check_buy_ship_rejected(rep_d, planet_id=pid, turn=1, cls=cls, price_gold=price, gold_held=poor, what=what_d)
+        if not problems:
+            f_buy, f_sell = E.price_factor(r1, band, selling=False), E.price_factor(r2, band, selling=True)
+            print(f"         seed {d.world.seed}: {name} ({pid}) at {d.key} {list(d.cell)}; food 10 → −{sorted(E.price_options(k['food_buy'], 10, f_buy))} silver (factor {f_buy:.2f}); "
+                  f"{el} 1 → +{sorted(E.element_sell_options(k['elements'][el]['value'], k['element_sell_pct'], f_sell))} (factor {f_sell:.3f}); food 200 refused; "
+                  f"food_buy {alt:g} → −{sorted(E.price_options(alt, 10, f_buy))}; ship {cls} for {price} gold, refused with {poor}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c39(ctx: Ctx) -> list[str]:
+    """smoke/39 — disposition: EF-04 refusal, the factor at respect 100, barter thresholds at two dispositions, FR-07 (PL-06, PR-05, TR-06, EF-04, FR-07, D-142)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        d = dock(ctx)
+        coins = (k3["gold_start"], k3["silver_start"])
+        band, spg = k["planet_price_band"], k["silver_per_gold"]
+        _, _, pid, prec = dock_probe(ctx, d, k, k3)
+        name = prec.get("name") or pid
+        problems: list[str] = []
+        low = max(0, k["planet_refuse_respect"] - 8)
+        what_a = f"smoke/39 buy food 10 at {name} with respect {low} < planet_refuse_respect {k['planet_refuse_respect']}"
+        scn_a = scenario(what_a, "EF-04, PR-05, PL-06, D-142", turns=1, script=["buy food 10"], teleport=d.teleport, respect=low, coins=coins)
+        rep_a, _, snap_a = run_scenario_full(ctx, "refused", scn_a, seed=d.world.seed)
+        problems += E.check_refused(rep_a, snap_a, planet_id=pid, turn=1, respect=low, refuse_respect=k["planet_refuse_respect"], what=what_a)
+        what_b = f"smoke/39 buy food 10 at respect 100 (factor {1 - band / 100:.2f})"
+        scn_b = scenario(what_b, "EF-04, PL-06, D-142", turns=1, script=["buy food 10"], teleport=d.teleport, respect=100, coins=coins)
+        rep_b, _, _ = run_scenario_full(ctx, "factor100", scn_b, seed=d.world.seed)
+        problems += E.check_factor_at(rep_b, planet_id=pid, turn=1, respect=100, band=band, unit_price=k["food_buy"], n=10, spg=spg, coins_before=coins, what=what_b)
+        el = sale_element(k)
+        value = k["elements"][el]["value"]
+        notes = []
+        for label, r in (("low", k["planet_refuse_respect"]), ("high", 90)):
+            f = E.barter_factor(E.disposition(r), band)
+            n_acc, n_rej = E.barter_bounds(value, k["food_buy"], f, cap=k["food_stock_start"])
+            script = [f"trade {pid} give {el}:1 for food:{n_rej}", f"trade {pid} give {el}:1 for food:{n_acc}"]
+            what_c = (f"smoke/39 barter at respect {r} (disposition {E.disposition(r)}, factor {f:.3f}): give {el}:1 (value {value:g}) for food:{n_rej} refused, "
+                      f"food:{n_acc} accepted")
+            scn_c = scenario(what_c, "TR-06, EF-04, FR-07, PL-06, D-142", turns=2, script=script, teleport=d.teleport, respect=r, coins=coins, give=f"{el}:1")
+            rep_c, _, snap_c = run_scenario_full(ctx, f"barter_{label}", scn_c, seed=d.world.seed)
+            problems += E.check_barter(rep_c, snap_c, counterparty=pid, give=(el, 1), want_item="food", n_accept=n_acc, n_reject=n_rej, accept_turn=2, reject_turn=1,
+                                       factor=f, trade_delta=k["trade_delta"], respect_before=r, what=what_c)
+            notes.append(f"respect {r}: food ≤ {n_acc} accepted, {n_rej} refused")
+        if not problems:
+            print(f"         {name} ({pid}): respect {low} refused (EF-04); respect 100 → factor {1 - band / 100:.2f}; {'; '.join(notes)}; FR-07 +{k['trade_delta']} per accepted trade")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c40(ctx: Ctx) -> list[str]:
+    """smoke/40 — upgrades: every [upgrades] pair, a wrong pairing rejected, the caps (CMD-13, UP-01…05, CFG-33…37, CFG-76, CFG-82, D-143)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        a = arena(ctx)
+        give = ",".join(f"{el}:1" for el in sorted(k["elements"]))
+        caps = {"torpedoes": None, "phasers": k["phaser_max"], "shields": k["shield_cap"], "engine": k3["impulse_max"], "warp": k3["warp_max"]}
+        pairs, turn = [], 1
+        for comp in E.STAT_OF:
+            for el, amt in sorted(k["upgrades"].get(comp, {}).items()):
+                if el not in k["elements"]:
+                    raise ScenarioError(f"[upgrades] {comp} names {el!r}, which is not an [elements] key (CFG-33…37, CFG-42)")
+                pairs.append({"turn": turn, "component": comp, "element": el, "amount": amt})
+                turn += 1
+        if not pairs:
+            raise ScenarioError("[upgrades] maps no element to any component (CFG-33…37)")
+        wrong_el = next((el for el in sorted(k["elements"]) if el not in k["upgrades"].get("shields", {})), None)
+        wrong = {"turn": turn, "component": "shields", "element": wrong_el} if wrong_el else None
+        script = [f"upgrade {p['component']} with {p['element']}" for p in pairs] + ([f"upgrade shields with {wrong_el}"] if wrong_el else [])
+        probe_scn = scenario("probe upgrades", "C11", turns=1, teleport=a.teleport, give=give)
+        _, _, probe_snap = run_scenario_full(ctx, "probe_upgrades", probe_scn, seed=a.world.seed)
+        if probe_snap is None:
+            raise ScenarioError("upgrade probe: no save snapshot after one turn (C6)")
+        pf = player_facts(probe_snap)
+        base = {E.STAT_OF[c]: float(pf[E.STAT_OF[c]]) for c in E.STAT_OF}
+        what = f"smoke/40 {len(pairs)} upgrades one a turn, then `upgrade shields with {wrong_el}` (not in the map)"
+        scn = scenario(what, "CMD-13, UP-01…05, CFG-33…37, D-143", turns=len(script), script=script, teleport=a.teleport, give=give)
+        rep, _, snap = run_scenario_full(ctx, "upgrades", scn, seed=a.world.seed)
+        problems = E.check_upgrades(rep, snap, pairs=pairs, caps=caps, base=base, wrong=wrong, what=what)
+        big, ini = [], {}
+        for comp in E.STAT_OF:                               # D-148 (11): each line rewritten to its first element with twice the cap (400 for torpedoes)
+            if not k["upgrades"].get(comp):
+                continue
+            el = sorted(k["upgrades"][comp])[0]
+            amt = 400.0 if caps[comp] is None else 2.0 * float(caps[comp])
+            ini[("upgrades", comp)] = f"{el}:{amt:g}"
+            big.append({"turn": len(big) + 1, "component": comp, "element": el, "amount": amt})
+        what2 = "smoke/40 caps: " + ", ".join(f"{p['component']} +{p['amount']:g} ({p['element']})" for p in big)
+        scn2 = scenario(what2, "CFG-76, CFG-82, CFG-22, UP-01…05, D-143", turns=len(big), script=[f"upgrade {p['component']} with {p['element']}" for p in big],
+                        teleport=a.teleport, give=give, ini=ini)
+        rep2, _, snap2 = run_scenario_full(ctx, "upgrades_caps", scn2, seed=a.world.seed)
+        problems += E.check_upgrades(rep2, snap2, pairs=big, caps=caps, base=base, wrong=None, what=what2)
+        if not problems:
+            print(f"         {len(pairs)} pairs applied (base {', '.join(f'{s} {v:g}' for s, v in base.items())}); `shields with {wrong_el}` rejected; caps "
+                  f"phasers {k['phaser_max']:g}, shields {k['shield_cap']:g}, engine {k3['impulse_max']:g}, warp {k3['warp_max']:g}, torpedoes uncapped")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c41(ctx: Ctx) -> list[str]:
+    """smoke/41 — barter with an AI captain in the cell across the respect_price_band threshold; goods and coins move (CMD-12, TR-06, EF-03, D-142)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        a = arena(ctx)
+        cell, _ = line_cell(a, 0)
+        el = sale_element(k)
+        value = k["elements"][el]["value"]
+        sp = [spawn_str(a, "kestrel", cell)]
+        probe_rep, probe_snap = probe_spawn(ctx, "barter_ai", a, sp)
+        victim = victim_facts(probe_rep, probe_snap)
+        problems, notes = [], []
+        low = max(k3["respect_start"], k["planet_attack_respect_max"])         # EF-05 never fires on the parked ship (D-148 (7))
+        for label, r in (("low", low), ("high", 90)):
+            f = E.barter_factor(E.disposition(r), k["respect_price_band"])
+            n_acc, n_rej = E.barter_bounds(value, 1.0, f)
+            if n_rej > victim["silver"]:
+                raise ScenarioError(f"the spawned captain holds {victim['silver']} silver but the threshold test needs {n_rej} ([captain] silver_start vs value({el}) {value:g}; gate logic)")
+            script = [f"trade {victim['captain']} give {el}:1 for silver:{n_rej}", f"trade {victim['captain']} give {el}:1 for silver:{n_acc}"]
+            what = (f"smoke/41 barter with {victim['captain']} at respect {r} (disposition {E.disposition(r)}, respect_price_band {k['respect_price_band']:g} → factor {f:.3f}): "
+                    f"{el}:1 for silver:{n_rej} refused, silver:{n_acc} accepted")
+            scn = scenario(what, "CMD-12, TR-06, EF-03, FR-07, D-142", turns=2, script=script, spawn=sp, teleport=a.teleport, give=f"{el}:1", respect=r)
+            rep, _, snap = run_scenario_full(ctx, f"barter_ai_{label}", scn, seed=a.world.seed)
+            problems += E.check_barter_ai(rep, snap, spawn={"captain": victim["captain"], "ship": victim["ship"], "silver": victim["silver"]}, give=(el, 1), n_accept=n_acc,
+                                          n_reject=n_rej, accept_turn=2, reject_turn=1, factor=f, trade_delta=k["trade_delta"], respect_before=r,
+                                          player_silver_before=k3["silver_start"], what=what)
+            notes.append(f"respect {r}: silver ≤ {n_acc} accepted, {n_rej} refused")
+        if not problems:
+            print(f"         {victim['captain']} ({victim['ship']}, {victim['silver']} silver) in the arena cell; {'; '.join(notes)}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c42(ctx: Ctx) -> list[str]:
+    """smoke/42 — planets in combat: CFG-77 stats, return fire, immobility, destruction and loot, peace per CB-03 (CM-11, PR-02, CB-01, CB-03, D-145)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        d = dock(ctx)
+        cls = k3["classes"][k3["starting_class"]]
+        respect, coins = safe_respect(k), (k3["gold_start"], k3["silver_start"])
+        _, probe_snap, pid, prec = dock_probe(ctx, d, k, k3)
+        name = prec.get("name") or pid
+        problems = E.check_planet_record(probe_snap, planet_id=pid, stats=k["planet"], what=f"smoke/42 {name} ({pid}) before any fight")
+        volley, hits, p, ini = planet_volley(k, k3, cls)
+        what_a = f"smoke/42 `fire phaser {pid}` at {name} from its cell, 3 turns"
+        scn_a = scenario(what_a, "CM-11, CM-01, FR-06, PR-02, D-145", turns=3, script=[f"fire phaser {pid}"], teleport=d.teleport, respect=respect, coins=coins, ini=ini)
+        rep_a, _, snap_a = run_scenario_full(ctx, "planet_fight", scn_a, seed=d.world.seed)
+        problems += E.check_planet_fight(rep_a, snap_a, planet_id=pid, planet_cell=d.cell, distance=0, phasers=k["planet"]["phasers"], per_unit=k3["phaser_per_unit"],
+                                         torpedo_damage=k3["torpedo_damage"], start_fight_delta=k3["start_fight_delta"], respect_start=respect, until_turn=3, what=what_a)
+        probe2_scn = scenario("probe planet-fight class", "C10", turns=1, teleport=d.teleport, respect=respect, coins=coins, ini=ini)
+        _, _, probe2 = run_scenario_full(ctx, "probe_planet_class", probe2_scn, seed=d.world.seed)
+        if probe2 is None:
+            raise ScenarioError("planet-fight probe: no save snapshot after one turn (C6)")
+        pf = player_facts(probe2)
+        n = min(volley, int(pf["torpedoes"]))
+        what_b = f"smoke/42 destroy {name}: a quiet turn, then one volley of {n} torpedoes (p {p:.2f}, {hits} hits to 0 shields) and the phasers"
+        scn_b = scenario(what_b, "CM-11, CB-01, HZ-09, PR-02, D-140, D-145", turns=4, script=["", f"fire torpedo {pid} {n}; fire phaser {pid}"], teleport=d.teleport,
+                         respect=respect, coins=coins, ini=ini)
+        rep_b, _, snap_b = run_scenario_full(ctx, "planet_destroy", scn_b, seed=d.world.seed)
+        idx_stock = d.planet.get("stock") if isinstance(d.planet.get("stock"), dict) else {}
+        prec_stock = prec.get("stock") if isinstance(prec.get("stock"), dict) else {}
+        regen, cap = k["stock_regen"], k["stock_cap"]
+
+        def deltas(item: str) -> set[int]:
+            base = idx_stock.get(item) if isinstance(idx_stock.get(item), int) else (prec_stock[item] - regen if isinstance(prec_stock.get(item), int) else None)
+            return set() if base is None else {min(cap, base + regen * r) - u for r in (0, 1, 2) for u in (0, 1)}
+        els = prec_stock.get("elements") if isinstance(prec_stock.get("elements"), dict) else (idx_stock.get("elements") if isinstance(idx_stock.get("elements"), dict) else {})
+        stock = {"food": deltas("food"), "water": deltas("water"), "elements": els}
+        ptorp = prec.get("torpedoes") if isinstance(prec.get("torpedoes"), (int, float)) else k["planet"]["torpedoes"]
+        problems += E.check_planet_destroyed(rep_b, snap_b, planet_id=pid, key=d.key, planet_cell=d.cell, player_before=pf, stock=stock, planet_torpedoes=ptorp, what=what_b)
+        if isinstance(snap_b, dict) and isinstance(probe_snap, dict):
+            terr = next((t for t in E.sector_terrain(probe_snap, d.key) if str(t.get("kind")) == "planet" and C._norm(t.get("cell")) == C._norm(list(d.cell))), None)
+            with_planet = copy.deepcopy(snap_b)
+            with_planet.setdefault("sectors", {}).setdefault(d.key, {"terrain": [], "items": []}).setdefault("terrain", [])
+            if terr is not None:
+                with_planet["sectors"][d.key]["terrain"].append(copy.deepcopy(terr))
+            else:
+                with_planet["sectors"][d.key]["terrain"].append({"kind": "planet", "cell": list(d.cell), "name": prec.get("name") or "planet"})
+            with_planet.setdefault("planets", {})[pid] = copy.deepcopy(prec)
+            probe = render_probe_run(ctx, "planet_gone", {"grid": [snap_b, with_planet]}, view=snap_b.get("view") or {"level": "follow"})
+            problems += probe_errors(probe)
+            g = (probe.get("renders") or {}).get("grid") or []
+            if len(g) == 2 and g[0] == g[1]:
+                problems.append(f"{what_b}: T2 draws the same grid with and without the destroyed planet at {list(d.cell)} — a destroyed planet leaves the map (CM-11, SYM-08, C4)")
+        shields_p = max(100.0, cls["shield_max"] + 40.0)
+        ini_p = {("planets", "shield_max"): f"{shields_p:g}", ("planets", "torpedoes"): "0", ("planets", "phasers"): "1"}
+        pstr = CB.strength(shields_p, 0, 1, torpedo_damage=k3["torpedo_damage"], phaser_per_unit=k3["phaser_per_unit"])
+        kstr = CB.strength(cls["shield_max"], cls["torpedoes"], cls["phasers"], torpedo_damage=k3["torpedo_damage"], phaser_per_unit=k3["phaser_per_unit"])
+        if pstr >= kstr:
+            raise ScenarioError(f"a planet with shields {shields_p:g}, 1 phaser and no torpedoes (strength {pstr:.0f}) is not weaker than a {k3['starting_class']} ({kstr:.0f}) — "
+                                f"the peace scenario cannot be built with this ini (gate logic)")
+        what_d = f"smoke/42 peace: fire phaser at a weaker {name} (shields {shields_p:g}, 1 phaser, strength {pstr:.0f} vs {kstr:.0f}), `peace offer {pid}` at turn 2"
+        scn_d = scenario(what_d, "CB-03, CM-09, D-46, D-122, D-145", turns=4, script=[f"fire phaser {pid}", f"peace offer {pid}"], teleport=d.teleport, respect=respect,
+                         coins=coins, ini=ini_p)
+        rep_d, _, snap_d = run_scenario_full(ctx, "planet_peace", scn_d, seed=d.world.seed)
+        problems += E.check_planet_peace(rep_d, snap_d, planet_id=pid, loot_max=k3["peace_loot_max"], offer_turn=2, coins_before=coins, planet_shield_max=shields_p, what=what_d)
+        if not problems:
+            kill = next((t.get("turn_no") for t in rep_b.get("per_turn") or [] if any(e.get("event") == "destroyed" for e in E.planet_events_at(t))), None)
+            b = CB.battle_between(rep_d, (snap_d or {}).get("player_id") or "", pid) or {}
+            print(f"         {name} ({pid}) at {d.key} {list(d.cell)}: {k['planet']['shield_max']:g}/{k['planet']['torpedoes']:g}/{k['planet']['phasers']:g}; fired back every "
+                  f"turn at distance 0; destroyed at turn {kill} by {n} torpedoes + phasers, loot taken, gone from T2; peace: ended {b.get('ended')} at turn {b.get('_turn')}, "
+                  f"victor {b.get('victor')}, pct {(b.get('transfer') or {}).get('pct')}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c43(ctx: Ctx) -> list[str]:
+    """smoke/43 — EF-05: a planet opens on a low-respect weaker ship in range within 2 turns, not at high respect, never on a stronger ship (EF-05, CFG-31, D-145)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        d = dock(ctx, neighbour=True)
+        cls = k3["classes"][k3["starting_class"]]
+        _, _, pid, prec = dock_probe(ctx, d, k, k3)
+        name = prec.get("name") or pid
+        td, pu = k3["torpedo_damage"], k3["phaser_per_unit"]
+        pstr = CB.strength(k["planet"]["shield_max"], k["planet"]["torpedoes"], k["planet"]["phasers"], torpedo_damage=td, phaser_per_unit=pu)
+        kstr = CB.strength(cls["shield_max"], cls["torpedoes"], cls["phasers"], torpedo_damage=td, phaser_per_unit=pu)
+        ratio = pstr / kstr
+        if ratio < k3["attack_ratio_min"]:
+            raise ScenarioError(f"a planet (strength {pstr:.0f}) is not attack_ratio_min {k3['attack_ratio_min']:g} × a {k3['starting_class']} ({kstr:.0f}) with this ini — "
+                                f"the EF-05 scenario cannot be built (CFG-29, CFG-77)")
+        low, high = max(0, k["planet_attack_respect_max"] - 10), min(100, k["planet_attack_respect_max"] + 40)
+        tele = C.teleport_arg(d.planet["galaxy"], d.planet["sector"], d.neighbour)
+        coins = (k3["gold_start"], k3["silver_start"])
+        what_a = f"smoke/43 a {k3['starting_class']} at distance 1 from {name} with respect {low} < planet_attack_respect_max {k['planet_attack_respect_max']} (ratio {ratio:.2f})"
+        scn_a = scenario(what_a, "EF-05, CFG-31, D-145", turns=4, teleport=tele, respect=low, coins=coins, ai=None)
+        rep_a, _, snap_a = run_scenario_full(ctx, "planet_opens", scn_a, seed=d.world.seed)
+        problems = E.check_planet_opens(rep_a, snap_a, planet_id=pid, within=2, respect=low, respect_max=k["planet_attack_respect_max"], ratio=ratio,
+                                        ratio_min=k3["attack_ratio_min"], what=what_a)
+        what_b = f"smoke/43 the same at respect {high} ≥ planet_attack_respect_max {k['planet_attack_respect_max']}, 10 turns"
+        scn_b = scenario(what_b, "EF-05, CFG-31", turns=10, teleport=tele, respect=high, coins=coins, ai=None)
+        rep_b, _, snap_b = run_scenario_full(ctx, "planet_holds", scn_b, seed=d.world.seed)
+        problems += E.check_planet_holds(rep_b, snap_b, planet_id=pid, turns=10, why=f"respect {high} ≥ planet_attack_respect_max {k['planet_attack_respect_max']}", what=what_b)
+        need = pstr / k3["attack_ratio_min"]
+        shields = max(cls["shield_max"], math.ceil(need - cls["torpedoes"] * td - cls["phasers"] * pu * 3 + 1))
+        ini = {("ships", k3["starting_class"]): class_line(dict(cls, shield_max=shields))}
+        kstr2 = CB.strength(shields, cls["torpedoes"], cls["phasers"], torpedo_damage=td, phaser_per_unit=pu)
+        what_c = f"smoke/43 a stronger ship (shields {shields:g}, strength {kstr2:.0f} ≥ {pstr:.0f} / {k3['attack_ratio_min']:g}) at respect {low}, 10 turns"
+        scn_c = scenario(what_c, "EF-05, CFG-29, CFG-31", turns=10, teleport=tele, respect=low, coins=coins, ai=None, ini=ini)
+        rep_c, _, snap_c = run_scenario_full(ctx, "planet_holds_strong", scn_c, seed=d.world.seed)
+        problems += E.check_planet_holds(rep_c, snap_c, planet_id=pid, turns=10,
+                                         why=f"the ship's strength {kstr2:.0f} is not below planet strength {pstr:.0f} / attack_ratio_min {k3['attack_ratio_min']:g}", what=what_c)
+        if not problems:
+            b = CB.battle_between(rep_a, (snap_a or {}).get("player_id") or "", pid) or {}
+            print(f"         {name} ({pid}, strength {pstr:.0f}) vs {k3['starting_class']} {kstr:.0f} (ratio {ratio:.2f}) from {list(d.neighbour)}: opened at turn "
+                  f"{b.get('opened_turn')} at respect {low}; quiet for 10 turns at respect {high} and against shields {shields:g}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c44(ctx: Ctx) -> list[str]:
+    """smoke/44 — AI supplies: restocking, population bounds, mutinies; the CFG-81 knobs are live (D-60, D-144, SUP-03, CFG-81)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        rep = ai200(ctx)
+        problems = E.check_ai_supplies(rep, turns=AI_RUN_TURNS_M4, what=f"smoke/44 {AI_RUN_TURNS_M4}-turn AI-only run")
+        knobs_turns = k3["food_start"] + k3["mutiny_turns_at_zero"] + 10          # D-148 (10)
+        rep_off = ai_run(ctx, knobs_turns, name="ai_knobs_off", ini={("ai", "buy_supplies_below"): "0", ("ai", "docking_income_silver"): "0"})
+        problems += E.check_knobs_live(rep, rep_off, what=f"smoke/44 {knobs_turns}-turn run with buy_supplies_below = 0 and docking_income_silver = 0")
+        if not problems:
+            fin = rep.get("final") or {}
+            print(f"         captains {fin.get('captains_start')} → min {fin.get('population_min')} / max {fin.get('population_max')} / final {fin.get('captains')}; "
+                  f"ai_purchases {fin.get('ai_purchases')}, restock trips {E.ai_economy_sum(rep, 'restock_trips')}, ai_mutinies {fin.get('ai_mutinies')} "
+                  f"(knobs at 0: {(rep_off.get('final') or {}).get('ai_mutinies')} in {knobs_turns} turns; buy_supplies_below {k['buy_supplies_below']}, "
+                  f"docking_income_silver {k['docking_income_silver']})")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c45(ctx: Ctx) -> list[str]:
+    """smoke/45 — the AI economy loop: sales, purchases and item pickups over the shared 200-turn run (OV-10, D-144)."""
+    require_pkg(ctx)
+    try:
+        m4(ctx)
+        rep = ai200(ctx)
+        problems = E.check_ai_economy(rep, turns=AI_RUN_TURNS_M4, what=f"smoke/45 {AI_RUN_TURNS_M4}-turn AI-only run")
+        if not problems:
+            print(f"         sales {E.ai_economy_sum(rep, 'sales')}, purchases {E.ai_economy_sum(rep, 'purchases')}, docked turns {E.ai_economy_sum(rep, 'docked')}, "
+                  f"pickups {(rep.get('final') or {}).get('pickups')}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c46(ctx: Ctx) -> list[str]:
+    """smoke/46 — M3 fix-ups: `fire <id>` = torpedo + phasers, `help fire` live numbers, ai_class_mix, ai_trace, name pools (D-137, D-138, D-139, CFG-74, CFG-75, D-146)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        a = arena(ctx)
+        cls = k3["classes"][k3["starting_class"]]
+        problems: list[str] = []
+        cell, _ = line_cell(a, 1)
+        sp = [spawn_str(a, "kestrel", cell)]
+        probe_rep, _ = probe_spawn(ctx, "fire_all", a, sp)
+        sid, _ = spawned_ids(probe_rep)
+        what_a = f"smoke/46 `fire {sid}` at a Kestrel 1 cell away"
+        scn_a = scenario(what_a, "CMD-08, D-137, D-146", turns=1, script=[f"fire {sid}"], spawn=sp, teleport=a.teleport)
+        rep_a, _, snap_a = run_scenario_full(ctx, "fire_all", scn_a, seed=a.world.seed)
+        problems += E.check_fire_all(rep_a, snap_a, what=what_a)
+        td, pu = k3["torpedo_damage"] + 16, k3["phaser_per_unit"] + 2
+        ini_h = write_ini(ctx, "help_fire.ini", {("battle", "torpedo_damage"): f"{td:g}", ("battle", "phaser_damage_per_unit"): f"{pu:g}"})
+        probe = render_probe_run(ctx, "help_fire", {}, help=["fire"], config=ini_h)
+        text = (probe.get("help") or {}).get("fire")
+        hit_pct = int(round(CB.torpedo_hit_p(k3["torpedo_hit_base"], k3["torpedo_evade"], cls["engine"]) * 100))
+        dmgs = [CB.phaser_damage(cls["phasers"], pu, dd) for dd in range(0, k3["phaser_range"] + 1)]
+        what_b = f"smoke/46 `help fire` with torpedo_damage {td:g} and phaser_damage_per_unit {pu:g} in a temp ini"
+        problems += probe_errors(probe) + E.check_help_fire(text, torpedo_damage=td, hit_pct=hit_pct, phaser_damages=dmgs, what=what_b)
+        cls_name = k3["starting_class"]
+        what_c = f"smoke/46 [world] ai_class_mix = {cls_name}:100 → every generated AI ship a {cls_name}"
+        scn_c = scenario(what_c, "CFG-75, D-131, D-146", turns=1, ini={("world", "ai_class_mix"): f"{cls_name}:100"})
+        _, _, snap_c = run_scenario_full(ctx, "class_mix", scn_c, seed=a.world.seed)
+        problems += E.check_class_mix(snap_c, cls=cls_name, what=what_c)
+        logs: dict[str, str | None] = {}
+        for mode in ("battle", "all"):
+            scn_t = scenario(f"smoke/46 [logging] ai_trace = {mode}", "CFG-74, D-139, OB-05", turns=2, ini={("logging", "ai_trace"): mode}, ai=None)
+            run_scenario_full(ctx, f"trace_{mode}", scn_t, seed=a.world.seed)
+            log_dir = ctx.art / f"saves_trace_{mode}" / "logs"
+            files = sorted(log_dir.glob("game-*.log")) if log_dir.exists() else []
+            logs[mode] = files[0].read_text(encoding="utf-8", errors="replace") if files else None
+        problems += E.check_ai_trace(logs["battle"], logs["all"], what="smoke/46 [logging] ai_trace battle vs all")
+        w = probe_world(ctx, 1234)
+        problems += E.check_first_names(w.snapshot, minimum=30, what="smoke/46 the seed-1234 captains")
+        if not problems:
+            names = {str(c.get("name", "")).split()[0] for cid, c in (w.snapshot.get("captains") or {}).items() if cid != w.snapshot.get("player_id") and c.get("name")}
+            print(f"         `fire {sid}` → torpedo + phaser rows; help fire shows {td:g}, {hit_pct} %, {'/'.join(f'{x:g}' for x in dmgs)}; ai_class_mix {cls_name}:100 honoured; "
+                  f"ai_trace battle → 0 random-walk lines, all → {(logs['all'] or '').lower().count('random walk')}; {len(names)} distinct first names")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c47(ctx: Ctx) -> list[str]:
+    """smoke/47 — economy UI: T4 cargo and planet panel, T2 item glyph only after a scan, T3 OUT-07/08/10, battle panel numbers (PNL-04, SYM-09, OUT-07, OUT-08, OUT-10, UX-09)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        w, _ = find_world(ctx, "a world", lambda w: True)
+        kk = {"planet_shield_max": k["planet"]["shield_max"], "planet_torpedoes": k["planet"]["torpedoes"], "planet_phasers": k["planet"]["phasers"], "food_buy": k["food_buy"],
+              "planet_price_band": k["planet_price_band"], "elements": {n: e["value"] for n, e in k["elements"].items()}, "peace_shield_pct": k3["peace_shield_pct"],
+              "peace_pct_at_fear100": k3["peace_pct_at_fear100"]}
+        for el in ("iridium", "orichalcum"):
+            if el not in kk["elements"]:
+                raise ScenarioError(f"[elements] has no {el!r} — the render fixtures name the catalogue's default elements (CFG-42; gate logic)")
+        variants = E.economy_render_snapshots(w.snapshot, kk)
+        payload = {"turn_no": variants["plain"]["turn_no"], "snapshot": variants["plain"], "events": E.ECONOMY_EVENTS}
+        probe = render_probe_run(ctx, "economy", {"status": [variants["cargo"], variants["plain"], variants["planet_trades"], variants["planet_refuses"], variants["battle"]],
+                                                  "grid": [variants["item_hidden"], variants["item_revealed"], variants["plain"]], "output": [payload]},
+                                 view=w.snapshot.get("view") or {"level": "follow"})
+        problems = probe_errors(probe) + E.check_economy_render(probe, variants, kk)
+        if problems and (probe.get("renders") or {}).get("status"):
+            head = "\n".join(probe["renders"]["status"][2].splitlines()[:30])
+            problems.append("status render (planet variant) head:\n" + textwrap.indent(head, " " * 10))
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c48(ctx: Ctx) -> list[str]:
+    """smoke/48 — save / load after an upgrade, a refused planet, a destroyed planet and (from smoke/37) a pickup: hash round trip, the planet stays gone (C6, OV-12)."""
+    require_pkg(ctx)
+    try:
+        k, k3 = m4(ctx), m3(ctx)
+        d = dock(ctx)
+        cls = k3["classes"][k3["starting_class"]]
+        _, _, pid, prec = dock_probe(ctx, d, k, k3)
+        low = max(0, k["planet_refuse_respect"] - 8)
+        comp = "engine" if k["upgrades"].get("engine") else next((c for c in E.STAT_OF if k["upgrades"].get(c)), None)
+        if comp is None:
+            raise ScenarioError("[upgrades] maps no element to any component (CFG-33…37)")
+        el, amt = sorted(k["upgrades"][comp].items())[0]
+        volley, hits, p, ini = planet_volley(k, k3, cls)
+        probe_scn = scenario("probe save class", "C10", turns=1, teleport=d.teleport, respect=low, ini=ini, give=f"{el}:1")
+        _, _, probe2 = run_scenario_full(ctx, "probe_save_class", probe_scn, seed=d.world.seed)
+        if probe2 is None:
+            raise ScenarioError("save probe: no save snapshot after one turn (C6)")
+        pf = player_facts(probe2)
+        n = min(volley, int(pf["torpedoes"]))
+        caps = {"torpedoes": None, "phasers": k["phaser_max"], "shields": k["shield_cap"], "engine": k3["impulse_max"], "warp": k3["warp_max"]}
+        want = float(pf[E.STAT_OF[comp]]) + amt if caps[comp] is None else min(float(caps[comp]), float(pf[E.STAT_OF[comp]]) + amt)
+        what = f"smoke/48 `upgrade {comp} with {el}` + a refused buy (respect {low}), destroy {prec.get('name')} ({pid}) with {n} torpedoes, then the save"
+        scn = scenario(what, "C6, OV-12, CM-11, EF-04, UP-01…05", turns=3, script=[f"upgrade {comp} with {el}; buy food 1", f"fire torpedo {pid} {n}; fire phaser {pid}"],
+                       teleport=d.teleport, respect=low, ini=ini, give=f"{el}:1")
+        rep, save_present, snap = run_scenario_full(ctx, "save_economy", scn, seed=d.world.seed)
+        problems: list[str] = []
+        save = ctx.art / "saves_save_economy" / "game.json"
+        final_hash = (rep.get("per_turn") or [{}])[-1].get("snapshot_hash")
+        if not save_present or not isinstance(final_hash, str):
+            problems.append(f"{what}: no save after the run ({save}) or no final snapshot_hash in the report (C6, C2)")
+        else:
+            doc, err = C.load_json(save)
+            problems += (C.check_save_document(doc, final_hash) if doc is not None else [f"{err} (C6)"]) + save_roundtrip_problems(ctx, save, final_hash)
+        if not any(e.get("planet") == pid and str(e.get("event")) == "destroyed" for t in rep.get("per_turn") or [] for e in E.planet_events_at(t)):
+            problems.append(f"{what}: {pid} was not destroyed within 3 turns (no planet_events 'destroyed' row), so the save cannot show a destroyed planet (CM-11, C11)")
+        problems += E.check_save_economy(snap, destroyed_planet=pid, refused_respect=low, upgraded={E.STAT_OF[comp]: want}, what=what)
+        got = ctx.shared.get("save_pickup")
+        if isinstance(got, tuple) and got[0].exists() and isinstance(got[1], str):
+            doc, err = C.load_json(got[0])
+            problems += (C.check_save_document(doc, got[1]) if doc is not None else [f"{err} (C6)"]) + save_roundtrip_problems(ctx, got[0], got[1])
+            pickup_note = "smoke/37's pickup save round-trips too"
+        else:
+            pickup_note = "smoke/37 left no pickup save to round-trip (its own verdict says why)"
+        if not problems:
+            print(f"         save after upgrade ({comp} → {want:g}), refusal at respect {low} and the destruction of {pid} round-trips (hash {final_hash[:8]}…); {pickup_note}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
 H = ("smoke/00",)                 # every row needs the harness check (ini values, milestone)
 MAIN = ("smoke/00", "smoke/02")   # rows that read the main run's report / save
 
@@ -2041,6 +2777,19 @@ CHECKS = [
     C.Check("smoke/34", "AI roaming: roams ≥ 1, 0 disables, never into a hole sector", "CFG-73, D-125, C10", c34, since="M3", needs=H),
     C.Check("smoke/35", "combat UI: T2 battle colour and target, T4 PNL-05/06, T3 OUT-04…09", "SYM-12, GRD-08, PNL-05, PNL-06, OUT-04…09, C4", c35, since="M3", needs=H),
     C.Check("smoke/36", "M2 fix-ups: wormhole exit distance, mutiny placement, planet bands", "D-114, D-115, D-116, CFG-61, CFG-62", c36, since="M3", needs=H),
+    # M4 (specs/M4.md § 4, C11) — rows share the world probe, the planet probe and the 200-turn AI run; none needs the bus
+    C.Check("smoke/37", "items: hidden until scan, pickup, FR-08 once for a special stack, no respawn", "SP-03, IT-04, IT-05, CMD-14, CMD-15, FR-08, D-141, C11", c37, since="M4", needs=H),
+    C.Check("smoke/38", "buy / sell at a planet: factored prices, stock, OUT-07, D-49, refusals, buy ship", "CMD-20, PRC-01…05, TR-04, PR-04, D-142, C11", c38, since="M4", needs=H),
+    C.Check("smoke/39", "disposition: EF-04 refusal, factor at respect 100, barter thresholds, FR-07", "PL-06, PR-05, TR-06, EF-04, FR-07, D-142, C11", c39, since="M4", needs=H),
+    C.Check("smoke/40", "upgrades: every [upgrades] pair, a wrong pairing rejected, the caps", "CMD-13, UP-01…05, CFG-33…37, CFG-76, CFG-82, D-143, C11", c40, since="M4", needs=H),
+    C.Check("smoke/41", "barter with an AI captain across the respect_price_band threshold", "CMD-12, TR-06, EF-03, D-142, C11", c41, since="M4", needs=H),
+    C.Check("smoke/42", "planet combat: CFG-77 stats, return fire, destroyed and looted, peace per CB-03", "CM-11, PR-02, CB-01, CB-03, D-145, C11", c42, since="M4", needs=H),
+    C.Check("smoke/43", "EF-05: a planet opens on a low-respect weaker ship, not otherwise", "EF-05, CFG-31, D-145, C11", c43, since="M4", needs=H),
+    C.Check("smoke/44", "AI supplies: restocking, population bounds, mutinies, CFG-81 knobs live", "D-60, D-144, SUP-03, CFG-81, C11", c44, since="M4", needs=H),
+    C.Check("smoke/45", "AI economy loop: sales, purchases, item pickups", "OV-10, D-144, C11", c45, since="M4", needs=H),
+    C.Check("smoke/46", "M3 fix-ups: fire = torpedo + phasers, help fire numbers, ai_class_mix, ai_trace, name pools", "D-137, D-138, D-139, CFG-74, CFG-75, D-146", c46, since="M4", needs=H),
+    C.Check("smoke/47", "economy UI: T4 cargo and planet panel, T2 item glyph after scan, T3 OUT-07/08/10, battle numbers", "PNL-04, SYM-09, OUT-07, OUT-08, OUT-10, UX-09, C4", c47, since="M4", needs=H),
+    C.Check("smoke/48", "save / load: upgrade, refused and destroyed planet, pickup round-trip", "C6, OV-12", c48, since="M4", needs=("smoke/00", "smoke/37")),
 ]
 
 
@@ -2048,7 +2797,7 @@ def run_gate(ctx: Ctx, select: set[str] | None = None, workers: int | None = Non
     ctx.art.mkdir(parents=True, exist_ok=True)
     label = f"smoke gate ({'quick' if ctx.quick else 'full'}) — root {ctx.root}"
     if ctx.quick:
-        print("quick mode: smoke/05–09, 11–36 are not run (full gate: smoke_test.py . without --quick)")
+        print("quick mode: smoke/05–09, 11–48 are not run (full gate: smoke_test.py . without --quick)")
     if select is None:
         select = QUICK_CODES if ctx.quick else None
     return C.run_checks(CHECKS, ctx, milestone=lambda: ctx.milestone, select=select,
@@ -2092,6 +2841,17 @@ def render_probe(in_path: Path, out_path: Path) -> int:
                 break
     except Exception:  # noqa: BLE001
         out["import_errors"]["starbour.config"] = traceback.format_exc()
+    if cfg is not None and spec.get("help"):
+        # UX-09 / D-138 (smoke/46): the T1 help text through the existing pure helper render_command.help_text(topic, cfg) (D-148 (9))
+        out["help"] = {}
+        try:
+            rc = importlib.import_module("starbour.terminals.render_command")
+            for topic in spec["help"]:
+                parts = rc.help_text(topic, cfg)
+                parts = parts if isinstance(parts, (list, tuple)) else [parts]
+                out["help"][topic] = "\n".join(str(getattr(p, "plain", p)) for p in parts)
+        except Exception:  # noqa: BLE001
+            out["errors"]["help"] = traceback.format_exc()
     if cfg is not None:
         from rich.console import Console
         for role, inputs in spec["inputs"].items():
@@ -2248,6 +3008,73 @@ def m3_case_problems(case: dict) -> list[str]:
     """Run the checker call a sim_m3_scenarios.json entry records: {check, args: [keys], kwargs}."""
     fn = getattr(CB, "check_" + case["check"])
     return fn(*[case[k] for k in case["args"]], **case["kwargs"])
+
+
+def m4_case_problems(case: dict) -> list[str]:
+    """Run the checker call a sim_m4_scenarios.json entry records against verify/_economy.py: {check, args: [keys], kwargs}."""
+    fn = getattr(E, "check_" + case["check"])
+    return fn(*[case[k] for k in case["args"]], **case["kwargs"])
+
+
+def _fake_economy_probe(variants: dict, k: dict, *, no_cargo: bool = False, no_planet: bool = False, no_glyph: bool = False, glyph_always: bool = False,
+                        no_lines: bool = False, no_pct: bool = False) -> dict:
+    """A correct (or deliberately broken) smoke/47 probe built from economy_render_snapshots()."""
+    sid, pid = variants["ship_id"], variants["player_id"]
+
+    def status(s: dict) -> str:
+        cap = s["captains"][pid]
+        lines = [f"Turn {s['turn_no']}", f"food {cap['food']}  water {cap['water']}  fear {cap['fear']}  respect {cap['respect']}"]
+        items = cap.get("items") or {}
+        if items and not no_cargo:
+            lines.append("Cargo: " + ", ".join(f"{el} ×{u} ({int(k['elements'][el] * u)} silver)" for el, u in items.items()))
+        ship = s["ships"][sid]
+        pos = ship["position"]
+        key = f"{pos[0][0]},{pos[0][1]}/{pos[1][0]},{pos[1][1]}"
+        for p in (s.get("planets") or {}).values():
+            if p["sector"] == key and list(p["cell"]) == list(pos[2]) and not no_planet:
+                verdict = "trades" if p["trades_with_player"] else "refuses to trade"
+                factor = 1 - k["planet_price_band"] / 100 * cap["respect"] / 100
+                lines.append(f"Planet {p['name']} · president {p['president']} · disposition {p['disposition_to_player']} · {verdict}")
+                lines.append(f"  food {k['food_buy'] * factor:.1f} · water {k['food_buy'] * factor:.1f} · torpedo {10 * factor:.1f} silver")
+        for b in s.get("battles") or []:
+            if b.get("ended") is None:
+                enemy_cid = next(c for c in b["sides"] if c != pid)
+                e = s["ships"][s["captains"][enemy_cid]["active_ship"]]
+                pct = int(round(e["shield_current"] / e["shield_max"] * 100))
+                line = f"Battle: {e['name']} distance 1 shields {e['shield_current']:g}/{e['shield_max']:g}" + ("" if no_pct else f" ({pct} %)")
+                if s["captains"][enemy_cid].get("visible_reputation") and not no_pct:
+                    thr = E.peace_threshold(k["peace_shield_pct"], k["peace_pct_at_fear100"], cap["fear"])
+                    line += f" · sues for peace below {thr:g} %"
+                lines.append(line)
+        return "\n".join(lines)
+
+    def grid(s: dict) -> str:
+        w, h = s["sizes"]["sector"]
+        pos = s["ships"][sid]["position"]
+        key = f"{pos[0][0]},{pos[0][1]}/{pos[1][0]},{pos[1][1]}"
+        items = {tuple(i["cell"]): i for i in s["sectors"][key]["items"]}
+        rows = [f"sector · turn {s['turn_no']}"]
+        for y in range(h):
+            cells = []
+            for x in range(w):
+                it = items.get((x, y))
+                if [x, y] == list(pos[2]):
+                    cells.append("▲ ")
+                elif it is not None and (it.get("revealed") or glyph_always) and not no_glyph:
+                    cells.append("? ")
+                else:
+                    cells.append("· ")
+            rows.append(f"{y:>2} " + "".join(cells))
+        return "\n".join(rows)
+
+    def output() -> str:
+        if no_lines:
+            return "\n".join(f"[{e['phase']}] {e['type']}" for e in E.ECONOMY_EVENTS)
+        return "\n".join(f"[{e['phase']}] {e['text']}" for e in E.ECONOMY_EVENTS)
+    v = variants
+    return {"renders": {"status": [status(v["cargo"]), status(v["plain"]), status(v["planet_trades"]), status(v["planet_refuses"]), status(v["battle"])],
+                        "grid": [grid(v["item_hidden"]), grid(v["item_revealed"]), grid(v["plain"])], "output": [output()]},
+            "errors": {}, "import_errors": {}, "config_loader": "starbour.config.load_config", "zmq_imported": False}
 
 
 def _fake_combat_probe(variants: dict, *, no_colour: bool = False, no_marker: bool = False, no_panel: bool = False, no_fleet: bool = False,
@@ -2787,6 +3614,81 @@ def selftest(root: Path) -> int:
     t("gating: smoke/23–36 run (and here FAIL) at MILESTONE M3", all(s == C.FAIL for s in fails.values()), fails)
     gate_level_proof(t, root, "M3", M3_CODES, "smoke/23–36", "smoke/24")
     gate_level_tree(t, root, "M3", M3_CODES | {"smoke/12"}, "smoke/12, 23–36", "smoke/24")
+
+    # ---------------------------------------------------------------- M4 (specs/M4.md § 4, C11)
+    print("-- M4 --")
+    from make_fixtures_m4 import FIXTURE_M4, RENDER_K  # noqa: E402
+    # 24. every good M4 fixture passes the exact checker call the gate makes; every broken one fails its row naming the IDs
+    scen4 = load("sim_m4_scenarios")
+    bad4 = {name: m4_case_problems(c) for name, c in scen4.items()}
+    bad4 = {k: v for k, v in bad4.items() if v}
+    t(f"M4 scenarios: all {len(scen4)} good fixtures pass their checkers ({', '.join(sorted(scen4))})", not bad4, bad4)
+    broken4 = {"sim_item_auto_pickup": ("smoke/37", "IT-04", "scan"), "sim_price_ignored": ("smoke/38", "PRC-01", "factor"),
+               "sim_trade_wrong_threshold": ("smoke/39", "TR-06", "accepted"), "sim_upgrade_uncapped": ("smoke/40", "D-143", "capped"),
+               "sim_barter_ai_wrong": ("smoke/41", "TR-06", "accepted"), "sim_planet_immortal": ("smoke/42", "CM-11", "destroyed"),
+               "sim_planet_too_wild": ("smoke/43", "EF-05", "respect"), "sim_ai_starves": ("smoke/44", "SUP-03", "mutinies"),
+               "sim_ai_no_trade": ("smoke/45", "D-144", "sales"), "sim_fire_all_one_row": ("smoke/46", "D-137", "torpedo"),
+               "sim_save_planet_resurrects": ("smoke/48", "CM-11", "destroyed")}
+    for name, (code, id_, word) in broken4.items():
+        r = m4_case_problems(load(name))
+        t(f"{name} fails {code} citing {id_} and naming '{word}'", bool(r) and any(id_ in m for m in r) and any(word.lower() in m.lower() for m in r), r[:3])
+        if r:
+            print(f"      message: {r[0][:170]}")
+    # smoke/12 (extended at M4): the C11 final counts and the population bound
+    lr4 = load("sim_m4_long_run")
+    r = E.check_long_run_economy(lr4["report"], turns=40, what="smoke/12")
+    t("smoke/12 (M4): a 40-turn run with final.trades, planets_destroyed and a bounded population passes", not r, r)
+    hot = json.loads(json.dumps(lr4["report"]))
+    hot["final"]["population_max"] = int(hot["final"]["captains_start"] * 1.3) + 1
+    t("smoke/12 (M4): population_max above 1.3 × captains_start fails citing D-144", any("D-144" in m for m in E.check_long_run_economy(hot, turns=40, what="smoke/12")))
+    no_trade = json.loads(json.dumps(lr4["report"]))
+    no_trade["final"]["trades"] = 0
+    t("smoke/12 (M4): final.trades = 0 fails citing OV-10", any("OV-10" in m for m in E.check_long_run_economy(no_trade, turns=40, what="smoke/12")))
+    t("smoke/12 (M4): the M3 fixture (no C11 counts) fails naming final.trades", any("final.trades" in m for m in E.check_long_run_economy(lr_good["report"], turns=40, what="smoke/12")))
+    # 25. formulas the M4 rows rely on (M4 § 5)
+    t("formulas: disposition 10/50/100 → −80/0/100; buy factor 0.90 at 50 and 0.80 at 100; sell 1.10 / 1.20; food 10 at 50 = 18; iridium sold at 50 = 19; barter 1.16 at 10, 0.84 at 90",
+      [E.disposition(r) for r in (10, 50, 100)] == [-80, 0, 100] and round(E.price_factor(50, 20, selling=False), 2) == 0.90 and round(E.price_factor(100, 20, selling=False), 2) == 0.80
+      and round(E.price_factor(50, 20, selling=True), 2) == 1.10 and round(E.price_factor(100, 20, selling=True), 2) == 1.20 and 18 in E.price_options(2, 10, 0.9)
+      and E.element_sell_options(30, 60, 1.1) == {19} and round(E.barter_factor(-80, 20), 2) == 1.16 and round(E.barter_factor(80, 20), 2) == 0.84)
+    t("formulas: planet barter bounds (iridium 30 for food at 2) are 13/14 at respect 20 and 17/19 at 90; AI silver bounds 27/29 at respect 10 and 32/34 at 90",
+      E.barter_bounds(30, 2, E.barter_factor(E.disposition(20), 20)) == (13, 14) and E.barter_bounds(30, 2, E.barter_factor(E.disposition(90), 20)) == (17, 19)
+      and E.barter_bounds(30, 1, E.barter_factor(E.disposition(10), 10)) == (27, 29) and E.barter_bounds(30, 1, E.barter_factor(E.disposition(90), 10)) == (32, 34))
+    t("formulas: planet strength 290 vs Kestrel 195 at torpedo_damage 15 (ratio 1.49 ≥ 1.3; M4 § 5)",
+      CB.strength(80, 10, 4, torpedo_damage=15, phaser_per_unit=5) == 290.0 and CB.strength(60, 6, 3, torpedo_damage=15, phaser_per_unit=5) == 195.0)
+    t("items_of reads a C11 dict and an M3 list alike", E.items_of({"items": {"iridium": 2}}) == {"iridium": 2} and E.items_of({"items": ["iridium", "iridium"]}) == {"iridium": 2}
+      and E.items_of({"items": [{"element": "osmium", "units": 3}]}) == {"osmium": 3})
+    # 26. economy render (smoke/47): a faithful probe passes; each omission fails naming the ID
+    variants4 = E.economy_render_snapshots(snap, RENDER_K)
+    r = E.check_economy_render(_fake_economy_probe(variants4, RENDER_K), variants4, RENDER_K)
+    t("economy render: a faithful T4/T2/T3 passes smoke/47", not r, r)
+    for kw, word in (("no_cargo", "PNL-04"), ("no_planet", "PL-05"), ("no_glyph", "SYM-09"), ("glyph_always", "SYM-09"), ("no_lines", "OUT-07"), ("no_pct", "UX-09")):
+        r = E.check_economy_render(_fake_economy_probe(variants4, RENDER_K, **{kw: True}), variants4, RENDER_K)
+        t(f"economy render: {kw} fails naming {word}", any(word in m for m in r), r)
+    # 27. stub engine market modes (the live/10 driver's selftest lives in live_test.py; here: the modes answer `buy`)
+    for mode, expect in (("market", None), ("market_leaky", "trade")):
+        eng = StubEngine(mode)
+        eng.start()
+        eng.ready.wait(5)
+        try:
+            cell = eng.snapshot["planets"]["p-900"]["cell"]
+            obs = E.drive_market(eng.pub_port, eng.pull_port, planet_cell=cell, n=5, hello_timeout=10.0, reply_timeout=2.0, turn_timeout=2.0)
+        finally:
+            eng.stop()
+        problems = E.check_market_bus(obs, n=5, cost_options=E.price_options(2, 5, 0.9), spg=20)
+        if expect is None:
+            t(f"bus: stub engine 'market' passes the buy driver (food {C._get(obs, 'before', 'food')} → {C._get(obs, 'after', 'food')}, silver {C._get(obs, 'before', 'silver')} → "
+              f"{C._get(obs, 'after', 'silver')}, trade texts {C._get(obs, 'resolved', 'trade_texts')})", not problems, problems)
+        else:
+            t(f"bus: stub engine 'market_leaky' fails naming {expect}", any(expect in m for m in problems), problems)
+    # 28. milestone gating: the M4 rows SKIP at M3 and run (here: fail) at M4; against `git archive m3-game` (the M3 game) they all FAIL
+    # at M4; against the tree they reach a verdict (PASS or FAIL, no SKIP/BLOCKED, no crash, exit matches)
+    rows = sorted(M4_CODES)
+    skips = {code: gate_status(code, "M3") for code in rows}
+    fails = {code: gate_status(code, "M4") for code in rows}
+    t(f"gating: smoke/37–48 SKIP at MILESTONE M3 ({len(rows)} rows)", all(s == C.SKIP for s in skips.values()), skips)
+    t("gating: smoke/37–48 run (and here FAIL) at MILESTONE M4", all(s == C.FAIL for s in fails.values()), fails)
+    gate_level_proof(t, root, "M4", M4_CODES, "smoke/37–48", "smoke/38")
+    gate_level_tree(t, root, "M4", M4_CODES | {"smoke/12"}, "smoke/12, 37–48", "smoke/38")
 
     bad = [n for ok, n in results if not ok]
     print(f"== smoke selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")
