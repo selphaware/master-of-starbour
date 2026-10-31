@@ -58,6 +58,7 @@ class GameConfig:
     galaxy_fill_pct: int
     sector_fill_pct: int
     multi_star_pct: int
+    void_item_pct: int                      # CFG-84
     planets_per_system_max: int
     planet_distance_min: int
     planet_distance_max: int
@@ -73,6 +74,7 @@ class GameConfig:
     # [ui]
     log_lines: int
     glyph_set: str
+    ceremony_seconds: int                   # CFG-89
     # [logging]
     ai_trace: str
     # [movement]
@@ -120,6 +122,7 @@ class GameConfig:
     yield_fear_min: int
     peace_shield_pct_at_fear100: int
     surrender_shield_pct: int
+    roam_void_pct: int                      # CFG-85
     roam_every_turns: int
     buy_supplies_below: int
     docking_income_silver: int
@@ -156,8 +159,11 @@ class GameConfig:
     respect_min: int
     fear_min: int
     wealth_min_silver: int
-    required_special_categories: int
+    required_special_distinct: int          # CFG-51 (was required_special_categories, D-157)
     guard_ships: int
+    ultimate_item_name: str                 # CFG-86
+    placement_distance_pct: int             # CFG-87
+    master_torpedoes: int                   # CFG-88
     # [planets] - CFG-77...79
     planet_shield_max: float
     planet_torpedoes: int
@@ -449,6 +455,7 @@ def load_config(path: Path | str) -> GameConfig:
         galaxy_fill_pct=r.pct("world", "galaxy_fill_pct"),
         sector_fill_pct=r.pct("world", "sector_fill_pct"),
         multi_star_pct=r.pct("world", "multi_star_pct"),
+        void_item_pct=r.pct("world", "void_item_pct"),
         planets_per_system_max=r.at_least("world", "planets_per_system_max", 0),
         planet_distance_min=planet_min,
         planet_distance_max=planet_max,
@@ -462,6 +469,7 @@ def load_config(path: Path | str) -> GameConfig:
         pull_port=r.integer("bus", "pull_port"),
         log_lines=r.integer("ui", "log_lines"),
         glyph_set=glyph_set,
+        ceremony_seconds=r.at_least("ui", "ceremony_seconds", 0),
         ai_trace=ai_trace,
         impulse_max=r.number("movement", "impulse_max"),
         warp_max=r.number("movement", "warp_max"),
@@ -503,6 +511,7 @@ def load_config(path: Path | str) -> GameConfig:
         yield_fear_min=r.integer("ai", "yield_fear_min"),
         peace_shield_pct_at_fear100=r.pct("ai", "peace_shield_pct_at_fear100"),
         surrender_shield_pct=r.pct("ai", "surrender_shield_pct"),
+        roam_void_pct=r.pct("ai", "roam_void_pct"),
         roam_every_turns=r.at_least("ai", "roam_every_turns", 0),
         buy_supplies_below=r.at_least("ai", "buy_supplies_below", 0),
         docking_income_silver=r.at_least("ai", "docking_income_silver", 0),
@@ -533,8 +542,11 @@ def load_config(path: Path | str) -> GameConfig:
         respect_min=r.integer("endgame", "respect_min"),
         fear_min=r.integer("endgame", "fear_min"),
         wealth_min_silver=r.integer("endgame", "wealth_min_silver"),
-        required_special_categories=r.integer("endgame", "required_special_categories"),
+        required_special_distinct=r.at_least("endgame", "required_special_distinct", 1),
         guard_ships=r.integer("endgame", "guard_ships"),
+        ultimate_item_name=r.text("endgame", "ultimate_item_name"),
+        placement_distance_pct=r.pct("endgame", "placement_distance_pct"),
+        master_torpedoes=r.at_least("endgame", "master_torpedoes", 1),
         planet_shield_max=r.number("planets", "shield_max"),
         planet_torpedoes=r.at_least("planets", "torpedoes", 0),
         planet_phasers=r.number("planets", "phasers"),
