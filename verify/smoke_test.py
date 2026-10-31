@@ -339,11 +339,44 @@ def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai
     return C.run_cmd(args, ctx.root, timeout)
 
 
-def run_sim_measured(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool | str, timeout: float,
-                     config: Path | None = None) -> tuple[C.CmdResult, float | None]:
-    """run_sim plus the child's peak resident set in MB, sampled every 0.5 s with psutil (peak_wset on Windows, the largest rss seen elsewhere) — the
-    --long tier's memory bound (M5 § 4 (c))."""
+def sample_tree_peaks(proc: subprocess.Popen, timeout: float, interval: float = 0.5) -> tuple[bool, dict[int, tuple[str, float]]]:
+    """Wait for `proc`, sampling its whole process tree every `interval` s with psutil — the root and its children, recursive.  Under the MOS venv
+    the root is the redirector stub (Scripts\\python.exe, ~4 MB) and the interpreter that runs the game is its child, so sampling the root alone
+    measured the stub (M5 § 4 (c), D-162 (7)).  Returns (timed out, {pid: (name, peak bytes)}): each process's peak working set (peak_wset on Windows, the largest
+    rss seen elsewhere).  On timeout the tree is killed."""
     import psutil
+    peaks: dict[int, tuple[str, float]] = {}
+    try:
+        root = psutil.Process(proc.pid)
+    except psutil.NoSuchProcess:
+        root = None
+    t0 = time.perf_counter()
+    while proc.poll() is None:
+        if root is not None:
+            try:
+                tree = [root] + root.children(recursive=True)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                tree = []
+            for p in tree:
+                try:
+                    mi = p.memory_info()
+                    cur = float(getattr(mi, "peak_wset", 0) or 0) or float(mi.rss)
+                    name = p.name()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+                if cur > peaks.get(p.pid, ("", -1.0))[1]:
+                    peaks[p.pid] = (name, cur)
+        if time.perf_counter() - t0 > timeout:
+            C.kill_tree(proc.pid)
+            return True, peaks
+        time.sleep(interval)
+    return False, peaks
+
+
+def run_sim_measured(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool | str, timeout: float,
+                     config: Path | None = None) -> tuple[C.CmdResult, float | None, list[tuple[str, int, float]]]:
+    """run_sim plus the peak resident set in MB across the sim's process tree (sample_tree_peaks every 0.5 s; the largest process's peak) — the
+    --long tier's memory bound (M5 § 4 (c), D-162 (7)) — and every sampled process as (name, pid, peak MB), largest first."""
     if save_dir.exists():
         shutil.rmtree(save_dir, ignore_errors=True)
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -353,30 +386,13 @@ def run_sim_measured(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir:
     env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
     out_path, err_path = ctx.art / "long_stdout.txt", ctx.art / "long_stderr.txt"
     t0 = time.perf_counter()
-    peak: float | None = None
-    timed_out = False
     with open(out_path, "w", encoding="utf-8") as fo, open(err_path, "w", encoding="utf-8") as fe:
         proc = subprocess.Popen(args, cwd=str(ctx.root), env=env, stdout=fo, stderr=fe, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        try:
-            ps = psutil.Process(proc.pid)
-        except psutil.NoSuchProcess:
-            ps = None
-        while proc.poll() is None:
-            if ps is not None:
-                try:
-                    mi = ps.memory_info()
-                    cur = float(getattr(mi, "peak_wset", 0) or 0) or float(mi.rss)
-                    peak = cur if peak is None else max(peak, cur)
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    pass
-            if time.perf_counter() - t0 > timeout:
-                timed_out = True
-                C.kill_tree(proc.pid)
-                break
-            time.sleep(0.5)
+        timed_out, peaks = sample_tree_peaks(proc, timeout)
     res = C.CmdResult(args, None if timed_out else proc.returncode, out_path.read_text(encoding="utf-8", errors="replace"),
                       err_path.read_text(encoding="utf-8", errors="replace"), time.perf_counter() - t0, timed_out)
-    return res, (peak / (1024 * 1024)) if peak is not None else None
+    tree = sorted(((name, pid, b / (1024 * 1024)) for pid, (name, b) in peaks.items()), key=lambda r: -r[2])
+    return res, (tree[0][2] if tree else None), tree
 
 
 def sim_problems(res: C.CmdResult, what: str, timeout: float) -> list[str]:
@@ -3213,6 +3229,51 @@ def c53(ctx: Ctx) -> list[str]:
         return [str(e)]
 
 
+def guardian_kill_turn(target: str, *, shield_max: float, torpedo_damage: float, p: float) -> tuple[str, int, int]:
+    """smoke/54's kill turn, built as smoke/26 builds its kill (HZ-09 / D-15 Agreed, D-120, CM-04; D-162 (6) corrected by D-168): the torpedo volley
+    that carries the guardian from shield_max to 0 — ⌈shield_max / torpedo_damage⌉ hits, sized by volley_size at hit chance p — then the phaser
+    volley, which always hits and lands after every torpedo, on 0 shields: the destroying hit.  The torpedoes alone leave it at exactly 0.
+    Returns (the turn's orders, the volley, the hits to 0)."""
+    hits_to_zero = int(math.ceil(float(shield_max) / float(torpedo_damage)))
+    volley = volley_size(hits_to_zero, p)
+    return f"fire torpedo {target} {volley}; fire phaser {target}", volley, hits_to_zero
+
+
+_FIRE_ORDER = re.compile(r"^fire\s+(?P<weapon>torpedo|phaser)\s+\S+(?:\s+(?P<n>\d+))?$")
+
+
+def kill_exchange(orders: str, *, shield_max: float, torpedo_damage: float, phaser_damage: float) -> tuple[float, bool]:
+    """The selftest's replay of one TP-04 exchange on one target at hit chance 1, under the Agreed and settled rules: every torpedo lands first,
+    then the phaser volley (D-120, CM-04); a hit that lands when the shields are already 0 destroys (HZ-09 / D-15), any other hit takes them
+    towards 0.  `orders` is a kill turn as guardian_kill_turn writes it.  Returns (shields left, destroyed)."""
+    torpedoes, phasers = 0, 0
+    for part in (s.strip() for s in orders.split(";")):
+        m = _FIRE_ORDER.match(part)
+        if m and m["weapon"] == "torpedo":
+            torpedoes += int(m["n"] or 1)
+        elif m:
+            phasers += 1
+    shield = float(shield_max)
+    for dmg in [float(torpedo_damage)] * torpedoes + [float(phaser_damage)] * phasers:
+        if shield <= 0.0:
+            return 0.0, True
+        shield = max(0.0, shield - dmg)
+    return shield, False
+
+
+def start_planet(index: dict, gs0: tuple, what: str) -> tuple[dict, tuple[int, int], str]:
+    """The start sector's planet from `--world-index` (C9, C11): (entry, cell, id), the id read from world_index.planets[*].id — not from the probe
+    snapshot's planets records, which list a planet only while it is off the seed trajectory (D-150 (2)); D-168."""
+    planet = next((p for p in index.get("planets") or [] if isinstance(p, dict) and isinstance(p.get("cell"), list) and C._gs(p) == gs0), None)
+    if planet is None:
+        raise ScenarioError(f"{what}: no planet in the start sector {G.sector_key(*gs0)} (safe_start, SP-05; gate logic)")
+    pid = planet.get("id")
+    if not isinstance(pid, str) or not pid:
+        raise ScenarioError(f"{what}: the world_index.planets entry at {G.sector_key(*gs0)} {planet['cell']} has id {pid!r} — world_index.planets[*].id must name the "
+                            f"planet (C9, C11; D-168)")
+    return planet, (int(planet["cell"][0]), int(planet["cell"][1])), pid
+
+
 def c54(ctx: Ctx) -> list[str]:
     """smoke/54 — mastery: guard_ships 1 and a strong temp class; the kill at turn 3, `pickup lodestone` at turn 4 → game.mastery that turn; then
     master, levels locked at 100, stats at the caps, a free `buy food 500` at factor 0.80 from a planet that refused at low respect, food and water
@@ -3227,7 +3288,6 @@ def c54(ctx: Ctx) -> list[str]:
         corsair = k3["classes"]["corsair"]
         shields_c = int(math.ceil(2.0 * master_str - corsair["torpedoes"] * td - corsair["phasers"] * pu * 3))
         bastion = k3["classes"]["bastion"]
-        volley = int(math.ceil(bastion["shield_max"] / td))
         kestrel_shields = max(400.0, 4 * (td + bastion["phasers"] * pu) + 1)          # two turns of one guardian's fire before the kill, with margin
         ini = strong_class_ini(k3, shield_max=kestrel_shields)
         ini.update({("endgame", "guard_ships"): "1", ("ships", "corsair"): class_line(dict(corsair, shield_max=float(shields_c), engine=0.0, warp=0.0)),
@@ -3235,10 +3295,7 @@ def c54(ctx: Ctx) -> list[str]:
         w = probe_world(ctx, 1234)
         start = w.index["player_start"]
         gs0 = w.start
-        planet = next((p for p in w.index.get("planets") or [] if isinstance(p, dict) and isinstance(p.get("cell"), list) and C._gs(p) == gs0), None)
-        if planet is None:
-            raise ScenarioError(f"seed 1234: no planet in the start sector {G.sector_key(*gs0)} (safe_start, SP-05; gate logic)")
-        pcell = (int(planet["cell"][0]), int(planet["cell"][1]))
+        planet, pcell, pid = start_planet(w.index, gs0, "seed 1234")
         got = C.cell_at_distance(w.index, planet, 1, v["sector_size"], diagonal=False) or C.cell_at_distance(w.index, planet, 1, v["sector_size"])
         if got is None or tuple(got[0]) == (int(start[2][0]), int(start[2][1])):
             raise ScenarioError(f"no free cell next to the planet at {pcell} other than the player's start (gate logic)")
@@ -3251,15 +3308,25 @@ def c54(ctx: Ctx) -> list[str]:
         gs = G.parse_sector_key(ld["sector"])
         cell = ld["cell"]
         target = next(iter(guards.values()))
-        pid_rec = E.planet_in(snap_p, G.sector_key(*gs0), pcell)
-        if pid_rec is None:
-            raise ScenarioError(f"the probe snapshot has no planets record at {G.sector_key(*gs0)} {list(pcell)} (C11)")
-        pid = pid_rec[0]
+        # the kill turn (D-168 corrects D-162 (6)): the torpedoes to 0, then the phasers — the hit on 0 that destroys (HZ-09).  The warp lands on
+        # the item cell (both are the free cell nearest the sector centre: the warp rule and EG-05), where the fire orders are checked when queued
+        # (CM-02) and fired after the move, so the guardian must stand within phaser_range of the item (D-164 places it two cells out).
+        gpos = ((snap_p.get("ships") or {}).get(target) or {}).get("position")
+        try:
+            d_guard = C.chebyshev(gpos[2], cell)
+        except (TypeError, IndexError, ValueError):
+            raise ScenarioError(f"probe mastery: the guardian's ship {target} has no position [[gx, gy], [sx, sy], [cx, cy]] in the saved snapshot (C3, C12)")
+        if d_guard > k3["phaser_range"]:
+            raise ScenarioError(f"the guardian {target} stands {d_guard} cells from the item cell {list(cell)}, beyond phaser_range {k3['phaser_range']} — the kill "
+                                f"turn's phaser volley (the hit on 0 shields, HZ-09) cannot reach it from the item (D-164, D-168; gate logic)")
+        p_hit = CB.torpedo_hit_p(float(ini[("battle", "torpedo_hit_base")]), float(ini[("battle", "torpedo_evade_per_engine")]), bastion["engine"])
+        kill_orders, volley, hits_to_zero = guardian_kill_turn(target, shield_max=bastion["shield_max"], torpedo_damage=td, p=p_hit)
         spawn_ship, spawn_cid = spawned_ids(_probe_report(ctx, "mastery"))
         band = k["planet_price_band"]
-        script = ["", f"warp {gs[0][0]} {gs[0][1]} {gs[1][0]} {gs[1][1]} 10", f"move {cell[0]} {cell[1]}; fire torpedo {target} {volley}", "scan; pickup lodestone",
+        script = ["", f"warp {gs[0][0]} {gs[0][1]} {gs[1][0]} {gs[1][1]} 10", f"move {cell[0]} {cell[1]}; {kill_orders}", "scan; pickup lodestone",
                   f"warp {gs0[0][0]} {gs0[0][1]} {gs0[1][0]} {gs0[1][1]} 10", f"move {pcell[0]} {pcell[1]}", "", "", "buy food 500", f"fire torpedo {spawn_ship} 1", "", "", "", ""]
-        what = (f"smoke/54 guard_ships 1: warp into {ld['sector']}, {volley} torpedoes at {target} (turn 3), scan + pickup lodestone (turn 4), warp home, dock at {pid} "
+        what = (f"smoke/54 guard_ships 1: warp into {ld['sector']}, {volley} torpedoes ({hits_to_zero} hits to 0 shields) then the phasers at {target}, {d_guard} cells "
+                f"away (turn 3), scan + pickup lodestone (turn 4), warp home, dock at {pid} "
                 f"{list(pcell)}, buy food 500 (turn 9), one torpedo at {spawn_ship} (corsair {shields_c:g} shields, ratio 2.0; turn 10), idle to 14")
         scn = scenario(what, "EG-07, EG-08, EF-06, SUP-05, OUT-15, D-159, C12", turns=14, script=script, ini=ini, spawn=spawn, ai=None, **flags)
         rep, save_present, snap = run_scenario_full(ctx, "mastery", scn, seed=1234)
@@ -3289,7 +3356,8 @@ def c54(ctx: Ctx) -> list[str]:
             problems += resume_master_problems(ctx, ctx.art / "saves_mastery", write_ini(ctx, "mastery.ini", ini), what="smoke/54 `--role engine --save-dir saves_mastery` (resume)")
         if not problems:
             fin = rep.get("final") or {}
-            print(f"         mastery at turn {fin.get('mastery_turn')} (kill turn 3, pickup turn 4), {rep.get('turns_completed')} turns completed; levels 100/100, "
+            print(f"         mastery at turn {fin.get('mastery_turn')} (kill turn 3: {volley} torpedoes to 0 shields, then the phasers at {d_guard} cells; pickup turn 4), "
+                  f"{rep.get('turns_completed')} turns completed; levels 100/100, "
                   f"shields {caps['shield_cap']:g}, phasers {caps['phaser_max']:g}, engine {caps['impulse_max']:g}, warp {caps['warp_max']:g}, torpedoes {k5['master_torpedoes']}; "
                   f"{pid} refused at respect {low}, sold 500 food at factor {E.price_factor(100, band, selling=False):.2f} for nothing; {spawn_ship} yielded at turn 10; "
                   f"3 fireworks frames + title; T4 title and ∞; save round-trips, resume keeps master, no second game.mastery")
@@ -3345,7 +3413,7 @@ def c_long(ctx: Ctx) -> list[str]:
         m5(ctx)
         report, save_dir = ctx.art / "report_long.json", ctx.art / "saves_long"
         what = f"sim --seed {LONG_TIER_SEED} --turns {LONG_TIER_TURNS} --ai-player trade"
-        res, peak_mb = run_sim_measured(ctx, seed=LONG_TIER_SEED, turns=LONG_TIER_TURNS, report=report, save_dir=save_dir, ai_player="trade", timeout=LONG_TIER_BOUND_S)
+        res, peak_mb, tree = run_sim_measured(ctx, seed=LONG_TIER_SEED, turns=LONG_TIER_TURNS, report=report, save_dir=save_dir, ai_player="trade", timeout=LONG_TIER_BOUND_S)
         problems = sim_problems(res, what, LONG_TIER_BOUND_S)
         doc, err = C.load_json(report)
         if doc is None:
@@ -3356,7 +3424,8 @@ def c_long(ctx: Ctx) -> list[str]:
         fin = doc.get("final") or {}
         print(f"         {LONG_TIER_TURNS} turns in {res.seconds:.0f} s; population {fin.get('captains_start')} → " + ", ".join(f"T{n} {c}" for n, c in curve) +
               f"; min {fin.get('population_min')} / max {fin.get('population_max')}; resolve_ms first 100 {first if first is None else round(first, 1)} / last 100 "
-              f"{last if last is None else round(last, 1)}; peak RSS {peak_mb if peak_mb is None else round(peak_mb)} MB; mutinies {len(fin.get('mutinies') or [])} "
+              f"{last if last is None else round(last, 1)}; peak RSS {peak_mb if peak_mb is None else round(peak_mb)} MB (the largest of {len(tree)} processes in the "
+              f"tree: {', '.join(f'{n} pid {pid} {mb:.0f} MB' for n, pid, mb in tree)}); mutinies {len(fin.get('mutinies') or [])} "
               f"(player {sum(1 for m in fin.get('mutinies') or [] if str(m.get('captain')) == 'player')}), mastery_turn {fin.get('mastery_turn')}")
         return problems
     except ScenarioError as e:
@@ -4562,6 +4631,60 @@ def selftest(root: Path) -> int:
           statuses.get("smoke/19") == C.FAIL and "D-153" in out and "unexpected exception inside the gate" not in out, f"statuses {statuses}; tail:\n{res.tail(12)}")
         if line:
             print(f"      gate line: {line.strip()[:200]}")
+    # 34. the M5 gates-fix: smoke/54's kill turn judged by a replay of HZ-09 / D-120 — good: the torpedoes to 0, then the phasers; broken: the
+    # torpedoes alone (the M5-gates plan) or one short — and the start planet's id from world_index.planets[*].id (D-168 corrects D-162 (6));
+    # the --long RSS sampled across the process tree (M5 § 4 (c), D-162 (7))
+    print("-- M5 gates-fix (D-168; D-162 (7)) --")
+    pd2 = CB.phaser_damage(10.0, 5.0, 2)                     # the strong class's phasers at the guardian's two cells (D-162 (5), D-164)
+    for shield, tdmg in ((100.0, 15.0), (90.0, 15.0), (100.0, 25.0)):
+        orders, volley, hits = guardian_kill_turn("s-9", shield_max=shield, torpedo_damage=tdmg, p=1.0)
+        left, dead = kill_exchange(orders, shield_max=shield, torpedo_damage=tdmg, phaser_damage=pd2)
+        t(f"smoke/54 kill turn at shield_max {shield:g} / torpedo_damage {tdmg:g}: `{orders}` — {hits} torpedo hits to 0, the phaser volley destroys (HZ-09, D-120)",
+          dead and volley == hits and orders == f"fire torpedo s-9 {hits}; fire phaser s-9", (orders, left, dead))
+        old = f"fire torpedo s-9 {hits}"
+        left_o, dead_o = kill_exchange(old, shield_max=shield, torpedo_damage=tdmg, phaser_damage=pd2)
+        t(f"  broken: the M5-gates plan `{old}` leaves the guardian at {left_o:g} shields, alive", not dead_o and left_o == 0.0, (left_o, dead_o))
+    short = "fire torpedo s-9 6; fire phaser s-9"
+    left_s, dead_s = kill_exchange(short, shield_max=100.0, torpedo_damage=15.0, phaser_damage=pd2)
+    t(f"  broken: one torpedo short (`{short}` at 100 / 15) — the phasers take the last {100 - 90:g} to 0 and nothing lands after, alive", not dead_s and left_s == 0.0, (left_s, dead_s))
+    t("replay: D-120 resolves torpedoes before phasers whatever the order text — `fire phaser s-9; fire torpedo s-9 7` at 100 / 15 destroys; 8 torpedoes alone "
+      "destroy too (the 8th lands on 0)", kill_exchange("fire phaser s-9; fire torpedo s-9 7", shield_max=100.0, torpedo_damage=15.0, phaser_damage=pd2)[1]
+      and kill_exchange("fire torpedo s-9 8", shield_max=100.0, torpedo_damage=15.0, phaser_damage=pd2)[1])
+    orders7, volley7, _ = guardian_kill_turn("s-9", shield_max=100.0, torpedo_damage=15.0, p=0.7)
+    t(f"smoke/54 kill turn at hit chance 0.70: the volley grows to {volley7} torpedoes (volley_size, as smoke/26's) and keeps the phaser volley",
+      volley7 == volley_size(7, 0.7) and volley7 > 7 and orders7.endswith("; fire phaser s-9"), orders7)
+    c = json.loads(json.dumps(scen5["mastery"]))
+    kt = int(c["kwargs"]["kill_turn"])
+    for tt in c["report"]["per_turn"]:
+        if tt.get("turn_no") == kt and isinstance(tt.get("lodestone"), dict):
+            tt["lodestone"]["guardians_alive"] = 1               # the guardian left at 0 shields with no hit after (HZ-09)
+    t(f"smoke/54: a guardian still alive after the kill turn ({kt}) fails naming guardians_alive", any("guardians_alive" in m for m in m5_case_problems(c)))
+    idx_p = {"planets": [{"galaxy": [3, 1], "sector": [2, 2], "cell": [5, 5], "id": "p-0001", "name": "Elsewhere"},
+                         {"galaxy": [3, 1], "sector": [13, 14], "cell": [3, 17], "id": "p-0042", "name": "Fixture Rest"}]}
+    got_p = start_planet(idx_p, ((3, 1), (13, 14)), "fixture")
+    t("smoke/54 start planet: the id comes from world_index.planets[*].id (p-0042 at 3,1/13,14 [3, 17])", got_p[1:] == ((3, 17), "p-0042"), got_p)
+    for label, mutate, word in (("an entry without an id", lambda d: d["planets"][1].pop("id"), "world_index.planets[*].id"),
+                                ("no planet in the start sector", lambda d: d["planets"].pop(1), "no planet in the start sector")):
+        idx_b = copy.deepcopy(idx_p)
+        mutate(idx_b)
+        try:
+            start_planet(idx_b, ((3, 1), (13, 14)), "fixture")
+            msg = ""
+        except ScenarioError as e:
+            msg = str(e)
+        t(f"  broken: {label} fails naming '{word}'", word in msg, msg or "no ScenarioError")
+    with tempfile.TemporaryDirectory() as td:
+        child, parent = Path(td) / "child.py", Path(td) / "parent.py"
+        child.write_text("import time\nblock = b'\\x01' * (192 << 20)\ntime.sleep(2.5)\n", encoding="utf-8")
+        parent.write_text(f"import subprocess, sys\nsys.exit(subprocess.run([sys.executable, {str(child)!r}]).returncode)\n", encoding="utf-8")
+        proc = subprocess.Popen([sys.executable, str(parent)], creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        timed_out, peaks = sample_tree_peaks(proc, timeout=60.0)
+        mb = 1024 * 1024
+        tree_mb = max((b for _, b in peaks.values()), default=0.0) / mb
+        root_mb = peaks.get(proc.pid, ("", 0.0))[1] / mb
+        t(f"--long RSS: a grandchild holding 192 MB under {Path(sys.executable).name} → the tree peak reads {tree_mb:.0f} MB across {len(peaks)} processes; "
+          f"the root alone (the old sample) reads {root_mb:.0f} MB", not timed_out and proc.returncode == 0 and tree_mb >= 192 and root_mb < 192,
+          {pid: (n, round(b / mb)) for pid, (n, b) in peaks.items()})
 
     bad = [n for ok, n in results if not ok]
     print(f"== smoke selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")
