@@ -408,6 +408,52 @@ def nearest_planet_sector(captain: Captain, ship: Ship, state: GameState, cfg: G
     return None
 
 
+def nearest_planet_sector_anywhere(captain: Captain, ship: Ship, state: GameState, cfg: GameConfig) -> tuple[Coord, Coord] | None:
+    """[ASSUMED] D-166: the nearest hole-free sector in the whole universe (flattened Chebyshev, ties by coordinates) holding a live planet
+    that trades with the captain; None when no planet will trade with it."""
+    f0 = flat_sector(ship.galaxy, ship.sector, cfg.galaxy_size)
+    best: tuple | None = None
+    for p in state.world.planets.values():
+        if p.destroyed or not planet_trades_with(p, captain, cfg):
+            continue
+        gs = (p.galaxy, p.sector)
+        sector = state.world.sectors.get(gs)
+        if sector is None or sector.has_hole():
+            continue
+        key = (chebyshev(flat_sector(gs[0], gs[1], cfg.galaxy_size), f0), gs)
+        if best is None or key < best:
+            best = key
+    return best[1] if best else None
+
+
+def stepping_stone(ship: Ship, state: GameState, cfg: GameConfig, pull: float, target: tuple[Coord, Coord]) -> tuple[Coord, Coord] | None:
+    """[ASSUMED] D-166: the sector within warp reach that lies nearest to ``target`` - a hole-free system first, deep space when nothing
+    else is in reach - so a stranded ship closes the distance every turn (D-103 ordering: distance, then kind, then coordinates)."""
+    box = _reach_box(ship, state, cfg, pull)
+    if box is None:
+        return None
+    r, (fx, fy) = box
+    tf = flat_sector(target[0], target[1], cfg.galaxy_size)
+    gw, gh = cfg.galaxy_size
+    uw, uh = cfg.universe_size
+    here = (ship.galaxy, ship.sector)
+    best: tuple | None = None
+    for y in range(max(0, fy - r), min(uh * gh, fy + r + 1)):
+        for x in range(max(0, fx - r), min(uw * gw, fx + r + 1)):
+            gs = state.world.flat_sectors.get((x, y))
+            deep = gs is None
+            if deep:
+                gs = ((x // gw, y // gh), (x % gw, y % gh))
+            elif state.world.sectors[gs].has_hole():
+                continue
+            if gs == here:
+                continue
+            key = (chebyshev((x, y), tf), deep, gs)
+            if best is None or key < best:
+                best = key
+    return best[2] if best else None
+
+
 def restock_step(ship: Ship, dest: Coord, cells: int, blocked: set[Coord]) -> Coord | None:
     """This turn's step towards the orbit cell (D-103: within reach, never persisting); the step is shortened when it would
     end on terrain, and None means the ship cannot move."""
@@ -462,10 +508,20 @@ def restock_orders(captain: Captain, ship: Ship, state: GameState, cfg: GameConf
         return [Order("move", (str(step[0]), str(step[1]), f"{ship.engine:g}"), ship.id, QUEUED)]
     dest_sector = nearest_planet_sector(captain, ship, state, cfg, pull)
     if dest_sector is None:
+        # [ASSUMED] D-166: no trading planet within reach (deep space, a void galaxy, a sparse corner) - head for the nearest one
+        # by the reachable sector closest to it instead of wandering in place until the crew mutiny (the M5 population run showed
+        # mutineers stranded in deep space breeding mutineers)
         captain.restock_target = None
-        note(trace, captain, ship, f"food {captain.food}, water {captain.water} low but no trading planet within warp reach from {at(ship.cell)} -> wanders", "D-144", "D-103",
-             kind=KIND_RESTOCK)
-        return None
+        far = nearest_planet_sector_anywhere(captain, ship, state, cfg)
+        step = stepping_stone(ship, state, cfg, pull, far) if far is not None else None
+        if step is None:
+            note(trace, captain, ship, f"food {captain.food}, water {captain.water} low but no trading planet within warp reach from {at(ship.cell)} and no way "
+                 f"towards one -> wanders", "D-144", "D-103", kind=KIND_RESTOCK)
+            return None
+        (gx, gy), (sx, sy) = step
+        note(trace, captain, ship, f"food {captain.food}, water {captain.water} low, no trading planet within warp reach -> heads for galaxy {far[0][0]},{far[0][1]} sector "
+             f"{far[1][0]},{far[1][1]} by way of galaxy {gx},{gy} sector {sx},{sy}", "D-144", "D-166", kind=KIND_RESTOCK)
+        return [Order("warp", (str(gx), str(gy), str(sx), str(sy)), ship.id, QUEUED)]
     (gx, gy), (sx, sy) = dest_sector
     if captain.restock_target is None and stats is not None:
         stats["restock_trips"] = stats.get("restock_trips", 0) + 1

@@ -17,6 +17,7 @@ from starbour.engine.state import GameState, from_snapshot, new_game
 from starbour.terminals import render_grid, render_status
 from starbour.world import deepspace as DS
 from starbour.world.generate import VOID, game_rng
+from starbour.world.grid import chebyshev
 
 
 def plain(renderable, width: int = 120) -> str:
@@ -208,3 +209,26 @@ def test_galaxy_view_shades_a_visited_deep_space_cell(small_state: GameState, sm
     styled = con.export_text(styles=True)
     assert "visited" in plain(render_grid.render(snap, {"level": "galaxy"}, small_cfg))
     assert styled.count("\x1b[36m") >= 1 or "cyan" in styled.lower() or styled, "the visited shading is applied somewhere"
+
+
+def test_hungry_ai_in_deep_space_heads_for_the_nearest_planet(small_state: GameState, small_cfg: GameConfig) -> None:
+    """[ASSUMED] D-166: no trading planet within reach -> warp towards the nearest one instead of wandering until the crew mutiny."""
+    cap = next(c for c in small_state.captains.values() if not c.is_player)
+    ship = small_state.ships[cap.active_ship]
+    g, s = first_void(small_state)
+    ship.position = (g, s, (5, 5))
+    ship.warp = 1.0           # reach 1 sector: the planets of the small world are seldom next door
+    cap.food = cap.water = small_cfg.buy_supplies_below - 1
+    far = ai.nearest_planet_sector_anywhere(cap, ship, small_state, small_cfg)
+    assert far is not None and far in small_state.world.sectors
+    orders = ai.decide(cap, small_state, game_rng(3), small_cfg)
+    warps = [o for o in orders if o.command == "warp"]
+    if ai.nearest_planet_sector(cap, ship, small_state, small_cfg, 0.0) is None:
+        assert warps, "a stranded hungry captain warps towards food rather than wandering (D-166)"
+        dest = ((int(warps[0].args[0]), int(warps[0].args[1])), (int(warps[0].args[2]), int(warps[0].args[3])))
+        from starbour.world.generate import flat_sector
+        d_now = chebyshev(flat_sector(g, s, small_cfg.galaxy_size), flat_sector(*far, small_cfg.galaxy_size))
+        d_next = chebyshev(flat_sector(*dest, small_cfg.galaxy_size), flat_sector(*far, small_cfg.galaxy_size))
+        assert d_next < d_now
+    else:
+        assert warps, "a trading planet within reach is the restock trip itself (D-144)"
