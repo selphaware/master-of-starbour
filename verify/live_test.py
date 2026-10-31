@@ -4,8 +4,10 @@
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\live_test.py --selftest   stub launcher; opens no window
 
 Checks live/01…07 per docs/BOOTSTRAP.md § Gate 2, live/08 per specs/M2.md § 3, live/09 per
-specs/M3.md § 4 and live/10 per specs/M4.md § 4 against docs/CONTRACTS.md (C1 command lines,
-C3 bus, C5 heartbeats, C6 save, C9 M2 additions, C10 M3 additions, C11 M4 additions).
+specs/M3.md § 4, live/10 per specs/M4.md § 4 and live/11 per specs/M5.md § 4 against
+docs/CONTRACTS.md (C1 command lines, C3 bus, C5 heartbeats, C6 save, C9 M2 additions, C10 M3
+additions, C11 M4 additions, C12 M5 additions).  live/07 (the exe) waits for M6, the packaging
+milestone (specs/M5.md: "Packaging is M6").
 Windows open and close on the desktop.  Not run by the hook.  Any existing saves\\game.json
 is moved aside first and restored afterwards; the gate's own save is deleted.  On any exit
 every process the gate started is killed.  Exit 0 pass, 1 fail, 3 HARNESS ERROR.
@@ -33,6 +35,7 @@ sys.path.insert(0, str(HERE))
 import _checks as C  # noqa: E402
 import _combat as CB  # noqa: E402
 import _economy as E  # noqa: E402
+import _endgame as G  # noqa: E402
 
 BUDGET_S = 180.0
 LAUNCH_WAIT_S = 15.0
@@ -611,6 +614,119 @@ def l09(ctx: Ctx) -> list[str]:
     return problems
 
 
+def write_live_ini(ctx: Ctx, name: str, changes: dict[tuple[str, str], str]) -> Path:
+    """A temp copy of controls_config.ini with some keys changed (live/11), as the smoke gate's write_ini does."""
+    cp = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=None)
+    cp.read(ctx.root / "controls_config.ini", encoding="utf-8")
+    for (section, key), value in changes.items():
+        cp.set(section, key, value)
+    path = ctx.art / name
+    with open(path, "w", encoding="utf-8") as f:
+        cp.write(f)
+    return path
+
+
+def l11(ctx: Ctx) -> list[str]:
+    """live/11 — (M5) end-to-end mastery with the smoke/54 setup: a temp ini (guard_ships 1, the starting class at torpedoes 999 / phasers 10 /
+    shields 400 / engine 10 / warp 10, torpedo_hit_base 1) and --respect / --fear / --coins / --give; the driver takes turn 1 (placement), warps
+    to the placed sector, moves onto the item, scans, kills the guardian with one volley and picks the Lodestone up → game.mastery; T3's heartbeat
+    shows the ceremony start and end within ceremony_seconds + 5, T4's says master, every window stays alive and keeps drawing; closing T1
+    leaves nothing (EG-07, OUT-15, BUS-06, C12)."""
+    if ctx.pkg_missing:
+        raise C.Blocked(ctx.pkg_missing)
+    if C.role_processes(ctx.root):
+        stop_everything(ctx)
+    cp = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=None)
+    cp.read(ctx.root / "controls_config.ini", encoding="utf-8")
+    try:
+        starting = cp.get("ships", "starting_class").strip().lower()
+        torp, phas, shield, engine, warp = [float(x) for x in cp.get("ships", starting).split(",")]
+        b_torp, b_phas, b_shield, _, _ = [float(x) for x in cp.get("ships", "bastion").split(",")]
+        td = cp.getfloat("battle", "torpedo_damage")
+        pu = cp.getfloat("battle", "phaser_damage_per_unit")
+        respect_min, fear_min = cp.getint("endgame", "respect_min"), cp.getint("endgame", "fear_min")
+        wealth_min, need = cp.getint("endgame", "wealth_min_silver"), cp.getint("endgame", "required_special_distinct")
+        spg = cp.getint("economy", "silver_per_gold")
+        ceremony_s = cp.getfloat("ui", "ceremony_seconds")
+        specials = sorted(n for n, line in cp.items("elements") if line.split(",")[2].strip().lower() == "special")
+    except (configparser.Error, ValueError, IndexError) as e:
+        return [f"the gate cannot read an M5 key from controls_config.ini: {e} (CFG-49…52, 86, 89; D-53)"]
+    if len(specials) < need:
+        return [f"[elements] lists {len(specials)} special elements but required_special_distinct = {need} (EG-04, D-157)"]
+    shields_k = max(400.0, 4 * (td + b_phas * pu) + 1)
+    ini = write_live_ini(ctx, "live11.ini", {("ships", starting): f"999, 10, {shields_k:g}, 10, 10", ("battle", "torpedo_hit_base"): "1.0",
+                                              ("battle", "torpedo_evade_per_engine"): "0", ("endgame", "guard_ships"): "1"})
+    volley = int(-(-b_shield // td))
+    respect, fear = min(100, respect_min + 5), min(100, fear_min + 5)
+    gold = int(-(-wealth_min // max(1, spg)))
+    give = ",".join(f"{e}:1" for e in specials[:need])
+    save = ctx.root / "saves" / "game.json"
+    if save.exists():
+        shutil.copy2(save, ctx.art / "game.json.before-live11")
+        save.unlink()
+    problems = launch(ctx, [ctx.py, "-m", "starbour", "--seed", str(LIVE_SEED), "--config", str(ini), "--respect", str(respect), "--fear", str(fear),
+                            "--coins", str(gold), "0", "--give", give], "mastery")
+    if problems:
+        problems.append("the launcher must accept --config, --respect, --fear, --coins and --give and pass them to the engine role (C1, C12, D-148 (13))")
+        stop_everything(ctx)
+        return problems
+    view_pids = {r: ctx.pids[r] for r in C.VIEW_ROLES if r in ctx.pids}
+
+    def ceremony() -> Any:
+        doc, _ = C.load_json(ctx.hb_dir / "output.json")
+        return doc.get("ceremony", "<missing>") if isinstance(doc, dict) else "<no heartbeat>"
+
+    def after_mastery(obs: dict) -> dict:
+        t0 = time.perf_counter()
+        n = obs["mastery_turn"]
+        seen: dict = {"turn_no": n}
+        C.wait_until(lambda: ceremony() in ("running", "done"), HB_WAIT_S, 0.05)
+        seen["running_after_s"] = round(time.perf_counter() - t0, 2) if ceremony() in ("running", "done") else None
+        seen["ceremony_field"] = ceremony()
+        C.wait_until(lambda: ceremony() == "done", ceremony_s + 5.0, 0.1)
+        seen["done_after_s"] = round(time.perf_counter() - t0, 2) if ceremony() == "done" else None
+        C.wait_until(lambda: status_field(ctx.hb_dir, "master") is True, HB_WAIT_S, 0.1)
+        seen["master"] = status_field(ctx.hb_dir, "master")
+        seen["guardians_alive"] = status_field(ctx.hb_dir, "lodestone_guardians_alive")
+        seen.update(windows_at_turn(ctx.hb_dir, n, view_pids))
+        return seen
+    obs = G.drive_mastery(ctx.pub_port, ctx.pull_port, warp_factor=10.0, volley=volley, hello_timeout=15.0, turn_timeout=15.0, after_mastery=after_mastery)
+    problems = G.check_mastery_bus(obs) + G.check_ceremony_heartbeat(obs.get("after_mastery"), ceremony_seconds=ceremony_s)
+    seen = obs.get("after_mastery") or {}
+    if seen.get("ceremony_field") in ("<missing>", "<no heartbeat>"):
+        problems.append(f"T3's heartbeat carries no 'ceremony' field ({seen.get('ceremony_field')}; C5 C12: output.json gains ceremony = null | running | done)")
+    if obs.get("extra_turn") is not None:
+        later = windows_at_turn(ctx.hb_dir, obs["extra_turn"], view_pids)
+        hb = list(later.get("problems") or [])
+        if hb:
+            hb[-1] += f" — the turn pushed after the ceremony ({obs['extra_turn']}) must reach every window; T3 keeps consuming turn.resolved (OUT-15, BUS-05, C5)"
+        problems += hb
+    import psutil
+    dead = [r for r, p in ctx.pids.items() if not psutil.pid_exists(p)]
+    if dead:
+        problems.append(f"window(s) {dead} died during the mastery turn or the ceremony — every window stays alive (OUT-15, TL)")
+    kill_role(ctx, "command")
+    waited = C.wait_until(lambda: ctx.launcher.poll() is not None and not C.role_processes(ctx.root), SHUTDOWN_WAIT_S, 0.2)
+    if ctx.launcher.poll() is None:
+        problems.append(f"the launcher is still running {SHUTDOWN_WAIT_S:.0f} s after T1 was killed after mastery — closing T1 must end the game (TL, BUS-06)")
+    problems += C.check_all_gone([(pid, role) for pid, role, _ in C.role_processes(ctx.root)],
+                                 f"{SHUTDOWN_WAIT_S:.0f} s after T1 was killed after mastery (orphans; BUS-06, D-59)")
+    if problems:
+        killed = stop_everything(ctx)
+        if killed:
+            problems.append("the gate had to kill: " + ", ".join(killed))
+        tail = launcher_log_tail(ctx)
+        if tail.strip():
+            problems.append("launcher log tail:\n" + textwrap.indent(tail, " " * 10))
+    else:
+        ld = obs.get("lodestone") or {}
+        print(f"         placed at {ld.get('sector')} {ld.get('cell')} (distance {ld.get('distance')}); warp, move, scan, {volley} torpedoes → guardians_alive 0 at turn "
+              f"{obs.get('kill_turn')}; pickup → game.mastery {obs.get('mastery_wait_s')} s after turn.end (turn {obs.get('mastery_turn')}); ceremony running at "
+              f"{seen.get('running_after_s')} s, done at {seen.get('done_after_s')} s (ceremony_seconds {ceremony_s:g}); T4 master true; windows at turn {seen.get('turn_no')} "
+              f"after {seen.get('waited_s')} s and at turn {obs.get('extra_turn')} after; everything gone {waited:.1f} s after killing T1")
+    return problems
+
+
 CHECKS = [
     C.Check("live/01", "ports free before start", "BUS-06", l01),
     C.Check("live/02", "launcher spawns engine + four terminals", "TL, BR-15, C1", l02),
@@ -621,7 +737,8 @@ CHECKS = [
     C.Check("live/08", "end-to-end game over: teleport into a star, game.over, save deleted, new", "OV-09b, MSG-09, OUT-16, C9", l08, since="M2"),
     C.Check("live/09", "end-to-end combat: spawn, fire, combat events, T4 in_battle, close T1", "CM-01, OUT-04, BUS-06, C10", l09, since="M3"),
     C.Check("live/10", "end-to-end trade: launch on a planet, buy food, trade event, T4 docked, close T1", "CMD-20, OUT-07, BUS-06, C11", l10, since="M4"),
-    C.Check("live/07", "starbour.exe launches and stays up", "BR-14, BR-15", l07, since="M5"),
+    C.Check("live/11", "end-to-end mastery: placement, kill, pickup, game.mastery, T3 ceremony heartbeat, T4 master, close T1", "EG-07, OUT-15, BUS-06, C12", l11, since="M5"),
+    C.Check("live/07", "starbour.exe launches and stays up", "BR-14, BR-15", l07, since="M6"),
 ]
 
 
@@ -829,7 +946,7 @@ def selftest(root: Path) -> int:
         return line.split()[0] if line else "?"
     t("gating: live/08 SKIPs at MILESTONE M1 and runs (here FAILs) at M2", gate_status("live/08", "M1") == C.SKIP and gate_status("live/08", "M2") == C.FAIL,
       (gate_status("live/08", "M1"), gate_status("live/08", "M2")))
-    t("gating: live/07 still SKIPs until M5", gate_status("live/07", "M2") == C.SKIP and gate_status("live/07", "M5") == C.FAIL)
+    t("gating: live/07 still SKIPs until M6 (packaging; specs/M5.md)", gate_status("live/07", "M5") == C.SKIP and gate_status("live/07", "M6") == C.FAIL)
     t("teleport_arg formats C9's six integers", C.teleport_arg([3, 4], [7, 9], [5, 5]) == "3 4 7 9 5 5")
 
     # ---------------------------------------------------------------- M3: live/09 (specs/M3.md § 4)
@@ -919,6 +1036,54 @@ def selftest(root: Path) -> int:
     t("gating: live/10 SKIPs at MILESTONE M3 and runs (here FAILs) at M4", gate_status("live/10", "M3") == C.SKIP and gate_status("live/10", "M4") == C.FAIL,
       (gate_status("live/10", "M3"), gate_status("live/10", "M4")))
     t("price_options: 5 food at factor 0.9 costs 9 (total floor) or 5 (per-unit floor)", E.price_options(2, 5, 0.9) == {9, 5})
+
+    # ---------------------------------------------------------------- M5: live/11 (specs/M5.md § 4, C12)
+    print("-- M5 --")
+    with tempfile.TemporaryDirectory() as td:
+        my_pids = {r: os.getpid() for r in C.VIEW_ROLES}
+        for mode, ends, expect in (("mastery", True, None), ("mastery_leaky", True, ("MSG-09", "master")), ("mastery", False, ("hangs",))):
+            hb_dir = Path(td) / f"hb_{mode}_{int(ends)}"
+            hb_dir.mkdir()
+            eng = StubEngine(mode)
+            eng.start()
+            eng.ready.wait(5)
+            win = StubWindows(eng.pub_port, hb_dir, ceremony_ends=ends)
+            win.start()
+            win.ready.wait(5)
+
+            def read_windows(obs: dict, hb_dir=hb_dir) -> dict:
+                t0 = time.perf_counter()
+                n = obs["mastery_turn"]
+                seen: dict = {"turn_no": n}
+
+                def cer() -> Any:
+                    doc, _ = C.load_json(hb_dir / "output.json")
+                    return doc.get("ceremony", "<missing>") if isinstance(doc, dict) else "<no heartbeat>"
+                C.wait_until(lambda: cer() in ("running", "done"), 2.0, 0.05)
+                seen["running_after_s"] = round(time.perf_counter() - t0, 2) if cer() in ("running", "done") else None
+                C.wait_until(lambda: cer() == "done", 2.5, 0.05)
+                seen["done_after_s"] = round(time.perf_counter() - t0, 2) if cer() == "done" else None
+                C.wait_until(lambda: status_field(hb_dir, "master") is True, 2.0, 0.05)
+                seen["master"] = status_field(hb_dir, "master")
+                seen.update(windows_at_turn(hb_dir, n, my_pids, wait_s=3.0))
+                return seen
+            try:
+                obs = G.drive_mastery(eng.pub_port, eng.pull_port, warp_factor=10.0, volley=7, hello_timeout=10.0, reply_timeout=2.0, turn_timeout=2.0, after_mastery=read_windows)
+            finally:
+                win.stop()
+                eng.stop()
+            problems = G.check_mastery_bus(obs) + G.check_ceremony_heartbeat(obs.get("after_mastery"), ceremony_seconds=0.6, grace_s=1.5)
+            if obs.get("extra_turn") is not None:
+                problems += list(windows_at_turn(hb_dir, obs["extra_turn"], my_pids, wait_s=3.0).get("problems") or [])
+            seen = obs.get("after_mastery") or {}
+            if expect is None:
+                t(f"live/11 driver: stub engine 'mastery' passes (lodestone after turn 1, kill at turn {obs.get('kill_turn')}, game.mastery with turn {obs.get('mastery_turn')}, "
+                  f"ceremony running at {seen.get('running_after_s')} s / done at {seen.get('done_after_s')} s, T4 master {seen.get('master')}, windows at turns {seen.get('turn_no')} "
+                  f"and {obs.get('extra_turn')})", not problems, problems)
+            else:
+                t(f"live/11 driver: stub engine '{mode}'{'' if ends else ' with a ceremony that never ends'} fails naming {expect}", all(any(w in m for m in problems) for w in expect), problems)
+    t("gating: live/11 SKIPs at MILESTONE M4 and runs (here FAILs) at M5", gate_status("live/11", "M4") == C.SKIP and gate_status("live/11", "M5") == C.FAIL,
+      (gate_status("live/11", "M4"), gate_status("live/11", "M5")))
 
     bad = [n for ok, n in results if not ok]
     print(f"== live selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")

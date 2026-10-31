@@ -1,0 +1,271 @@
+{
+ "check": "deep_space_warp",
+ "args": [
+  "report"
+ ],
+ "kwargs": {
+  "void": [
+   [
+    3,
+    4
+   ],
+   [
+    5,
+    9
+   ]
+  ],
+  "start": [
+   [
+    3,
+    4
+   ],
+   [
+    7,
+    9
+   ]
+  ],
+  "warp_turn": 1,
+  "scan_turn": 2,
+  "back_turn": 3,
+  "what": "fixture deep-space warp"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 3,
+  "turns_completed": 3,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       11,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "script order 'warp 3 4 5 9' rejected: destination 3,4/5,9 is Void - there is no sector there (CMD-07, WG-02)"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       11,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "script order 'scan' accepted: Scan: nothing to pick up in cell 11,11"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       11,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "Lantern warped to 3,4/7,9"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 2,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 10,
+   "player_respect": 10,
+   "roams": 0,
+   "trades": 0,
+   "pickups": 0,
+   "upgrades": 0,
+   "planets_destroyed": 0,
+   "ai_purchases": 0,
+   "ai_mutinies": 0,
+   "captains_start": 193,
+   "population_min": 193,
+   "population_max": 193,
+   "eligible_turn": null,
+   "ai_void_visits": 0,
+   "guardians_destroyed": 0
+  },
+  "spawned": []
+ }
+}

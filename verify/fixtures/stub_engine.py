@@ -27,6 +27,16 @@ Modes:
                    factored price, a type 'trade' event (OUT-07), the planet's stock − n (M4 § 4 live/10)
   market_leaky     accepts `buy` but nothing happens: no trade event, food and coins unchanged (the
                    broken counterpart)
+  mastery          as good, plus the C12 endgame: snapshot.lodestone placed in the home sector two cells
+                   from the player with one guardian Bastion (c-901 / s-901, `guardian: true`) beside it;
+                   `warp` accepts factor ≤ 10 and the home sector; `scan` reveals the item (`ultimate`);
+                   `pickup lodestone` is rejected citing CM-13 while the guardian lives; an accepted
+                   `fire torpedo s-901 n` destroys it at the next turn.end (guardians_alive 0); the accepted
+                   pickup then resolves at the next turn.end: captains[player].master / infinite_wealth
+                   true, fear and respect 100, a type 'mastery' event, and game.mastery (MSG-09) published
+                   after turn.resolved (M5 § 4 live/11)
+  mastery_leaky    the same up to the pickup, which is accepted but resolves to nothing: no mastery event,
+                   no game.mastery, master stays false (the broken counterpart)
 
 Runs as a thread (StubEngine) or as a script (prints the bound ports as JSON on stdout).
 Opens no window.
@@ -47,9 +57,13 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 from _checks import chebyshev, flat_sector, signed, warp_reach  # noqa: E402
 
-MODES = ("good", "stuck_turn", "same_snapshot", "reject_no_id", "no_reply", "no_hello", "game_over", "game_over_leaky", "battle", "battle_leaky", "market", "market_leaky")
+MODES = ("good", "stuck_turn", "same_snapshot", "reject_no_id", "no_reply", "no_hello", "game_over", "game_over_leaky", "battle", "battle_leaky", "market", "market_leaky",
+         "mastery", "mastery_leaky")
 BATTLE_MODES = ("battle", "battle_leaky")
 MARKET_MODES = ("market", "market_leaky")
+MASTERY_MODES = ("mastery", "mastery_leaky")
+GUARD_SHIP, GUARD_CAPTAIN = "s-901", "c-901"
+ITEM_ID, ITEM_NAME, MASTER_TORPEDOES = "i-lode", "Lodestone of Starbour", 99
 ENGINE, WARP, GALAXY_SIZE, UNIVERSE_SIZE = 4, 3.0, (16, 16), (8, 8)
 HOME = ((3, 4), (7, 9))
 SPAWN_SHIP, SPAWN_CAPTAIN = "s-900", "c-900"
@@ -57,11 +71,12 @@ PLANET_ID, PLANET_NAME = "p-900", "Halvenmoor"
 FOOD_BUY, PRICE_BAND, PLANET_RESPECT = 2, 20, 50          # the default ini's PRC-01 / CFG-43; factor 0.9 at respect 50 (D-142)
 
 
-def default_snapshot(spawn: bool = False, planet: bool = False) -> dict:
+def default_snapshot(spawn: bool = False, planet: bool = False, lodestone: bool = False) -> dict:
     doc = json.loads((HERE / "snapshot_good.json").read_text(encoding="utf-8"))
     doc["turn_no"] = 0
     doc["game_over"] = False
     doc["battles"] = []
+    doc["lodestone"] = None
     for ship in doc["ships"].values():
         ship.setdefault("move_remaining", None)
         ship.setdefault("hazard", None)
@@ -92,6 +107,27 @@ def default_snapshot(spawn: bool = False, planet: bool = False) -> dict:
                                       "disposition_to_player": 2 * PLANET_RESPECT - 100, "trades_with_player": True, "in_battle": None, "destroyed": False}}
         sector = doc.setdefault("sectors", {}).setdefault(key, {"terrain": [], "items": []})
         sector["terrain"] = [t for t in sector.get("terrain") or [] if list(t.get("cell") or []) != [cx, cy]] + [{"kind": "planet", "cell": [cx, cy], "name": PLANET_NAME}]
+    for cap in doc["captains"].values():                 # C12 captain flags
+        cap.setdefault("master", False)
+        cap.setdefault("infinite_wealth", False)
+        cap.setdefault("guardian", False)
+    if lodestone:                                  # C12: the item two cells right of the player, one guardian Bastion beside it (live/11)
+        pid = doc["player_id"]
+        sid = doc["captains"][pid]["active_ship"]
+        (gx, gy), (sx, sy), (cx, cy) = doc["ships"][sid]["position"]
+        key = f"{gx},{gy}/{sx},{sy}"
+        item_cell = [cx + 2, cy]
+        doc["captains"][GUARD_CAPTAIN] = {"name": "Warden Ashcombe", "is_player": False, "gold": 0, "silver": 0, "fear": 50, "respect": 50, "food": 30, "water": 30,
+                                          "ships": [GUARD_SHIP], "active_ship": GUARD_SHIP, "items": {}, "is_master": False, "mutiny_countdown": None,
+                                          "visible_reputation": False, "master": False, "infinite_wealth": False, "guardian": True}
+        doc["ships"][GUARD_SHIP] = {"name": "Iron Warden", "class": "bastion", "captain": GUARD_CAPTAIN, "torpedoes": 20, "phasers": 8.0, "shield_max": 100.0,
+                                    "shield_current": 100.0, "engine": 3.0, "warp": 4.0, "position": [[gx, gy], [sx, sy], [cx + 3, cy]], "orders_queued": 0,
+                                    "orders": [], "hazard": None, "move_remaining": None, "in_battle": None, "target": None}
+        sector = doc.setdefault("sectors", {}).setdefault(key, {"terrain": [], "items": []})
+        sector["kind"] = "system"
+        sector["terrain"] = [t for t in sector.get("terrain") or [] if list(t.get("cell") or []) not in (item_cell, [cx + 3, cy])]
+        sector["items"] = [i for i in sector.get("items") or [] if list(i.get("cell") or []) != item_cell] + [{"id": ITEM_ID, "cell": item_cell, "rarity": "special", "revealed": False}]
+        doc["lodestone"] = {"sector": key, "cell": item_cell, "distance": 70, "placed_turn": 1, "guardians": [GUARD_CAPTAIN], "guardians_alive": 1, "picked_up_turn": None}
     return doc
 
 
@@ -107,8 +143,9 @@ class StubEngine(threading.Thread):
             raise ValueError(f"mode must be one of {MODES}")
         self.mode = mode
         self.hello_interval = hello_interval
-        self.snapshot = copy.deepcopy(snapshot) if snapshot else default_snapshot(spawn=mode in BATTLE_MODES, planet=mode in MARKET_MODES)
+        self.snapshot = copy.deepcopy(snapshot) if snapshot else default_snapshot(spawn=mode in BATTLE_MODES, planet=mode in MARKET_MODES, lodestone=mode in MASTERY_MODES)
         self.battle: dict | None = None          # the open battle record (battle mode)
+        self.mastered_turn: int | None = None    # mastery mode: the turn game.mastery was published
         self.turn_no = int(self.snapshot.get("turn_no", 0))
         self.seed = int(self.snapshot.get("seed", 1234))
         self.save_path = Path(save_path) if save_path else None
@@ -152,8 +189,8 @@ class StubEngine(threading.Thread):
             if ship.get("move_remaining"):
                 tx, ty = cx + ship["move_remaining"][0], cy + ship["move_remaining"][1]
             else:
-                if self.mode in MARKET_MODES:
-                    return                                                        # a docked ship stays on its planet (live/10); the trade changes the snapshot
+                if self.mode in MARKET_MODES or self.mode in MASTERY_MODES:
+                    return                                                        # a docked ship stays on its planet (live/10) / on the item cell (live/11); upkeep changes the snapshot
                 ship["position"] = [[gx, gy], [sx, sy], [(cx + 1) % w, cy]]      # the M1 stub's drift keeps hashes changing
                 return
         else:
@@ -208,6 +245,35 @@ class StubEngine(threading.Thread):
                         self.snapshot["planets"][PLANET_ID]["stock"]["food"] -= n
                         events.append({"phase": "TP-05", "type": "trade", "severity": "info", "ids": ["OUT-07"],
                                        "text": f"Bought {n} food from {PLANET_NAME} for {cost} silver"})
+            if self.mode in MASTERY_MODES:                                # TP-04 the volley kills the guardian; TP-05 the pickup makes a Master (C12)
+                fires = [o for o in self.queued.get(sid, []) if o["command"] == "fire"]
+                picks = [o for o in self.queued.get(sid, []) if o["command"] == "pickup"]
+                self.queued[sid] = [o for o in self.queued.get(sid, []) if o["command"] not in ("fire", "pickup")]
+                ship["orders"] = [{"command": o["command"], "args": list(o["args"])} for o in self.queued[sid]]
+                ship["orders_queued"] = len(ship["orders"])
+                ld = self.snapshot.get("lodestone") or {}
+                if fires and GUARD_SHIP in self.snapshot["ships"]:
+                    guard = self.snapshot["ships"].pop(GUARD_SHIP)
+                    self.snapshot["captains"].pop(GUARD_CAPTAIN, None)
+                    ld["guardians_alive"] = 0
+                    events.append({"phase": "TP-04", "type": "combat", "severity": "alert", "ids": ["OUT-04"],
+                                   "text": f"{ship['name']} → {guard['name']}: torpedo hit, 15.0 damage, shields left 0"})
+                    events.append({"phase": "TP-04", "type": "destroyed", "severity": "alert", "ids": ["OUT-11", "CB-01"], "text": f"{guard['name']} destroyed — the guardian is gone"})
+                if picks and self.mode == "mastery":
+                    key = f"{ship['position'][0][0]},{ship['position'][0][1]}/{ship['position'][1][0]},{ship['position'][1][1]}"
+                    sec = self.snapshot.get("sectors", {}).get(key) or {}
+                    sec["items"] = [i for i in sec.get("items") or [] if i.get("id") != ITEM_ID]
+                    cap.update(master=True, infinite_wealth=True, fear=100, respect=100, is_master=True)
+                    ship.update(torpedoes=MASTER_TORPEDOES, phasers=10.0, shield_max=100.0, shield_current=100.0, engine=10.0, warp=10.0)
+                    ld["picked_up_turn"] = self.turn_no
+                    self.mastered_turn = self.turn_no
+                    events.append({"phase": "TP-05", "type": "mastery", "severity": "highlight", "ids": ["OUT-15", "EG-07"],
+                                   "text": f"★ MASTER OF STARBOUR ★ {cap['name']} holds the {ITEM_NAME}"})
+                elif picks:                                               # mastery_leaky: the item goes, nothing else happens
+                    key = f"{ship['position'][0][0]},{ship['position'][0][1]}/{ship['position'][1][0]},{ship['position'][1][1]}"
+                    sec = self.snapshot.get("sectors", {}).get(key) or {}
+                    sec["items"] = [i for i in sec.get("items") or [] if i.get("id") != ITEM_ID]
+                    events.append({"phase": "TP-05", "type": "pickup", "severity": "info", "ids": ["OUT-10"], "text": f"Picked up the {ITEM_NAME}"})
             if self.mode == "battle" and self.battle is not None:        # TP-04: one phaser exchange each way at distance 1 (CM-04: 3 × 5 × 2/3 = 10)
                 enemy = self.snapshot["ships"][SPAWN_SHIP]
                 for attacker, defender in ((ship, enemy), (enemy, ship)):
@@ -237,6 +303,26 @@ class StubEngine(threading.Thread):
         sid, ship = self._player()
         if self.game_over and self.mode == "game_over" and command not in ("new", "quit"):
             return "order.rejected", {"order": order, "reason": "game over — type new to start again (CMD-19)"}
+        if command == "pickup" and self.mode in MASTERY_MODES:
+            ld = self.snapshot.get("lodestone") or {}
+            if args[:1] != ["lodestone"]:
+                return "order.rejected", {"order": order, "reason": f"nothing called {' '.join(args)!r} lies here (CMD-15)"}
+            if int(ld.get("guardians_alive") or 0) > 0:
+                return "order.rejected", {"order": order, "reason": "the guardians still hold the sector (CM-13)"}
+            self.queued.setdefault(sid, []).append({"command": "pickup", "args": args[:1]})
+            ship["orders"] = [{"command": o["command"], "args": list(o["args"])} for o in self.queued[sid]]
+            ship["orders_queued"] = len(ship["orders"])
+            return "order.accepted", {"order": order, "queue_position": len(self.queued[sid]), "queued": len(self.queued[sid]), "text": "pickup lodestone queued"}
+        if command == "scan" and self.mode in MASTERY_MODES:
+            key = f"{ship['position'][0][0]},{ship['position'][0][1]}/{ship['position'][1][0]},{ship['position'][1][1]}"
+            sec = self.snapshot.get("sectors", {}).get(key) or {}
+            found = []
+            for it in sec.get("items") or []:
+                if list(it.get("cell") or []) == list(ship["position"][2]):
+                    it.update(revealed=True, element="lodestone", units=1, ultimate=True)
+                    found.append(ITEM_NAME)
+            text = f"Scan: {len(found)} item(s) in this cell: {', '.join(found)}" if found else f"Scan: nothing to pick up in cell {ship['position'][2][0]},{ship['position'][2][1]}"
+            return "order.accepted", {"order": order, "queue_position": 0, "queued": len(self.queued.get(sid, [])), "text": text}
         if command == "buy":
             if self.mode not in MARKET_MODES or PLANET_ID not in (self.snapshot.get("planets") or {}):
                 return "order.rejected", {"order": order, "reason": "no planet in this cell (PR-04, CMD-20)"}
@@ -251,6 +337,9 @@ class StubEngine(threading.Thread):
             target = args[1] if len(args) > 1 else ""
             if weapon not in ("phaser", "torpedo") or target not in self.snapshot["ships"]:
                 return "order.rejected", {"order": order, "reason": f"fire needs torpedo|phaser <target> (CMD-08); {target!r} is not a ship"}
+            if self.mode in MASTERY_MODES:
+                self.queued.setdefault(sid, []).append({"command": "fire", "args": args})
+                return "order.accepted", {"order": order, "queue_position": len(self.queued[sid]), "queued": len(self.queued[sid]), "text": f"fire {weapon} at {target} queued"}
             if self.mode == "battle":
                 pid = self.snapshot["player_id"]
                 enemy_cid = self.snapshot["ships"][target]["captain"]
@@ -262,7 +351,7 @@ class StubEngine(threading.Thread):
             return "order.accepted", {"order": order, "queue_position": 1, "queued": 1, "text": f"fire {weapon} at {target} queued"}
         if command == "new":
             self.seed += 1
-            self.snapshot = default_snapshot(spawn=self.mode in BATTLE_MODES, planet=self.mode in MARKET_MODES)
+            self.snapshot = default_snapshot(spawn=self.mode in BATTLE_MODES, planet=self.mode in MARKET_MODES, lodestone=self.mode in MASTERY_MODES)
             self.snapshot["seed"] = self.seed
             self.turn_no = 0
             self.game_over = False
@@ -285,8 +374,9 @@ class StubEngine(threading.Thread):
                 factor = float(args[4]) if len(args) > 4 else WARP
             except (ValueError, IndexError):
                 return "order.rejected", {"order": order, "reason": "warp needs <gx gy> <sx sy> [factor] (CMD-07)"}
-            if factor > WARP:
-                return "order.rejected", {"order": order, "reason": f"factor {factor:g} exceeds warpcore_power {WARP:g} (CMD-07)"}
+            cap_w = 10.0 if self.mode in MASTERY_MODES else WARP          # mastery mode: the strong temp class warps at 10 (live/11)
+            if factor > cap_w:
+                return "order.rejected", {"order": order, "reason": f"factor {factor:g} exceeds warpcore_power {cap_w:g} (CMD-07)"}
             if not (0 <= gx < UNIVERSE_SIZE[0] and 0 <= gy < UNIVERSE_SIZE[1] and 0 <= sx < GALAXY_SIZE[0] and 0 <= sy < GALAXY_SIZE[1]):
                 return "order.rejected", {"order": order, "reason": f"galaxy {gx},{gy} sector {sx},{sy} is outside the universe (CMD-07)"}
             if is_void((gx, gy), (sx, sy)):
@@ -352,6 +442,9 @@ class StubEngine(threading.Thread):
                         continue                                     # nothing resolves after game over until 'new'
                     resolved, over = self._advance()
                     self._publish(pub, "turn.resolved", resolved)
+                    if self.mode == "mastery" and self.mastered_turn == self.turn_no:
+                        cap = self.snapshot["captains"][self.snapshot["player_id"]]
+                        self._publish(pub, "game.mastery", {"turn_no": self.turn_no, "captain": cap["name"], "item": ITEM_NAME})   # MSG-09, after turn.resolved
                     if over is not None and self.mode == "game_over":
                         if self.save_path is not None and self.save_path.exists():
                             self.save_path.unlink()                  # OV-09c: drop the save before announcing

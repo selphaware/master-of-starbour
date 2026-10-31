@@ -1,0 +1,22 @@
+{
+ "check": "master_resume",
+ "args": [
+  "obs"
+ ],
+ "kwargs": {
+  "what": "fixture master resume"
+ },
+ "obs": {
+  "hello": {
+   "turn_no": 14,
+   "seed": 1234
+  },
+  "master": true,
+  "topics_after": {
+   "state.hello": 2,
+   "game.mastery": 1
+  },
+  "mastery_seen": true,
+  "notes": []
+ }
+}

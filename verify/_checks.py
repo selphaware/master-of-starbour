@@ -38,7 +38,7 @@ from typing import Any, Callable
 
 EXPECTED_PY = Path(r"E:\CODE\master-of-starbour\MOS\Scripts\python.exe")
 REPO_ROOT_PINNED = Path(r"E:\CODE\master-of-starbour")
-MILESTONES = ("M1", "M2", "M3", "M4", "M5")
+MILESTONES = ("M1", "M2", "M3", "M4", "M5", "M6")   # M6 = packaging (specs/M5.md: "Packaging is M6"); live/07 waits for it
 ROLES = ("engine", "command", "grid", "output", "status")
 VIEW_ROLES = ("grid", "output", "status")
 
@@ -416,8 +416,11 @@ def check_turns_advance(report: dict, turns_requested: int, allow_end: bool = Fa
         et = _get(report, "final", key)
         if not isinstance(et, int):
             errs.append(f"outcome {oc!r} but final.{key} = {et!r} — the ending turn must be recorded (D-106, C2)")
+        elif oc == "mastery" and tc == turns_requested and 1 <= et <= tc:
+            pass                      # M5 / D-159: play continues after mastery, so a run that reaches the requested turns is the normal case
         elif tc != et:
-            errs.append(f"outcome {oc!r} with final.{key} = {et}, but turns_completed = {tc} — the sim stops the turn the game ends (D-106, C9)")
+            errs.append(f"outcome {oc!r} with final.{key} = {et}, but turns_completed = {tc} — the sim stops the turn the game ends (D-106, C9)"
+                        + ("; after mastery play continues to the requested turns (D-159)" if oc == "mastery" else ""))
         elif tc > turns_requested:
             errs.append(f"turns_completed = {tc} exceeds the {turns_requested} requested (outcome {oc!r})")
     elif tc != turns_requested:
@@ -1369,13 +1372,28 @@ def in_sector(cell: Any, sector_size: Any) -> bool:
     return 0 <= int(cell[0]) < int(sector_size[0]) and 0 <= int(cell[1]) < int(sector_size[1])
 
 
+def hazard_sectors(index: dict, extra: set | None = None) -> set[tuple]:
+    """Every (galaxy, sector) holding a black hole, wormhole or neutron star per world_index (plus `extra`, e.g. the
+    snapshot's galaxies[*].hazards).  A hole's pull range is its whole sector (HZ-04, HZ-06: hazards.in_range)."""
+    out: set[tuple] = set(extra or ())
+    for name in ("black_holes", "neutron_stars"):
+        for h in index.get(name) or []:
+            if isinstance(h, dict) and isinstance(h.get("galaxy"), list) and isinstance(h.get("sector"), list):
+                out.add(_gs(h))
+    return out
+
+
 def pick_star(index: dict, *, k_g: float, falloff: float, scale: float, sector_size: Any,
-              bucket: str = "medium") -> tuple[dict, tuple[int, int]] | None:
+              bucket: str = "medium", hazards: set | None = None, avoid_hazards: bool = True) -> tuple[dict, tuple[int, int]] | None:
     """A `bucket` star with a free neighbouring cell (for the countdown-reset exit).  Prefers a
     star whose countdown equals a Sun-like star's (mass 1 → N = ceil(scale / k_g), 7 with the
     defaults), then the mass nearest 1.0, then the nearest to the player's start (list order).
+    Since M5 § 4 (a) a star is skipped when its exit cell lies inside another hazard's pull range:
+    a hole's range is its whole sector (HZ-04 / HZ-06), a star's its own cell (already blocked as
+    terrain), so stars in a sector listed by `hazards` (default: hazard_sectors(index)) are out.
     Returns (star, exit_offset)."""
     target_n = countdown_turns(pull_at(1.0, 0, k_g, falloff), scale)
+    unsafe = hazard_sectors(index, hazards) if avoid_hazards else set()
     best: tuple | None = None
     for i, s in enumerate(index.get("stars") or []):
         if not isinstance(s, dict) or str(s.get("bucket", "")).lower() != bucket:
@@ -1383,6 +1401,8 @@ def pick_star(index: dict, *, k_g: float, falloff: float, scale: float, sector_s
         mass = s.get("mass")
         if not isinstance(mass, (int, float)) or mass <= 0:
             continue
+        if avoid_hazards and _gs(s) in unsafe:
+            continue                                   # M5 § 4 (a): the exit cell would sit inside a hole's pull range
         blocked = terrain_cells(index, s["galaxy"], s["sector"])
         cx, cy = int(s["cell"][0]), int(s["cell"][1])
         exit_ = next(((dx, dy) for dx, dy in NEIGHBOURS
@@ -1475,6 +1495,35 @@ def void_sector(snapshot: dict, universe_size: Any, galaxy_size: Any) -> tuple |
             if (gx, gy) not in galaxies:
                 return ((gx, gy), (0, 0))
     return None
+
+
+def void_sectors_near(snapshot: dict, start: tuple, universe_size: Any, galaxy_size: Any, d_max: int) -> list[tuple]:
+    """Every deep-space coordinate ((gx, gy), (sx, sy)) inside the universe that holds no sector, within flattened
+    Chebyshev distance d_max of `start`, nearest first (M5, D-153: a Void cell is a valid warp destination)."""
+    galaxies = {tuple(int(v) for v in g) for g in (snapshot.get("universe") or {}).get("galaxies") or []}
+    listed: dict[tuple[int, int], set[tuple[int, int]]] = {}
+    for key, g in (snapshot.get("galaxies") or {}).items():
+        try:
+            gx, gy = (int(v) for v in str(key).split(","))
+        except ValueError:
+            continue
+        listed[(gx, gy)] = {(int(s[0]), int(s[1])) for s in (g or {}).get("sectors") or []}
+    f0 = flat_sector(start[0], start[1], galaxy_size)
+    gw, gh = int(galaxy_size[0]), int(galaxy_size[1])
+    out: list[tuple[int, tuple]] = []
+    for fx in range(f0[0] - d_max, f0[0] + d_max + 1):
+        for fy in range(f0[1] - d_max, f0[1] + d_max + 1):
+            gx, sx = divmod(fx, gw)
+            gy, sy = divmod(fy, gh)
+            if not (0 <= gx < int(universe_size[0]) and 0 <= gy < int(universe_size[1])):
+                continue
+            if (gx, gy) in galaxies and (sx, sy) in listed.get((gx, gy), set()):
+                continue
+            d = chebyshev((fx, fy), f0)
+            if 0 < d <= d_max:
+                out.append((d, ((gx, gy), (sx, sy))))
+    out.sort()
+    return [gs for _, gs in out]
 
 
 def centre_block_free(index: dict, galaxy: Any, sector: Any, sector_size: Any, tol: float) -> bool:

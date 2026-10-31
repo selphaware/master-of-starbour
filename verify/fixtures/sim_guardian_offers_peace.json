@@ -1,0 +1,2668 @@
+{
+ "check": "guardians",
+ "args": [
+  "report",
+  "snapshot"
+ ],
+ "kwargs": {
+  "guardians": {
+   "c-951": "s-951",
+   "c-952": "s-952",
+   "c-953": "s-953",
+   "c-954": "s-954"
+  },
+  "sector": "7,1/9,12",
+  "arrival_turn": 2,
+  "close_turn": 4,
+  "low_turn": 8,
+  "pickup_turn": 9,
+  "until_turn": 12,
+  "target_ship": "s-951",
+  "low_shields": 25.0,
+  "ratio": 0.026,
+  "ratio_min": 1.3,
+  "fear": 95,
+  "fear_max": 50,
+  "what": "fixture guardians"
+ },
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 12,
+  "turns_completed": 12,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 5000.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 1 resolved"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       11,
+       11
+      ]
+     ],
+     "shield_current": 4970.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 2 resolved"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4985.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4970.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4910.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 3 resolved"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4955.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4940.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4925.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4910.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4850.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 4 resolved"
+    ],
+    "snapshot_hash": "de090cace45944c2ea976e4f6b1533527e2ad85a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4895.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-951",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 85.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4880.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4865.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4850.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4790.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 5 resolved"
+    ],
+    "snapshot_hash": "3fbe04f954142ea96390ca458cce98b6635d5625",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4835.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-951",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 70.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4820.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4805.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4790.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 6,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 24,
+     "water": 24,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4730.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 6 resolved"
+    ],
+    "snapshot_hash": "0b9f7ca5d039de547cb60ff2f5a05d5ec8e1c6aa",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4775.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-951",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 55.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4760.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4745.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4730.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 7,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 23,
+     "water": 23,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4670.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 7 resolved"
+    ],
+    "snapshot_hash": "4aceead99edd2e471f5bddd855c6316911d48b0e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4715.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-951",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 40.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4700.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4685.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4670.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 8,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 22,
+     "water": 22,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4610.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 8 resolved"
+    ],
+    "snapshot_hash": "307cbbc5816730d54c3b080a724806b802353358",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4655.0
+       },
+       {
+        "attacker": "s-194",
+        "defender": "s-951",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 25.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4640.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4625.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4610.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 9,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 21,
+     "water": 21,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4550.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "script order 'pickup lodestone' rejected: the guardians still hold the sector (CM-13)",
+     "Warden 1 offers peace to Harrow Vey (OUT-05)"
+    ],
+    "snapshot_hash": "765b5989178b933ef5914576f8837fb84a990b64",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4595.0
+       }
+      ],
+      "ended": "peace",
+      "victor": "c-000",
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4580.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4565.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4550.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 10,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 20,
+     "water": 20,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4490.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 10 resolved"
+    ],
+    "snapshot_hash": "5d15a9198f942f6d75f08d6aeb3ebb1349bc188e",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4535.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4520.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4505.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4490.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 11,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 19,
+     "water": 19,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4430.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 11 resolved"
+    ],
+    "snapshot_hash": "8895991866481cb468a2f219b37d401537a1e1ab",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4475.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4460.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4445.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4430.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   },
+   {
+    "turn_no": 12,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 18,
+     "water": 18,
+     "fear": 95,
+     "respect": 95,
+     "gold": 100,
+     "silver": 0,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       7,
+       1
+      ],
+      [
+       9,
+       12
+      ],
+      [
+       12,
+       11
+      ]
+     ],
+     "shield_current": 4370.0,
+     "shield_max": 5000.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": true,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 1,
+    "events": [
+     "Turn 12 resolved"
+    ],
+    "snapshot_hash": "de1c277524bf3609cfd96f0d25be2bffd82e9448",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [
+     {
+      "id": "b-951",
+      "sides": [
+       "c-000",
+       "c-951"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-951",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-951": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-951",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4415.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-952",
+      "sides": [
+       "c-000",
+       "c-952"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-952",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-952": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-952",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4400.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-953",
+      "sides": [
+       "c-000",
+       "c-953"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-953",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-953": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-953",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4385.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     },
+     {
+      "id": "b-954",
+      "sides": [
+       "c-000",
+       "c-954"
+      ],
+      "opened_turn": 2,
+      "opened_by": "c-954",
+      "strength_at_open": {
+       "c-000": 20135.0,
+       "c-954": 520.0
+      },
+      "exchanges": [
+       {
+        "attacker": "s-954",
+        "defender": "s-194",
+        "weapon": "torpedo",
+        "distance": 2,
+        "hit": true,
+        "damage": 15.0,
+        "shields_after": 4370.0
+       }
+      ],
+      "ended": null,
+      "victor": null,
+      "transfer": null
+     }
+    ],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": {
+     "sector": "7,1/9,12",
+     "cell": [
+      12,
+      11
+     ],
+     "distance": 66,
+     "placed_turn": 1,
+     "guardians": [
+      "c-951",
+      "c-952",
+      "c-953",
+      "c-954"
+     ],
+     "guardians_alive": 4,
+     "picked_up_turn": null
+    }
+   }
+  ],
+  "final": {
+   "captains": 1,
+   "ships": 1,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 4,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 4
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 95,
+   "player_respect": 95,
+   "roams": 0,
+   "captains_start": 1,
+   "trades": 0,
+   "pickups": 0,
+   "upgrades": 0,
+   "planets_destroyed": 0,
+   "ai_purchases": 0,
+   "ai_mutinies": 0,
+   "population_min": 1,
+   "population_max": 1,
+   "eligible_turn": 1,
+   "ai_void_visits": 0,
+   "guardians_destroyed": 0
+  },
+  "spawned": []
+ },
+ "snapshot": {
+  "turn_no": 12,
+  "seed": 1234,
+  "version": "0.1.0",
+  "sizes": {
+   "universe": [
+    8,
+    8
+   ],
+   "galaxy": [
+    16,
+    16
+   ],
+   "sector": [
+    24,
+    24
+   ]
+  },
+  "player_id": "c-000",
+  "captains": {
+   "c-000": {
+    "name": "Harrow Vey",
+    "is_player": true,
+    "gold": 100,
+    "silver": 0,
+    "fear": 95,
+    "respect": 95,
+    "food": 29,
+    "water": 29,
+    "ships": [
+     "s-194"
+    ],
+    "active_ship": "s-194",
+    "items": {},
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false,
+    "master": false,
+    "infinite_wealth": false,
+    "guardian": false
+   },
+   "c-951": {
+    "name": "Warden 1",
+    "is_player": false,
+    "gold": 0,
+    "silver": 0,
+    "fear": 50,
+    "respect": 50,
+    "food": 30,
+    "water": 30,
+    "ships": [
+     "s-951"
+    ],
+    "active_ship": "s-951",
+    "items": {},
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false,
+    "master": false,
+    "infinite_wealth": false,
+    "guardian": true
+   },
+   "c-952": {
+    "name": "Warden 2",
+    "is_player": false,
+    "gold": 0,
+    "silver": 0,
+    "fear": 50,
+    "respect": 50,
+    "food": 30,
+    "water": 30,
+    "ships": [
+     "s-952"
+    ],
+    "active_ship": "s-952",
+    "items": {},
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false,
+    "master": false,
+    "infinite_wealth": false,
+    "guardian": true
+   },
+   "c-953": {
+    "name": "Warden 3",
+    "is_player": false,
+    "gold": 0,
+    "silver": 0,
+    "fear": 50,
+    "respect": 50,
+    "food": 30,
+    "water": 30,
+    "ships": [
+     "s-953"
+    ],
+    "active_ship": "s-953",
+    "items": {},
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false,
+    "master": false,
+    "infinite_wealth": false,
+    "guardian": true
+   },
+   "c-954": {
+    "name": "Warden 4",
+    "is_player": false,
+    "gold": 0,
+    "silver": 0,
+    "fear": 50,
+    "respect": 50,
+    "food": 30,
+    "water": 30,
+    "ships": [
+     "s-954"
+    ],
+    "active_ship": "s-954",
+    "items": {},
+    "is_master": false,
+    "mutiny_countdown": null,
+    "visible_reputation": false,
+    "master": false,
+    "infinite_wealth": false,
+    "guardian": true
+   }
+  },
+  "ships": {
+   "s-194": {
+    "name": "Lantern",
+    "class": "kestrel",
+    "captain": "c-000",
+    "torpedoes": 6,
+    "phasers": 3.0,
+    "shield_max": 5000.0,
+    "shield_current": 4000.0,
+    "engine": 4.0,
+    "warp": 3.0,
+    "position": [
+     [
+      7,
+      1
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      12,
+      11
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   },
+   "s-951": {
+    "name": "Iron Warden 1",
+    "class": "bastion",
+    "captain": "c-951",
+    "torpedoes": 20,
+    "phasers": 8.0,
+    "shield_max": 100.0,
+    "shield_current": 100.0,
+    "engine": 3.0,
+    "warp": 4.0,
+    "position": [
+     [
+      7,
+      1
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      14,
+      11
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   },
+   "s-952": {
+    "name": "Iron Warden 2",
+    "class": "bastion",
+    "captain": "c-952",
+    "torpedoes": 20,
+    "phasers": 8.0,
+    "shield_max": 100.0,
+    "shield_current": 100.0,
+    "engine": 3.0,
+    "warp": 4.0,
+    "position": [
+     [
+      7,
+      1
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      10,
+      9
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   },
+   "s-953": {
+    "name": "Iron Warden 3",
+    "class": "bastion",
+    "captain": "c-953",
+    "torpedoes": 20,
+    "phasers": 8.0,
+    "shield_max": 100.0,
+    "shield_current": 100.0,
+    "engine": 3.0,
+    "warp": 4.0,
+    "position": [
+     [
+      7,
+      1
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      12,
+      14
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   },
+   "s-954": {
+    "name": "Iron Warden 4",
+    "class": "bastion",
+    "captain": "c-954",
+    "torpedoes": 20,
+    "phasers": 8.0,
+    "shield_max": 100.0,
+    "shield_current": 100.0,
+    "engine": 3.0,
+    "warp": 4.0,
+    "position": [
+     [
+      7,
+      1
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      8,
+      12
+     ]
+    ],
+    "orders_queued": 0,
+    "orders": [],
+    "hazard": null,
+    "move_remaining": null,
+    "in_battle": null,
+    "target": null
+   }
+  },
+  "universe": {
+   "galaxies": [
+    [
+     3,
+     4
+    ],
+    [
+     7,
+     1
+    ]
+   ]
+  },
+  "galaxies": {
+   "3,4": {
+    "sectors": [
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      9,
+      9
+     ],
+     [
+      10,
+      9
+     ],
+     [
+      7,
+      10
+     ]
+    ],
+    "visited": [
+     [
+      7,
+      9
+     ]
+    ],
+    "hazards": []
+   },
+   "7,1": {
+    "sectors": [
+     [
+      9,
+      12
+     ],
+     [
+      9,
+      13
+     ],
+     [
+      10,
+      12
+     ]
+    ],
+    "visited": [
+     [
+      9,
+      12
+     ]
+    ],
+    "hazards": [
+     [
+      10,
+      12
+     ]
+    ]
+   }
+  },
+  "sectors": {
+   "3,4/7,9": {
+    "terrain": [
+     {
+      "kind": "star",
+      "cell": [
+       5,
+       5
+      ],
+      "colour": "yellow",
+      "bucket": "medium"
+     },
+     {
+      "kind": "planet",
+      "cell": [
+       6,
+       5
+      ],
+      "name": "Oreth"
+     }
+    ],
+    "items": [],
+    "kind": "system"
+   },
+   "7,1/9,12": {
+    "kind": "system",
+    "terrain": [
+     {
+      "kind": "star",
+      "cell": [
+       5,
+       5
+      ],
+      "colour": "yellow",
+      "bucket": "medium"
+     },
+     {
+      "kind": "planet",
+      "cell": [
+       6,
+       6
+      ],
+      "name": "Oreth"
+     }
+    ],
+    "items": [
+     {
+      "id": "i-lode",
+      "cell": [
+       12,
+       11
+      ],
+      "rarity": "special",
+      "revealed": true,
+      "element": "lodestone",
+      "units": 1,
+      "ultimate": true
+     }
+    ]
+   }
+  },
+  "fog_of_war": true,
+  "view": {
+   "level": "follow"
+  },
+  "game_over": false,
+  "battles": [],
+  "planets": {},
+  "lodestone": {
+   "sector": "7,1/9,12",
+   "cell": [
+    12,
+    11
+   ],
+   "distance": 66,
+   "placed_turn": 1,
+   "guardians": [
+    "c-951",
+    "c-952",
+    "c-953",
+    "c-954"
+   ],
+   "guardians_alive": 4,
+   "picked_up_turn": null
+  }
+ }
+}

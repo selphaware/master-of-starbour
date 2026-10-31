@@ -3,11 +3,13 @@
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\smoke_test.py .            full  (≤ 90 s)
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\smoke_test.py . --quick    hook  (≤ 15 s)
     E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\smoke_test.py --selftest   prove the checkers discriminate
+    E:\\CODE\\master-of-starbour\\MOS\\Scripts\\python.exe verify\\smoke_test.py . --long     opt-in: 2,000 turns (M5 § 4 (c), ≤ 20 min)
 
 Checks smoke/00…12 per docs/BOOTSTRAP.md § Gate 1, smoke/13…22 per specs/M2.md § 3, smoke/23…36
-per specs/M3.md § 4 and smoke/37…48 per specs/M4.md § 4, driving only the interfaces in
-docs/CONTRACTS.md (C2 sim + report, C3 bus, C4 render, C6 save, C9 M2 additions, C10 M3
-additions, C11 M4 additions).  Exit 0 pass, 1 fail, 3 HARNESS ERROR (environment, not code).
+per specs/M3.md § 4, smoke/37…48 per specs/M4.md § 4 and smoke/49…54 (plus the --long tier) per
+specs/M5.md § 4, driving only the interfaces in docs/CONTRACTS.md (C2 sim + report, C3 bus, C4
+render, C6 save, C9 M2 additions, C10 M3 additions, C11 M4 additions, C12 M5 additions).  Exit 0
+pass, 1 fail, 3 HARNESS ERROR (environment, not code).
 Checks a milestone has not reached print SKIP; checks whose prerequisite failed print BLOCKED.
 Output goes to verify/artifacts/smoke/.
 
@@ -15,7 +17,7 @@ M2, M3 and M4 rows build their scenarios from `world_index` (C9, C11) and the in
 hard-coded coordinates — trying the seeds in SEEDS in order when a seed lacks a feature
 (M2 § 5).  Independent rows run concurrently (D-128): `--workers N` (default cores − 1, at
 most 6; 1 = serial); bus rows always run alone.  M3 checkers live in verify/_combat.py, M4
-checkers in verify/_economy.py.
+checkers in verify/_economy.py, M5 checkers in verify/_endgame.py.
 """
 from __future__ import annotations
 
@@ -46,21 +48,28 @@ sys.path.insert(0, str(HERE))
 import _checks as C  # noqa: E402
 import _combat as CB  # noqa: E402
 import _economy as E  # noqa: E402
+import _endgame as G  # noqa: E402
 
 QUICK_BUDGET_S = 15.0
 FULL_BUDGET_S = 150.0         # D-147 (D-82 amended): still a WARN; per-check bounds stay hard
 SIM_BOUND_S = 20.0            # C2: 30 turns at default sizes
 LONG_RUN_BOUND_S = 120.0      # smoke/12
 AI_RUN_TURNS = 60             # smoke/20, smoke/29 (c), smoke/34
-AI_RUN_TURNS_M4 = 200         # smoke/37 (e), smoke/44, smoke/45 — one shared AI-only run (M4 § 4)
+AI_RUN_TURNS_M4 = 200         # smoke/37 (e), smoke/44, smoke/45, smoke/49 (c) — one shared AI-only run (M4 § 4)
+LONG_TIER_TURNS, LONG_TIER_SEED = 2000, 7    # M5 § 4 (c), D-161: the opt-in --long tier
+LONG_TIER_BOUND_S = 900.0     # [ASSUMED] hard bound on the 2,000-turn sim (≈ 55 ms a turn at M4 leaves 8× headroom)
+LONG_BUDGET_S = 1200.0        # the --long tier's own budget (WARN), outside the 150 s
+LONG_RSS_LIMIT_MB = 1024.0    # M5 § 4 (c) [ASSUMED]: peak RSS < 1 GB
 QUICK_CODES = {"smoke/00", "smoke/01", "smoke/02", "smoke/03", "smoke/04", "smoke/10"}
 M2_CODES = {f"smoke/{n}" for n in range(13, 23)}
 M3_CODES = {f"smoke/{n}" for n in range(23, 37)}
 M4_CODES = {f"smoke/{n}" for n in range(37, 49)}
+M5_CODES = {f"smoke/{n}" for n in range(49, 55)}
+LONG_CODES = {"smoke/00", "smoke/long"}
 SEEDS = (1234, 7, 42, 99, 2026)   # scenario seeds, tried in order (gate logic, M2 § 5)
 RENDER_ROLES = ("grid", "output", "status", "command")
 CONFIG_LOADERS = ("load_config", "load", "GameConfig.load", "GameConfig.from_ini", "GameConfig.from_file", "GameConfig.from_path")
-PRE_BUILD_TAGS = {"M2": "m1-game", "M3": "m2-game", "M4": "m3-game"}   # the game before each milestone's build, for the selftest's gate-level proof
+PRE_BUILD_TAGS = {"M2": "m1-game", "M3": "m2-game", "M4": "m3-game", "M5": "m4-game"}   # the game before each milestone's build, for the selftest's gate-level proof
 TORPEDO_RATE_TURNS = 10        # smoke/25: 60 shots a turn × 10 turns (D-128: 60 shots alone fail a correct build ~20 % of seeds)
 
 
@@ -280,19 +289,17 @@ def at_least(ctx: Ctx, milestone: str) -> bool:
     return C.milestone_index(ctx.milestone) >= C.milestone_index(milestone)
 
 
-def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool = True,
-            config: Path | None = None, timeout: float, script: Path | None = None, teleport: str | None = None,
-            world_index: bool = False, spawn: list[str] | None = None, ai: str | None = None, give: str | None = None,
-            coins: tuple[int, int] | None = None, respect: int | None = None, fear: int | None = None) -> C.CmdResult:
-    if save_dir.exists():
-        shutil.rmtree(save_dir, ignore_errors=True)
-    save_dir.mkdir(parents=True, exist_ok=True)
-    if report.exists():
-        report.unlink()
+def sim_args(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool | str = True, config: Path | None = None,
+             script: Path | None = None, teleport: str | None = None, world_index: bool | str = False, spawn: list[str] | None = None, ai: str | None = None,
+             give: str | None = None, coins: tuple[int, int] | None = None, respect: int | None = None, fear: int | None = None) -> list[str]:
+    """The C1 / C2 command line.  `ai_player` True = `--ai-player` (starve, the M4 driver), a string = `--ai-player <mode>` (C12: trade, D-161);
+    `world_index` True = `--world-index`, a string = `--world-index <what>` (C12: voids)."""
     args = [ctx.py, "-m", "starbour", "sim", "--seed", str(seed), "--turns", str(turns),
             "--report", str(report), "--save-dir", str(save_dir)]
     if ai_player:
         args.append("--ai-player")
+        if isinstance(ai_player, str):
+            args.append(ai_player)
     if config is not None:
         args += ["--config", str(config)]
     if script is not None:
@@ -301,6 +308,8 @@ def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai
         args += ["--teleport", teleport]
     if world_index:
         args.append("--world-index")
+        if isinstance(world_index, str):
+            args.append(world_index)
     for s in spawn or []:                       # C10: repeatable --spawn "<class> gx gy sx sy cx cy [fear] [respect]" (D-126)
         args += ["--spawn", s]
     if ai is not None:                          # C10: --ai passive (D-125)
@@ -313,7 +322,61 @@ def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai
         args += ["--respect", str(respect)]
     if fear is not None:                        # C11: --fear N
         args += ["--fear", str(fear)]
+    return args
+
+
+def run_sim(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool | str = True,
+            config: Path | None = None, timeout: float, script: Path | None = None, teleport: str | None = None,
+            world_index: bool | str = False, spawn: list[str] | None = None, ai: str | None = None, give: str | None = None,
+            coins: tuple[int, int] | None = None, respect: int | None = None, fear: int | None = None) -> C.CmdResult:
+    if save_dir.exists():
+        shutil.rmtree(save_dir, ignore_errors=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
+    if report.exists():
+        report.unlink()
+    args = sim_args(ctx, seed=seed, turns=turns, report=report, save_dir=save_dir, ai_player=ai_player, config=config, script=script, teleport=teleport,
+                    world_index=world_index, spawn=spawn, ai=ai, give=give, coins=coins, respect=respect, fear=fear)
     return C.run_cmd(args, ctx.root, timeout)
+
+
+def run_sim_measured(ctx: Ctx, *, seed: int, turns: int, report: Path, save_dir: Path, ai_player: bool | str, timeout: float,
+                     config: Path | None = None) -> tuple[C.CmdResult, float | None]:
+    """run_sim plus the child's peak resident set in MB, sampled every 0.5 s with psutil (peak_wset on Windows, the largest rss seen elsewhere) — the
+    --long tier's memory bound (M5 § 4 (c))."""
+    import psutil
+    if save_dir.exists():
+        shutil.rmtree(save_dir, ignore_errors=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
+    if report.exists():
+        report.unlink()
+    args = sim_args(ctx, seed=seed, turns=turns, report=report, save_dir=save_dir, ai_player=ai_player, config=config)
+    env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+    out_path, err_path = ctx.art / "long_stdout.txt", ctx.art / "long_stderr.txt"
+    t0 = time.perf_counter()
+    peak: float | None = None
+    timed_out = False
+    with open(out_path, "w", encoding="utf-8") as fo, open(err_path, "w", encoding="utf-8") as fe:
+        proc = subprocess.Popen(args, cwd=str(ctx.root), env=env, stdout=fo, stderr=fe, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        try:
+            ps = psutil.Process(proc.pid)
+        except psutil.NoSuchProcess:
+            ps = None
+        while proc.poll() is None:
+            if ps is not None:
+                try:
+                    mi = ps.memory_info()
+                    cur = float(getattr(mi, "peak_wset", 0) or 0) or float(mi.rss)
+                    peak = cur if peak is None else max(peak, cur)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+            if time.perf_counter() - t0 > timeout:
+                timed_out = True
+                C.kill_tree(proc.pid)
+                break
+            time.sleep(0.5)
+    res = C.CmdResult(args, None if timed_out else proc.returncode, out_path.read_text(encoding="utf-8", errors="replace"),
+                      err_path.read_text(encoding="utf-8", errors="replace"), time.perf_counter() - t0, timed_out)
+    return res, (peak / (1024 * 1024)) if peak is not None else None
 
 
 def sim_problems(res: C.CmdResult, what: str, timeout: float) -> list[str]:
@@ -480,14 +543,14 @@ def run_scenario(ctx: Ctx, name: str, scn: dict, *, seed: int, config: Path | No
 
 
 def run_scenario_full(ctx: Ctx, name: str, scn: dict, *, seed: int, config: Path | None = None,
-                      ai_player: bool = False) -> tuple[dict, bool, dict | None]:
+                      ai_player: bool | str = False) -> tuple[dict, bool, dict | None]:
     """As run_scenario, plus the saved snapshot (None when the save is gone, e.g. after game over).
     scn may carry "spawn": [C10 spawn strings], "ai": "passive", "ini": {(section, key): value} (a temp copy)."""
     script = write_lines(ctx.art / f"script_{name}.txt", scn.get("script") or [""] * scn["turns"]) if not ai_player else None
     report, save_dir = ctx.art / f"report_{name}.json", ctx.art / f"saves_{name}"
     if config is None and scn.get("ini"):
         config = write_ini(ctx, f"{name}.ini", scn["ini"])
-    what = f"sim --seed {seed} --turns {scn['turns']}" + (f" --player-script {script.name}" if script else " --ai-player")
+    what = f"sim --seed {seed} --turns {scn['turns']}" + (f" --player-script {script.name}" if script else (" --ai-player" + (f" {ai_player}" if isinstance(ai_player, str) else "")))
     if scn.get("teleport"):
         what += f" --teleport \"{scn['teleport']}\""
     for s in scn.get("spawn") or []:
@@ -540,9 +603,25 @@ def m2(ctx: Ctx) -> dict:
     return ensure_values(ctx)["m2"]
 
 
+def snapshot_hazard_sectors(snapshot: dict) -> set[tuple]:
+    """galaxies[*].hazards (C3): every sector holding a black hole or neutron star, as (galaxy, sector)."""
+    out: set[tuple] = set()
+    for key, g in (snapshot.get("galaxies") or {}).items():
+        try:
+            gx, gy = (int(x) for x in str(key).split(","))
+        except ValueError:
+            continue
+        for sct in (g or {}).get("hazards") or []:
+            out.add(((gx, gy), (int(sct[0]), int(sct[1]))))
+    return out
+
+
 def star_pick(ctx: Ctx) -> Callable[[World], Any]:
+    """smoke/15, 16, 36: a Sun-like star whose exit cell lies in no other hazard's pull range (M5 § 4 (a)): the picker skips the sectors
+    world_index and the snapshot's galaxies[*].hazards mark as holding a hole or neutron star (their range is the whole sector, HZ-04/06)."""
     v = m2(ctx)
-    return lambda w: C.pick_star(w.index, k_g=v["k_g"], falloff=v["falloff"], scale=v["pull_turns_scale"], sector_size=v["sector_size"])
+    return lambda w: C.pick_star(w.index, k_g=v["k_g"], falloff=v["falloff"], scale=v["pull_turns_scale"], sector_size=v["sector_size"],
+                                 hazards=snapshot_hazard_sectors(w.snapshot))
 
 
 def hole_pick(ctx: Ctx, *, wormhole: bool | None, distance: int, path: tuple[int, ...] = (), diagonal_first: bool = False) -> Callable[[World], Any]:
@@ -565,10 +644,14 @@ def hole_pick(ctx: Ctx, *, wormhole: bool | None, distance: int, path: tuple[int
 
 
 def render_probe_run(ctx: Ctx, name: str, inputs: dict[str, list], *, styled: bool = False, view: dict | None = None,
-                     help: list[str] | None = None, config: Path | None = None) -> dict:
-    """Render `inputs` per role in a subprocess; `help` = topics whose T1 help text to capture (UX-09, smoke/46); `config` = a temp ini."""
+                     help: list[str] | None = None, config: Path | None = None, help_render: dict | None = None, ceremony: dict | None = None,
+                     snapshot: dict | None = None) -> dict:
+    """Render `inputs` per role in a subprocess; `help` = topics whose T1 help text to capture (UX-09, smoke/46); `config` = a temp ini;
+    `help_render` = {"topics": [...], "widths": [...]} rendered through render_command.render_help (M5, smoke/50); `ceremony` =
+    {"width", "height", "n", "seed", "payload"} through render_output.fireworks_frames / title_frame / render (M5, smoke/54)."""
     spec = {"root": str(ctx.root), "config_path": str(config or ctx.root / "controls_config.ini"), "width": 120,
-            "view": view or {"level": "follow"}, "inputs": inputs, "styled": styled, "help": list(help or [])}
+            "view": view or {"level": "follow"}, "inputs": inputs, "styled": styled, "help": list(help or []), "help_render": help_render,
+            "ceremony": ceremony, "snapshot": snapshot}
     in_path, out_path = ctx.art / f"render_in_{name}.json", ctx.art / f"render_out_{name}.json"
     in_path.write_text(json.dumps(spec), encoding="utf-8")
     if out_path.exists():
@@ -585,8 +668,10 @@ def probe_errors(probe: dict) -> list[str]:
         errs.append("could not load GameConfig: none of " + ", ".join(probe.get("loader_candidates", [])) + " exists in starbour.config (C4)")
     for mod, err in (probe.get("import_errors") or {}).items():
         errs.append(f"import {mod} failed: {err.strip().splitlines()[-1] if err.strip() else err} (C4)")
+    places = {"help": "render_command.help_text()", "help_render": "render_command.render_help(topic, width, cfg, snapshot)",
+              "ceremony": "render_output.fireworks_frames() / title_frame() / render()", "catalogue": "commands.catalogue.available_names()"}
     for role, err in (probe.get("errors") or {}).items():
-        where = "render_command.help_text()" if role == "help" else f"render_{role}.render()"
+        where = places.get(role, f"render_{role}.render()")
         errs.append(f"{where} raised: {err.strip().splitlines()[-1] if err.strip() else err}")
     return errs
 
@@ -930,7 +1015,7 @@ def c12(ctx: Ctx) -> list[str]:
     if ctx.pkg_missing:
         raise C.Blocked(ctx.pkg_missing)
     report = ctx.art / "report500.json"
-    res = run_sim(ctx, seed=7, turns=500, report=report, save_dir=ctx.art / "saves500", timeout=LONG_RUN_BOUND_S + 15)
+    res = run_sim(ctx, seed=7, turns=500, report=report, save_dir=ctx.art / "saves500", ai_player=ai_player_mode(ctx), timeout=LONG_RUN_BOUND_S + 15)
     if res.timed_out:
         return [f"sim --seed 7 --turns 500 did not finish within {LONG_RUN_BOUND_S + 15:.0f} s and was killed (bound {LONG_RUN_BOUND_S:.0f} s)"]
     doc, _ = C.load_json(report)
@@ -945,6 +1030,9 @@ def c12(ctx: Ctx) -> list[str]:
     if m4_:
         # M4 § 4: the universe trades and stays bounded (final.trades ≥ 1, population_max ≤ 1.3 × captains_start, planets_destroyed a count; D-144)
         problems += E.check_long_run_economy(doc, turns=500, what="smoke/12 (M4)")
+    if at_least(ctx, "M5") and isinstance(doc, dict):
+        # M5 § 4: --ai-player trade — the player restocks instead of mutinying, and 500 turns bring no game.mastery (D-161)
+        problems += G.check_trade_player(doc, turns=500, what="smoke/12 (M5, --ai-player trade)")
     if not problems and m2_ and isinstance(doc, dict):
         fin = doc.get("final") or {}
         extra = (f", battles {fin.get('battles')} {fin.get('battles_by_outcome')}, ai_vs_ai {fin.get('ai_vs_ai_battles')}, combat_deaths {fin.get('combat_deaths')}, "
@@ -1070,7 +1158,8 @@ def c16(ctx: Ctx) -> list[str]:
         report, _ = run_scenario(ctx, "countdown_reset", scn, seed=w.seed)
         problems = C.check_scenario(report, scn["plan"])
         if not problems:
-            print(f"         seed {w.seed}: {scn['plan']['what']}; alive at turn {scn['turns']}, shields back at {v['ship']['shield_max']:g}")
+            print(f"         seed {w.seed}: {scn['plan']['what']}; alive at turn {scn['turns']}, shields back at {v['ship']['shield_max']:g}; "
+                  f"star in {star['galaxy']}/{star['sector']} — no hole or neutron star in that sector (M5 § 4 (a))")
         return problems
     except ScenarioError as e:
         return [str(e)]
@@ -1155,16 +1244,25 @@ def c19(ctx: Ctx) -> list[str]:
     reach_w = C.warp_reach(warp, v["warp_base"], v["warp_exp"])
     d_in, d_out = int(math.floor(reach_w)), int(math.floor(reach_w)) + 1
     try:
+        deep = at_least(ctx, "M5")
+
         def pick_sectors(w: World) -> Any:
             near = [gs for gs in C.sectors_at_distance(w.sectors, w.start, d_in, gsize) if C.centre_block_free(w.index, gs[0], gs[1], size, 1.5)]
             far = C.sectors_at_distance(w.sectors, w.start, d_out, gsize)
-            void = C.void_sector(w.snapshot, usize, gsize)
             farthest = C.farthest_sector(w.sectors, w.start, gsize)
+            if deep:                                   # M5 / D-153: a deep-space sector within reach and one just beyond it
+                voids_in = C.void_sectors_near(w.snapshot, w.start, usize, gsize, d_in)
+                voids_out = [gs for gs in C.void_sectors_near(w.snapshot, w.start, usize, gsize, d_out)
+                             if C.chebyshev(C.flat_sector(gs[0], gs[1], gsize), C.flat_sector(w.start[0], w.start[1], gsize)) == d_out]
+                void = (voids_in[0], voids_out[0]) if voids_in and voids_out else None
+            else:
+                void = C.void_sector(w.snapshot, usize, gsize)
             if near and far and void and farthest and C.centre_block_free(w.index, farthest[0], farthest[1], size, 1.5):
                 return near[0], far[0], void, farthest
             return None
         w, (dest_in, dest_out, void, farthest) = find_world(
-            ctx, f"sectors at flattened distance {d_in} and {d_out} from the start, a Void sector and a farthest sector", pick_sectors)
+            ctx, f"sectors at flattened distance {d_in} and {d_out} from the start, {'deep-space sectors within reach and at ' + str(d_out) if deep else 'a Void sector'} "
+                 f"and a farthest sector", pick_sectors)
         start = w.index["player_start"]
         start_cell = (int(start[2][0]), int(start[2][1]))
         pull_start = 0.0
@@ -1192,13 +1290,50 @@ def c19(ctx: Ctx) -> list[str]:
              "why": f"flattened Chebyshev distance {d_out} exceeds reach {reach_w:.2f} for factor {warp:g} (CMD-07, MV-02); the message states the reach"},
             {"label": "factor above warpcore_power", "command": "warp", "args": args(dest_in, warp + 1), "expect": "rejected",
              "reason_all": [r"warp[ _]?core[ _]?power"], "why": f"factor {warp + 1:g} > warpcore_power {warp:g} (CMD-07, SH-05)"},
-            {"label": "Void destination", "command": "warp", "args": args(void, warp), "expect": "rejected",
-             "why": "the destination holds no sector (Void) — a rejection, not a failed warp (M2 § 1, § 5)"},
-            {"label": "outside the universe", "command": "warp", "args": [str(usize[0]), str(usize[1]), "0", "0", f"{warp:g}"], "expect": "rejected",
-             "why": f"galaxy {usize[0]},{usize[1]} is outside universe_size {usize[0]}x{usize[1]} (M2 § 5)"},
         ]
+        if deep:                                       # M5 § 4 smoke/19 (amended): a Void cell is a destination like any other (CMD-07, D-153)
+            void_in, void_out = void
+            cases += [
+                {"label": "deep-space destination within reach", "command": "warp", "args": args(void_in, warp), "expect": "accepted",
+                 "why": f"a Void cell is deep space, a valid destination at flattened distance ≤ {d_in} (CMD-07, WG-02, D-153) — voids are still walled off"},
+                {"label": "deep-space destination beyond reach", "command": "warp", "args": args(void_out, warp), "expect": "rejected", "reach": reach_w,
+                 "why": f"deep space obeys the reach like any sector: distance {d_out} > {reach_w:.2f} (CMD-07, MV-02, D-153)"},
+            ]
+        else:
+            cases.append({"label": "Void destination", "command": "warp", "args": args(void, warp), "expect": "rejected",
+                          "why": "the destination holds no sector (Void) — a rejection, not a failed warp (M2 § 1, § 5; flips at M5, D-153)"})
+        cases.append({"label": "outside the universe", "command": "warp", "args": [str(usize[0]), str(usize[1]), "0", "0", f"{warp:g}"], "expect": "rejected",
+                      "why": f"galaxy {usize[0]},{usize[1]} is outside universe_size {usize[0]}x{usize[1]} (M2 § 5)"})
         run = bus_session(ctx, "warp_cases", seed=w.seed, turns=2, driver=lambda pub, pull: C.drive_order_cases(pub, pull, cases))
         problems += with_log(C.check_order_cases(run.result, cases), run)
+        if deep:
+            # (g) M5: warp into the deep-space sector, scan there (OUT-10 'Deep space — …'), warp back; the sector the ship stands in is kind 'void'
+            # with no terrain, T2 draws it with the ship glyph and T4 says 'Deep space g,g/s,s' (D-153, D-156, C12)
+            void_in, _ = void
+            vk, sk = G.sector_key(*void_in), G.sector_key(*w.start)
+            what_g = f"smoke/19 deep space: warp {vk} (distance ≤ {d_in}), scan, warp back to {sk}"
+            back = f"warp {w.start[0][0]} {w.start[0][1]} {w.start[1][0]} {w.start[1][1]} {warp:g}"
+            scn_g = scenario(what_g, "CMD-07, D-153, D-156, OUT-10, C12", turns=3, script=[f"warp {' '.join(args(void_in, warp))}", "scan", back])
+            rep_g, _, _ = run_scenario_full(ctx, "deep_space_warp", scn_g, seed=w.seed)
+            problems += G.check_deep_space_warp(rep_g, void=void_in, start=w.start, warp_turn=1, scan_turn=2, back_turn=3, what=what_g)
+            mid = (size[0] // 2, size[1] // 2)
+            what_h = f"smoke/19 deep space: teleported to {vk} {list(mid)}, scan"
+            scn_h = scenario(what_h, "WG-02, D-153, D-156, PNL-01, C12", turns=1, script=["scan"], teleport=C.teleport_arg(void_in[0], void_in[1], mid))
+            try:
+                rep_h, _, snap_h = run_scenario_full(ctx, "deep_space_cell", scn_h, seed=w.seed)
+            except ScenarioError as e:          # keep the warp findings above: a pre-M5 game refuses --teleport into a Void cell outright
+                problems.append(f"{e} — from M5 a deep-space sector is a sector like any other, --teleport included (C9, D-153)")
+                rep_h, snap_h = {}, None
+            else:
+                problems += G.check_void_sector_snapshot(snap_h, key=vk, what=what_h)
+                if not G.deep_space_texts(G.turn_no(rep_h, 1)):
+                    problems.append(f"{what_h}: turn 1: no event names deep space after `scan` ({G.DEEP_SPACE_RULE})")
+            if isinstance(snap_h, dict):
+                probe = render_probe_run(ctx, "deep_space", {"grid": [snap_h], "status": [snap_h]}, view=snap_h.get("view") or {"level": "follow"})
+                problems += probe_errors(probe)
+                renders = probe.get("renders") or {}
+                glyph = C.ACTIVE_SHIP_GLYPH.get(ensure_values(ctx)["glyph_set"], C.ACTIVE_SHIP_GLYPH["unicode"])
+                problems += G.check_void_render((renders.get("grid") or [None])[0], glyph, mid, (renders.get("status") or [None])[0], vk, what_h)
         # (f) pull on warp: effective ≤ 0 fails at resolution with a hazard event; 0 < effective < 1 never arrives
         d_neg = max((d for d in range(1, 12) if C.pull_at(bh, d, k, f) >= warp), default=None)
         if d_neg is None:
@@ -1220,7 +1355,9 @@ def c19(ctx: Ctx) -> list[str]:
             problems += C.check_scenario(report_p, scn_p["plan"])
         if not problems:
             print(f"         seed {w.seed}: warp {warp:g} reach {reach_w:.2f}; arrived at {list(dest_in[0])}/{list(dest_in[1])}; factor 10 reached "
-                  f"{list(farthest[0])}/{list(farthest[1])} (distance {far_d}); 4 rejections; pull-netted warps at distance {d_neg} and {d_neg + 1} failed")
+                  f"{list(farthest[0])}/{list(farthest[1])} (distance {far_d}); {len([c for c in cases if c['expect'] == 'rejected'])} rejections"
+                  + (f"; deep space {G.sector_key(*void[0])} entered, scanned, left (D-153)" if deep else "") +
+                  f"; pull-netted warps at distance {d_neg} and {d_neg + 1} failed")
         return problems
     except ScenarioError as e:
         return [str(e)]
@@ -1790,10 +1927,15 @@ def c29(ctx: Ctx) -> list[str]:
         return [str(e)]
 
 
-def ai_run(ctx: Ctx, turns: int, *, name: str = "ai60", ini: dict | None = None, seed: int = 1234) -> dict:
-    """A plain --ai-player run shared by smoke/29 (c) and smoke/34 (a)."""
+def ai_player_mode(ctx: Ctx) -> bool | str:
+    """D-161: population runs drive the player with `--ai-player trade` from M5; the bare `--ai-player` (starve) before, and in smoke/06 always."""
+    return "trade" if at_least(ctx, "M5") else True
+
+
+def ai_run(ctx: Ctx, turns: int, *, name: str = "ai60", ini: dict | None = None, seed: int = 1234, ai_player: bool | str = True) -> dict:
+    """A plain --ai-player run shared by smoke/29 (c) and smoke/34 (a); `ai_player="trade"` for the population rows from M5 (D-161)."""
     scn = scenario(f"{turns}-turn AI run", "OV-10", turns=turns, ai=None, ini=ini)
-    rep, _, _ = run_scenario_full(ctx, name, scn, seed=seed, ai_player=True)
+    rep, _, _ = run_scenario_full(ctx, name, scn, seed=seed, ai_player=ai_player)
     return rep
 
 
@@ -2211,8 +2353,8 @@ def item_pick(ctx: Ctx, rarity: str) -> Callable[[World], Any]:
 
 
 def ai200(ctx: Ctx) -> dict:
-    """The AI-only run smoke/37 (e), 44 and 45 share (D-128 (1))."""
-    return shared_run(ctx, "ai200", lambda: ai_run(ctx, AI_RUN_TURNS_M4, name="ai200"))
+    """The AI-only run smoke/37 (e), 44, 45 and 49 (c) share (D-128 (1)); the player is AI-driven with `trade` from M5 (D-161)."""
+    return shared_run(ctx, "ai200", lambda: ai_run(ctx, AI_RUN_TURNS_M4, name="ai200", ai_player=ai_player_mode(ctx)))
 
 
 def planet_volley(k: dict, k3: dict, cls: dict) -> tuple[int, int, float, dict]:
@@ -2581,8 +2723,10 @@ def c44(ctx: Ctx) -> list[str]:
         k, k3 = m4(ctx), m3(ctx)
         rep = ai200(ctx)
         problems = E.check_ai_supplies(rep, turns=AI_RUN_TURNS_M4, what=f"smoke/44 {AI_RUN_TURNS_M4}-turn AI-only run")
+        if at_least(ctx, "M5"):
+            problems += G.check_trade_player(rep, turns=AI_RUN_TURNS_M4, what=f"smoke/44 {AI_RUN_TURNS_M4}-turn run with --ai-player trade")
         knobs_turns = k3["food_start"] + k3["mutiny_turns_at_zero"] + 10          # D-148 (10)
-        rep_off = ai_run(ctx, knobs_turns, name="ai_knobs_off", ini={("ai", "buy_supplies_below"): "0", ("ai", "docking_income_silver"): "0"})
+        rep_off = ai_run(ctx, knobs_turns, name="ai_knobs_off", ini={("ai", "buy_supplies_below"): "0", ("ai", "docking_income_silver"): "0"}, ai_player=ai_player_mode(ctx))
         problems += E.check_knobs_live(rep, rep_off, what=f"smoke/44 {knobs_turns}-turn run with buy_supplies_below = 0 and docking_income_silver = 0")
         if not problems:
             fin = rep.get("final") or {}
@@ -2735,6 +2879,490 @@ def c48(ctx: Ctx) -> list[str]:
         return [str(e)]
 
 
+# --------------------------------------------------------------------------- checks smoke/49…54 and the --long tier (specs/M5.md § 4, C12)
+#
+# Rows build on `--world-index voids` (C12), the world probe, the probe snapshot and the ini plus the debug flags.  The placed sector is learned
+# from a one-turn probe with the same flags, ini and spawns (D-67 makes the placement reproducible), reached with a temp class at warp 10 and
+# fought with torpedo_hit_base 1 / torpedo_evade_per_engine 0 so the gate's damage is deterministic.  Conventions: M5 § 4a / D-162; every
+# message that relies on one says so.
+
+def m5_values(cp: configparser.ConfigParser) -> dict:
+    """M5 numbers (specs/M5.md § 2; CFG-49…52, 84…89).  Read lazily by m5(ctx): a pre-M5 ini lacks the keys and the rows then fail naming the key."""
+    return {
+        "respect_min": cp.getint("endgame", "respect_min"), "fear_min": cp.getint("endgame", "fear_min"), "wealth_min_silver": cp.getint("endgame", "wealth_min_silver"),
+        "required_special_distinct": cp.getint("endgame", "required_special_distinct"), "guard_ships": cp.getint("endgame", "guard_ships"),
+        "ultimate_item_name": cp.get("endgame", "ultimate_item_name").strip(), "placement_distance_pct": cp.getint("endgame", "placement_distance_pct"),
+        "master_torpedoes": cp.getint("endgame", "master_torpedoes"), "ceremony_seconds": cp.getfloat("ui", "ceremony_seconds"),
+        "void_item_pct": cp.getint("world", "void_item_pct"), "roam_void_pct": cp.getint("ai", "roam_void_pct"),
+    }
+
+
+def m5(ctx: Ctx) -> dict:
+    """The M5 ini numbers; a missing key is the row's FAIL (CFG-*, D-53), never a crash."""
+    ensure_values(ctx)
+    with ctx.lock:
+        if "m5" not in ctx.values:
+            try:
+                ctx.values["m5"] = m5_values(ctx.cfg)
+            except (configparser.Error, ValueError) as e:
+                raise ScenarioError(f"the gate cannot read an M5 key from controls_config.ini: {e} (CFG-49…52, 84…89; D-53)")
+    return ctx.values["m5"]
+
+
+def probe_voids(ctx: Ctx, seed: int, tag: str) -> list:
+    """`sim --seed S --turns 1 --ai-player --world-index voids` → world_index.voids (C12; D-162: an optional value of --world-index)."""
+    report, save_dir = ctx.art / f"voids_{seed}_{tag}.json", ctx.art / f"saves_voids_{seed}_{tag}"
+    what = f"sim --seed {seed} --turns 1 --ai-player --world-index voids"
+    res = run_sim(ctx, seed=seed, turns=1, report=report, save_dir=save_dir, world_index="voids", timeout=SIM_BOUND_S * 2)
+    problems = sim_problems(res, what, SIM_BOUND_S * 2)
+    if problems:
+        raise ScenarioError(problems[0] + " — `--world-index voids` lists the start galaxy's deep-space sectors with their would-be content (C12, D-156)")
+    doc, err = C.load_json(report)
+    if not isinstance(doc, dict):
+        raise ScenarioError(f"{what}: no report written: {err} (C2)")
+    voids = (doc.get("world_index") or {}).get("voids")
+    errs = G.voids_shape_errors(voids, what)
+    if errs:
+        raise ScenarioError(errs[0])
+    return voids
+
+
+def galaxy_voids(w: World, galaxy_size: Any) -> set[str]:
+    """The start galaxy's cells that hold no sector, as 'g,g/s,s' keys (the snapshot's galaxies[*].sectors, C3)."""
+    gx, gy = w.start[0]
+    listed = {(int(sct[0]), int(sct[1])) for sct in ((w.snapshot.get("galaxies") or {}).get(f"{gx},{gy}") or {}).get("sectors") or []}
+    return {f"{gx},{gy}/{sx},{sy}" for sx in range(int(galaxy_size[0])) for sy in range(int(galaxy_size[1])) if (sx, sy) not in listed}
+
+
+def strong_class_ini(k3: dict, **over: float) -> dict:
+    """The starting class rewritten to a ship no guardian can beat (torpedoes 999, phasers 10, shields 5000, engine 10, warp 10 unless `over` says
+    otherwise) plus torpedo_hit_base 1 / torpedo_evade_per_engine 0 — deterministic damage both ways (D-162)."""
+    cls = dict(k3["classes"][k3["starting_class"]], torpedoes=999.0, phasers=10.0, shield_max=5000.0, engine=10.0, warp=10.0)
+    cls.update(over)
+    return {("ships", k3["starting_class"]): class_line(cls), ("battle", "torpedo_hit_base"): "1.0", ("battle", "torpedo_evade_per_engine"): "0"}
+
+
+def eligibility_flags(k: dict, k5: dict, *, respect: int | None = None, specials_held: int | None = None) -> dict:
+    """--respect / --fear / --coins / --give that make the player eligible at turn 1 (EG-01…04), or deliberately short of one threshold."""
+    specials = G.special_elements(k["elements"])
+    need = k5["required_special_distinct"]
+    if len(specials) < need:
+        raise ScenarioError(f"[elements] lists {len(specials)} special elements but required_special_distinct = {need} (EG-04, D-157, CFG-51)")
+    held = need if specials_held is None else specials_held
+    return {"respect": min(100, k5["respect_min"] + 5) if respect is None else respect, "fear": min(100, k5["fear_min"] + 5),
+            "coins": G.eligibility_coins(k5["wealth_min_silver"], k["silver_per_gold"]), "give": ",".join(f"{e}:1" for e in specials[:held]) or None}
+
+
+def lodestone_probe(ctx: Ctx, name: str, *, ini: dict, spawn: list[str] | None, flags: dict, seed: int) -> tuple[dict, dict, dict]:
+    """One turn with the row's exact flags, ini and spawns: the lodestone row, the saved snapshot and the guardians' ships (captain → ship)."""
+    scn = scenario(f"probe {name}", "D-158, D-67", turns=1, ini=ini, spawn=spawn, ai=None, **flags)
+    rep, _, snap = run_scenario_full(ctx, f"probe_{name}", scn, seed=seed)
+    ld = G.lodestone_at(G.turn_no(rep, 1))
+    errs = G.lodestone_shape_errors(ld, f"probe {name}: turn 1")
+    if errs:
+        rej = [G.event_text(e)[:100] for e in (G.turn_no(rep, 1).get("events") or [])][:4]
+        raise ScenarioError(f"{errs[0]} — the probe (--respect {flags.get('respect')} --fear {flags.get('fear')} --coins {flags.get('coins')} --give {flags.get('give')}) "
+                            f"must place the item at turn 1 (EG-01…04, D-158); events {rej}")
+    if not isinstance(snap, dict):
+        raise ScenarioError(f"probe {name}: no save snapshot after one turn (C6)")
+    guards: dict[str, str] = {}
+    for cid in ld["guardians"]:
+        cap = (snap.get("captains") or {}).get(str(cid)) or {}
+        sid = cap.get("active_ship")
+        if not isinstance(sid, str) or sid not in (snap.get("ships") or {}):
+            raise ScenarioError(f"probe {name}: guardian {cid} has no ship in the saved snapshot (EG-06, C12)")
+        guards[str(cid)] = sid
+    return ld, snap, guards
+
+
+def read_game_log(save_dir: Path) -> str | None:
+    """The sim's gameplay log under its --save-dir (logs/game-<seed>.log, D-135)."""
+    log_dir = save_dir / "logs"
+    files = sorted(log_dir.glob("game-*.log")) if log_dir.exists() else []
+    return files[0].read_text(encoding="utf-8", errors="replace") if files else None
+
+
+def c49(ctx: Ctx) -> list[str]:
+    """smoke/49 — deep space: `--world-index voids` deterministic and at void_item_pct (three seeds pooled), a stack picked up once and gone for good,
+    save/load keeps it gone, AI roaming visits deep space and roam_void_pct = 0 stops it (D-153, D-156, D-67, IT-05)."""
+    require_pkg(ctx)
+    try:
+        k, k5, v = m4(ctx), m5(ctx), m2(ctx)
+        gsize, usize = v["galaxy_size"], v["universe_size"]
+        warp = v["ship"]["warp"]
+        seeds = (1234, 7, 42)
+        listings: dict[int, tuple[list, list]] = {}
+        expected: dict[int, set[str]] = {}
+        for seed in seeds:
+            listings[seed] = (probe_voids(ctx, seed, "a"), probe_voids(ctx, seed, "b"))
+            expected[seed] = galaxy_voids(probe_world(ctx, seed), gsize)
+        what_a = f"smoke/49 --world-index voids (seeds {list(seeds)}, twice each)"
+        problems = G.check_voids_listing(listings, expected, pct=k5["void_item_pct"], what=what_a)
+        # (b) a deep-space stack: hidden until scan, picked up, gone after leaving and re-entering, gone in the save
+        pick = None
+        for seed in seeds:
+            with_item = [e for e in listings[seed][0] if isinstance(e, dict) and isinstance(e.get("item"), dict) and G.parse_sector_key(e.get("sector"))]
+            if with_item:
+                pick = (seed, with_item[0])
+                break
+        if pick is None:
+            raise ScenarioError(f"no deep-space sector with a stack among the voids listings of seeds {list(seeds)} (void_item_pct {k5['void_item_pct']}; CFG-84)")
+        seed, entry = pick
+        w = probe_world(ctx, seed)
+        gs = G.parse_sector_key(entry["sector"])
+        item = dict(entry["item"], galaxy=list(gs[0]), sector=list(gs[1]))
+        el, key = str(item["element"]), entry["sector"]
+        flat = C.flat_sector(gs[0], gs[1], gsize)
+        listed = set(w.sectors)
+        nb = None
+        for cand in C.void_sectors_near(w.snapshot, gs, usize, gsize, 1) + [x for x in listed if C.chebyshev(C.flat_sector(x[0], x[1], gsize), flat) == 1]:
+            if cand in listed:
+                nb = cand
+                break
+            nb = nb or cand
+        if nb is None:
+            raise ScenarioError(f"no sector at flattened distance 1 from {key} inside the universe (gate logic)")
+        script = [f"pickup {el}", "scan", f"pickup {el}", f"warp {nb[0][0]} {nb[0][1]} {nb[1][0]} {nb[1][1]} {warp:g}", f"warp {gs[0][0]} {gs[0][1]} {gs[1][0]} {gs[1][1]} {warp:g}", "scan"]
+        what_b = f"smoke/49 teleported onto the {el} × {item.get('units')} stack at {key} {item['cell']}: pickup (blind), scan, pickup, warp to {G.sector_key(*nb)}, warp back, scan"
+        scn = scenario(what_b, "IT-04, IT-05, CMD-14, CMD-15, D-156, C12", turns=6, script=script, teleport=C.teleport_arg(gs[0], gs[1], item["cell"]))
+        rep, save_present, snap = run_scenario_full(ctx, "void_item", scn, seed=seed)
+        problems += G.check_void_item(rep, snap, item=item, key=key, el=el, blind_turn=1, scan_turn=2, pickup_turn=3, reenter_turn=5, rescan_turn=6, what=what_b)
+        save = ctx.art / "saves_void_item" / "game.json"
+        final_hash = (rep.get("per_turn") or [{}])[-1].get("snapshot_hash")
+        if not save_present or not isinstance(final_hash, str):
+            problems.append(f"{what_b}: no save after the run ({save}) or no final snapshot_hash (C6, C2)")
+        else:
+            doc, err = C.load_json(save)
+            problems += (C.check_save_document(doc, final_hash) if doc is not None else [f"{err} (C6)"]) + save_roundtrip_problems(ctx, save, final_hash)
+        # (c) AI roaming into deep space: ≥ 1 arrival in the shared 200-turn run; none with roam_void_pct = 0
+        rep_ai = ai200(ctx)
+        rep_zero = ai_run(ctx, AI_RUN_TURNS, name="ai_novoid", ini={("ai", "roam_void_pct"): "0"}, ai_player=ai_player_mode(ctx))
+        problems += G.check_ai_void_visits(rep_ai, rep_zero, turns_default=AI_RUN_TURNS_M4, turns_zero=AI_RUN_TURNS,
+                                           what=f"smoke/49 {AI_RUN_TURNS_M4}-turn AI run vs {AI_RUN_TURNS} turns with [ai] roam_void_pct = 0")
+        if not problems:
+            total = sum(len(a) for a, _ in listings.values())
+            stacks = sum(1 for a, _ in listings.values() for e in a if e.get("item") is not None)
+            print(f"         voids: {', '.join(f'seed {sd}: {len(listings[sd][0])} sectors' for sd in seeds)}; {stacks}/{total} hold a stack ({100 * stacks / max(1, total):.0f} %, "
+                  f"void_item_pct {k5['void_item_pct']}); {el} at {key} picked up once (seed {seed}), gone after re-entry and in the save; "
+                  f"ai_void_visits {(rep_ai.get('final') or {}).get('ai_void_visits')} in {AI_RUN_TURNS_M4} turns, 0 with roam_void_pct = 0")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c50(ctx: Ctx) -> list[str]:
+    """smoke/50 — help: render_help at widths 80 and 120 fits the width, loses no word, lists every catalogue command exactly once in five groups;
+    `help fighting` is fire / peace / escape; `help warp` is a panel with Syntax / Does / When / Example and its IDs; `help fire` keeps the live
+    numbers (CMD-01, UX-09, D-154)."""
+    require_pkg(ctx)
+    try:
+        k3 = m3(ctx)
+        w, _ = find_world(ctx, "a world", lambda w: True)
+        widths = [80, 120]
+        probe = render_probe_run(ctx, "help_groups", {}, help_render={"topics": ["all", "fighting", "warp", "fire"], "widths": widths + [400]}, snapshot=w.snapshot)
+        problems = probe_errors(probe)
+        renders = probe.get("help_render") or {}
+        commands = probe.get("catalogue") or []
+        if not commands:
+            problems.append("the render probe could not list the catalogue's commands (starbour.commands.catalogue.available_names() / COMMANDS; CMD-01)")
+        else:
+            problems += G.check_help_render(renders, widths=widths, commands=[c for c in commands if c != "?"], what="smoke/50 render_help")
+        cls = k3["classes"][k3["starting_class"]]
+        hit_pct = int(round(CB.torpedo_hit_p(k3["torpedo_hit_base"], k3["torpedo_evade"], cls["engine"]) * 100))
+        dmgs = [CB.phaser_damage(cls["phasers"], k3["phaser_per_unit"], d) for d in range(0, k3["phaser_range"] + 1)]
+        problems += E.check_help_fire(renders.get("fire@120"), torpedo_damage=k3["torpedo_damage"], hit_pct=hit_pct, phaser_damages=dmgs,
+                                      what="smoke/50 `help fire` panel at width 120 (UX-09 numbers from the ini)")
+        if not problems:
+            rows80 = G.command_rows(renders.get("all@80", ""))
+            print(f"         {len(commands)} commands, each one row at 80 and 120 columns ({len(renders.get('all@80', '').splitlines())} / "
+                  f"{len(renders.get('all@120', '').splitlines())} lines), no line over width, no word lost; `help fighting` → {sorted(G.command_rows(renders.get('fighting@80', '')))}; "
+                  f"`help warp` panel; `help fire` shows {k3['torpedo_damage']:g}, {hit_pct} %, {'/'.join(f'{x:g}' for x in dmgs)}; rows at 80: {sum(rows80.values())}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c51(ctx: Ctx) -> list[str]:
+    """smoke/51 — the gameplay log carries every player line with its outcome (queued / rejected: reason verbatim / the reply), ai_trace all vs off
+    scopes the AI lines, and command.echo is logged, answered by nothing and changes no snapshot hash (OB-05, D-155, D-160, MSG-10)."""
+    require_pkg(ctx)
+    try:
+        v = m2(ctx)
+        usize, size = v["universe_size"], v["sector_size"]
+        w = probe_world(ctx, 1234)
+        (gx, gy), (sx, sy), (cx, cy) = w.index["player_start"]
+        blocked = C.terrain_cells(w.index, (gx, gy), (sx, sy))
+        step = int(math.floor(v["ship"]["engine"]))
+        direction = next((d for d in ((1, 0), (-1, 0), (0, 1), (0, -1))
+                          if all(C.in_sector((cx + d[0] * t, cy + d[1] * t), size) and (cx + d[0] * t, cy + d[1] * t) not in blocked for t in range(1, step + 1))), None)
+        if direction is None:
+            raise ScenarioError(f"no clear {step}-cell path from the player's start {cx},{cy} for seed 1234 (gate logic)")
+        move = f"move {C.signed(direction[0] * step)} {C.signed(direction[1] * step)}"
+        warp = f"warp {usize[0]} {usize[1]} 0 0"
+        lines = [(1, move), (2, warp), (3, "scan"), (4, "help"), (5, "status")]
+        what_a = "smoke/51 scripted: " + " · ".join(ln for _, ln in lines)
+        scn = scenario(what_a, "OB-05, D-155, D-160, C12", turns=5, script=[ln for _, ln in lines], ai=None)
+        rep, _, _ = run_scenario_full(ctx, "log_lines", scn, seed=1234)
+        problems = G.check_gameplay_log(read_game_log(ctx.art / "saves_log_lines"), rep, lines=lines, queued=(move,), rejected=(warp,), what=what_a)
+        logs: dict[str, str | None] = {}
+        snap_all = None
+        for mode in ("all", "off"):
+            scn_t = scenario(f"smoke/51 [logging] ai_trace = {mode}", "CFG-74, D-139, OB-05", turns=2, ini={("logging", "ai_trace"): mode}, ai=None)
+            _, _, snap_t = run_scenario_full(ctx, f"scope_{mode}", scn_t, seed=1234)
+            logs[mode] = read_game_log(ctx.art / f"saves_scope_{mode}")
+            if mode == "all":
+                snap_all = snap_t
+        problems += G.check_trace_scope(logs["all"], logs["off"], snap_all, what="smoke/51 [logging] ai_trace all vs off")
+        echoes = [{"line": "help fighting", "handled": "T1", "summary": "Fighting: fire, peace, escape"},
+                  {"line": "status", "handled": "T1", "summary": "the captain's standing and the active ship's stats"}]
+        run_e = bus_session(ctx, "echo", seed=1234, turns=2, driver=lambda pub, pull: G.drive_echo(pub, pull, turns=2, echoes=echoes))
+        run_p = bus_session(ctx, "echo_plain", seed=1234, turns=2, driver=lambda pub, pull: G.drive_echo(pub, pull, turns=2, echoes=[]))
+        problems += with_log(G.check_echo_harmless(run_e.result, run_p.result, read_game_log(ctx.art / "saves_echo"), echoes=echoes, turns=2,
+                                                   what="smoke/51 command.echo × 2 before turns 1 and 2 over the bus"), run_e)
+        if not problems:
+            got = G.you_lines(read_game_log(ctx.art / "saves_log_lines") or "")
+            print(f"         {len(got)} 'you >' lines for 5 script lines ({', '.join(repr(o[:28]) for _, _, o in got[:5])}); ai_trace all → "
+                  f"{sum(G.decision_captains(logs['all'] or '').values())} decision lines, off → {sum(G.decision_captains(logs['off'] or '').values())}; "
+                  f"command.echo answered by nothing, hashes {[h[:6] for h in run_e.result.get('hashes', [])]} equal with and without")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c52(ctx: Ctx) -> list[str]:
+    """smoke/52 — eligibility & placement: the first turn all four thresholds hold announces the sector, places the item ≥ placement_distance_pct of
+    the diameter away in a real hole-free system with guard_ships Bastion guardians within torpedo_range, excluded from the population; T4 shows the
+    Lodestone line; respect or the specials one short → nothing in 20 turns and T4's progress line shows the gap (EG-01…04, SP-08, EG-06, D-157, D-158)."""
+    require_pkg(ctx)
+    try:
+        k, k3, k5, v = m4(ctx), m3(ctx), m5(ctx), m2(ctx)
+        threshold = G.placement_threshold(v["universe_size"], v["galaxy_size"], k5["placement_distance_pct"])
+        flags = eligibility_flags(k, k5)
+        what_a = f"smoke/52 --respect {flags['respect']} --fear {flags['fear']} --coins {flags['coins'][0]} {flags['coins'][1]} --give {flags['give']}"
+        scn_a = scenario(what_a, "EG-01…04, SP-08, EG-06, D-157, D-158, C12", turns=2, **flags)
+        rep_a, _, snap_a = run_scenario_full(ctx, "eligible", scn_a, seed=1234)
+        problems = G.check_eligible(rep_a, snap_a, threshold=threshold, guard_ships=k5["guard_ships"], torpedo_range=k3["torpedo_range"], galaxy_size=v["galaxy_size"],
+                                    eligible_turn=1, what=what_a)
+        ld = G.lodestone_at(G.turn_no(rep_a, 1))
+        view = (snap_a or {}).get("view") or {"level": "follow"}
+        if isinstance(ld, dict) and isinstance(snap_a, dict):
+            probe = render_probe_run(ctx, "lodestone_line", {"status": [snap_a]}, view=view)
+            problems += probe_errors(probe) + G.check_lodestone_render((probe.get("renders") or {}).get("status", [None])[0], key=str(ld.get("sector")),
+                                                                      alive=int(ld.get("guardians_alive") or 0), name=k5["ultimate_item_name"], what=f"{what_a} (T4)")
+        short = {"respect": (max(0, k5["respect_min"] - 5), k5["respect_min"]), "specials": (k5["required_special_distinct"] - 1, k5["required_special_distinct"])}
+        for label, (value, minimum) in short.items():
+            fl = eligibility_flags(k, k5, respect=value) if label == "respect" else eligibility_flags(k, k5, specials_held=value)
+            why = f"{label} {value} < {minimum} ({'respect_min' if label == 'respect' else 'required_special_distinct'})"
+            what_b = f"smoke/52 the same with {why}, 20 turns"
+            scn_b = scenario(what_b, "EG-02, EG-04, D-157", turns=20, **fl)
+            rep_b, _, snap_b = run_scenario_full(ctx, f"ineligible_{label}", scn_b, seed=1234)
+            problems += G.check_not_eligible(rep_b, turns=20, why=why, what=what_b)
+            if isinstance(snap_b, dict):
+                probe = render_probe_run(ctx, f"progress_{label}", {"status": [snap_b]}, view=snap_b.get("view") or view)
+                problems += probe_errors(probe) + G.check_progress_render((probe.get("renders") or {}).get("status", [None])[0], fractions={label: (value, minimum)},
+                                                                         what=f"{what_b} (T4 progress line)")
+        if not problems:
+            print(f"         seed 1234: eligible at turn 1 — {k5['ultimate_item_name']} at {ld.get('sector')} {ld.get('cell')}, distance {ld.get('distance')} ≥ {threshold}, "
+                  f"{len(ld.get('guardians') or [])} guardians within torpedo_range {k3['torpedo_range']}, excluded from captains ({(rep_a.get('final') or {}).get('captains')}); "
+                  f"T4 Lodestone line; respect {short['respect'][0]} and {short['specials'][0]} specials → nothing in 20 turns, progress line shows the gap")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c53(ctx: Ctx) -> list[str]:
+    """smoke/53 — guardians: a strong temp class warps into the placed sector; every guardian fires from the arrival turn although CM-10 would refuse
+    (ratio ≪ attack_ratio_min, fear ≥ attack_fear_max); one is worn below peace_shield_pct and none offers peace, escapes, surrenders or leaves in
+    10 turns; `pickup lodestone` is rejected citing CM-13; the trace names them guardians; the sector is a real system (CM-13, D-158)."""
+    require_pkg(ctx)
+    try:
+        k, k3, k5 = m4(ctx), m3(ctx), m5(ctx)
+        ini = strong_class_ini(k3)
+        flags = eligibility_flags(k, k5)
+        ld, snap_p, guards = lodestone_probe(ctx, "guardians", ini=ini, spawn=None, flags=flags, seed=1234)
+        gs = G.parse_sector_key(ld["sector"])
+        cell = ld["cell"]
+        target_cid = str(ld["guardians"][0])
+        target = guards[target_cid]
+        bastion = k3["classes"]["bastion"]
+        td, pu = k3["torpedo_damage"], k3["phaser_per_unit"]
+        shots = 5
+        low = bastion["shield_max"] - shots * td
+        if low >= k3["peace_shield_pct"] / 100.0 * bastion["shield_max"] or low <= 0:
+            raise ScenarioError(f"{shots} torpedoes of {td:g} leave a Bastion ({bastion['shield_max']:g} shields) at {low:g}, not below peace_shield_pct {k3['peace_shield_pct']:g} % "
+                                f"and above 0 — the wear-down plan cannot be built from this ini (gate logic)")
+        strong = dict(k3["classes"][k3["starting_class"]], torpedoes=999.0, phasers=10.0, shield_max=5000.0)
+        ratio = CB.strength(bastion["shield_max"], bastion["torpedoes"], bastion["phasers"], torpedo_damage=td, phaser_per_unit=pu) / \
+            CB.strength(strong["shield_max"], strong["torpedoes"], strong["phasers"], torpedo_damage=td, phaser_per_unit=pu)
+        script = ["", f"warp {gs[0][0]} {gs[0][1]} {gs[1][0]} {gs[1][1]} 10", f"move {cell[0]} {cell[1]}", f"scan; fire torpedo {target} 1"]
+        script += [f"fire torpedo {target} 1"] * (shots - 1) + ["pickup lodestone", "", "", ""]
+        what = (f"smoke/53 warp into {ld['sector']} at turn 2 as a {k3['starting_class']} with {strong['shield_max']:g} shields (ratio {ratio:.3f} < {k3['attack_ratio_min']:g}, "
+                f"fear {flags['fear']} ≥ {k3['attack_fear_max']}), move onto {list(cell)}, {shots} torpedoes at {target} ({target_cid}), pickup at turn 9, idle to 12")
+        scn = scenario(what, "CM-13, EG-06, D-158, C12", turns=12, script=script, ini=ini, ai=None, **flags)
+        rep, _, snap = run_scenario_full(ctx, "guardians", scn, seed=1234)
+        problems = G.check_guardians(rep, snap, guardians=guards, sector=str(ld["sector"]), arrival_turn=2, close_turn=4, low_turn=3 + shots, pickup_turn=9, until_turn=12,
+                                     target_ship=target, low_shields=low, ratio=ratio, ratio_min=k3["attack_ratio_min"], fear=int(flags["fear"]), fear_max=k3["attack_fear_max"],
+                                     what=what)
+        problems += G.check_placed_sector(snap, key=str(ld["sector"]), cell=cell, what=f"smoke/53 the placed sector {ld['sector']}")
+        problems += G.check_guardian_trace(read_game_log(ctx.art / "saves_guardians"), guardians=guards, what="smoke/53 logs/game-1234.log")
+        if not problems:
+            print(f"         {len(guards)} guardians in {ld['sector']} fired from turn 2 (ratio {ratio:.3f}, fear {flags['fear']}); {target} worn to {low:g} shields by turn {3 + shots} — "
+                  f"no peace, escape or surrender through turn 12, none left; `pickup lodestone` rejected (CM-13); sector has a star, no hole; trace names guardian")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def c54(ctx: Ctx) -> list[str]:
+    """smoke/54 — mastery: guard_ships 1 and a strong temp class; the kill at turn 3, `pickup lodestone` at turn 4 → game.mastery that turn; then
+    master, levels locked at 100, stats at the caps, a free `buy food 500` at factor 0.80 from a planet that refused at low respect, food and water
+    never fall, an AI at ratio 2 never opens and yields when fired on, T3 ceremony frames and title, T4 title and ∞, the save round-trips and a
+    resumed engine keeps master without re-emitting the event, the run keeps counting (EG-07, EG-08, EF-06, SUP-05, OUT-15, D-159)."""
+    require_pkg(ctx)
+    try:
+        k, k3, k5, v = m4(ctx), m3(ctx), m5(ctx), m2(ctx)
+        td, pu = k3["torpedo_damage"], k3["phaser_per_unit"]
+        caps = {"shield_cap": k["shield_cap"], "phaser_max": k["phaser_max"], "impulse_max": k3["impulse_max"], "warp_max": k3["warp_max"]}
+        master_str = CB.strength(caps["shield_cap"], k5["master_torpedoes"], caps["phaser_max"], torpedo_damage=td, phaser_per_unit=pu)
+        corsair = k3["classes"]["corsair"]
+        shields_c = int(math.ceil(2.0 * master_str - corsair["torpedoes"] * td - corsair["phasers"] * pu * 3))
+        bastion = k3["classes"]["bastion"]
+        volley = int(math.ceil(bastion["shield_max"] / td))
+        kestrel_shields = max(400.0, 4 * (td + bastion["phasers"] * pu) + 1)          # two turns of one guardian's fire before the kill, with margin
+        ini = strong_class_ini(k3, shield_max=kestrel_shields)
+        ini.update({("endgame", "guard_ships"): "1", ("ships", "corsair"): class_line(dict(corsair, shield_max=float(shields_c), engine=0.0, warp=0.0)),
+                    ("planets", "food_stock_start"): "600", ("planets", "stock_cap"): "600"})
+        w = probe_world(ctx, 1234)
+        start = w.index["player_start"]
+        gs0 = w.start
+        planet = next((p for p in w.index.get("planets") or [] if isinstance(p, dict) and isinstance(p.get("cell"), list) and C._gs(p) == gs0), None)
+        if planet is None:
+            raise ScenarioError(f"seed 1234: no planet in the start sector {G.sector_key(*gs0)} (safe_start, SP-05; gate logic)")
+        pcell = (int(planet["cell"][0]), int(planet["cell"][1]))
+        got = C.cell_at_distance(w.index, planet, 1, v["sector_size"], diagonal=False) or C.cell_at_distance(w.index, planet, 1, v["sector_size"])
+        if got is None or tuple(got[0]) == (int(start[2][0]), int(start[2][1])):
+            raise ScenarioError(f"no free cell next to the planet at {pcell} other than the player's start (gate logic)")
+        scell = (int(got[0][0]), int(got[0][1]))
+        spawn = [CB.spawn_arg("corsair", gs0[0], gs0[1], scell, 0)]
+        flags = eligibility_flags(k, k5)
+        ld, snap_p, guards = lodestone_probe(ctx, "mastery", ini=ini, spawn=spawn, flags=flags, seed=1234)
+        if len(guards) != 1:
+            raise ScenarioError(f"[endgame] guard_ships = 1 in the temp ini but the probe placed {len(guards)} guardians (CFG-52, D-49)")
+        gs = G.parse_sector_key(ld["sector"])
+        cell = ld["cell"]
+        target = next(iter(guards.values()))
+        pid_rec = E.planet_in(snap_p, G.sector_key(*gs0), pcell)
+        if pid_rec is None:
+            raise ScenarioError(f"the probe snapshot has no planets record at {G.sector_key(*gs0)} {list(pcell)} (C11)")
+        pid = pid_rec[0]
+        spawn_ship, spawn_cid = spawned_ids(_probe_report(ctx, "mastery"))
+        band = k["planet_price_band"]
+        script = ["", f"warp {gs[0][0]} {gs[0][1]} {gs[1][0]} {gs[1][1]} 10", f"move {cell[0]} {cell[1]}; fire torpedo {target} {volley}", "scan; pickup lodestone",
+                  f"warp {gs0[0][0]} {gs0[0][1]} {gs0[1][0]} {gs0[1][1]} 10", f"move {pcell[0]} {pcell[1]}", "", "", "buy food 500", f"fire torpedo {spawn_ship} 1", "", "", "", ""]
+        what = (f"smoke/54 guard_ships 1: warp into {ld['sector']}, {volley} torpedoes at {target} (turn 3), scan + pickup lodestone (turn 4), warp home, dock at {pid} "
+                f"{list(pcell)}, buy food 500 (turn 9), one torpedo at {spawn_ship} (corsair {shields_c:g} shields, ratio 2.0; turn 10), idle to 14")
+        scn = scenario(what, "EG-07, EG-08, EF-06, SUP-05, OUT-15, D-159, C12", turns=14, script=script, ini=ini, spawn=spawn, ai=None, **flags)
+        rep, save_present, snap = run_scenario_full(ctx, "mastery", scn, seed=1234)
+        problems = G.check_mastery(rep, snap, mastery_turn=4, kill_turn=3, buy_turn=9, buy_n=500, buy_factor=E.price_factor(100, band, selling=False), planet_id=pid, fire_turn=10,
+                                   spawn={"captain": spawn_cid, "ship": spawn_ship}, caps=caps, master_torpedoes=k5["master_torpedoes"], turns=14, what=what)
+        low = max(0, k["planet_refuse_respect"] - 8)
+        what_r = f"smoke/54 buy food 10 at {pid} with respect {low} < planet_refuse_respect {k['planet_refuse_respect']} (the same planet refuses before mastery)"
+        scn_r = scenario(what_r, "EF-04, EF-06", turns=1, script=["buy food 10"], teleport=C.teleport_arg(gs0[0], gs0[1], pcell), respect=low,
+                         coins=(k3["gold_start"], k3["silver_start"]), ini=ini)
+        rep_r, _, snap_r = run_scenario_full(ctx, "refused_before_mastery", scn_r, seed=1234)
+        problems += E.check_refused(rep_r, snap_r, planet_id=pid, turn=1, respect=low, refuse_respect=k["planet_refuse_respect"], what=what_r)
+        if isinstance(snap, dict):
+            payload = {"turn_no": 4, "snapshot": snap, "events": [{"phase": "TP-05", "type": "mastery", "severity": "highlight", "ids": ["OUT-15", "EG-07"],
+                                                                   "text": f"MASTER OF STARBOUR — the captain holds the {k5['ultimate_item_name']}"}]}
+            probe = render_probe_run(ctx, "mastery_ui", {"status": [snap], "output": [payload]}, view=snap.get("view") or {"level": "follow"},
+                                     ceremony={"width": 120, "height": 20, "n": 3, "seed": 7, "payload": payload})
+            problems += probe_errors(probe) + G.check_ceremony_probe(probe, width=120, height=20, n=3, what="smoke/54 T3 ceremony")
+            infinity = "∞" if ensure_values(ctx)["glyph_set"] == "unicode" else None
+            problems += G.check_master_render((probe.get("renders") or {}).get("status", [None])[0], infinity=infinity, what="smoke/54 T4 after mastery")
+        save = ctx.art / "saves_mastery" / "game.json"
+        final_hash = (rep.get("per_turn") or [{}])[-1].get("snapshot_hash")
+        if not save_present or not isinstance(final_hash, str):
+            problems.append(f"{what}: no save after the run ({save}) or no final snapshot_hash (C6, C2)")
+        else:
+            doc, err = C.load_json(save)
+            problems += (C.check_save_document(doc, final_hash) if doc is not None else [f"{err} (C6)"]) + save_roundtrip_problems(ctx, save, final_hash)
+            problems += resume_master_problems(ctx, ctx.art / "saves_mastery", write_ini(ctx, "mastery.ini", ini), what="smoke/54 `--role engine --save-dir saves_mastery` (resume)")
+        if not problems:
+            fin = rep.get("final") or {}
+            print(f"         mastery at turn {fin.get('mastery_turn')} (kill turn 3, pickup turn 4), {rep.get('turns_completed')} turns completed; levels 100/100, "
+                  f"shields {caps['shield_cap']:g}, phasers {caps['phaser_max']:g}, engine {caps['impulse_max']:g}, warp {caps['warp_max']:g}, torpedoes {k5['master_torpedoes']}; "
+                  f"{pid} refused at respect {low}, sold 500 food at factor {E.price_factor(100, band, selling=False):.2f} for nothing; {spawn_ship} yielded at turn 10; "
+                  f"3 fireworks frames + title; T4 title and ∞; save round-trips, resume keeps master, no second game.mastery")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
+def _probe_report(ctx: Ctx, name: str) -> dict:
+    """The report the lodestone probe wrote (report_probe_<name>.json), for the spawned ids (C10)."""
+    doc, err = C.load_json(ctx.art / f"report_probe_{name}.json")
+    if not isinstance(doc, dict):
+        raise ScenarioError(f"probe {name}: no report to read the spawned ids from ({err}; C2)")
+    return doc
+
+
+def resume_master_problems(ctx: Ctx, save_dir: Path, ini: Path, *, what: str) -> list[str]:
+    """Start `--role engine --save-dir <dir> --config <ini>` on free ports, read state.hello and watch 3 s: master survives the load and game.mastery is
+    not re-emitted (C6 C12, D-159).  The engine is shut down over the bus, killed if it lingers."""
+    pub, pull = C.free_ports(2)
+    log = ctx.art / "resume_engine.log"
+    args = [ctx.py, "-m", "starbour", "--role", "engine", "--save-dir", str(save_dir), "--config", str(ini), "--pub-port", str(pub), "--pull-port", str(pull)]
+    env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+    env.pop("MOS_LAUNCHER_PID", None)
+    with open(log, "w", encoding="utf-8") as lf:
+        proc = subprocess.Popen(args, cwd=str(ctx.root), env=env, stdout=lf, stderr=subprocess.STDOUT, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        try:
+            obs = G.drive_resume(pub, pull, hello_timeout=20.0, watch_s=3.0)
+            if proc.poll() is None:
+                try:
+                    cl = C.BusClient(pub, pull)
+                    cl.send("system.shutdown", {"reason": "gate finished"})
+                    cl.close()
+                except Exception:  # noqa: BLE001
+                    pass
+                C.wait_until(lambda: proc.poll() is not None, 5.0)
+        finally:
+            if proc.poll() is None:
+                C.kill_tree(proc.pid)
+    problems = G.check_master_resume(obs, what=what)
+    if problems:
+        tail = log_tail(log)
+        if tail.strip():
+            problems.append("engine log tail:\n" + textwrap.indent(tail, " " * 10))
+    return problems
+
+
+def c_long(ctx: Ctx) -> list[str]:
+    """smoke/long — the opt-in tier (M5 § 4 (c), D-161): 2,000 turns with --ai-player trade on seed 7 — exit 0, population within 0.7…1.3 ×
+    captains_start, no game.mastery, peak RSS below 1 GB, the last 100 turns resolve in ≤ 2 × the first 100; prints the curve every 200 turns."""
+    require_pkg(ctx)
+    try:
+        m5(ctx)
+        report, save_dir = ctx.art / "report_long.json", ctx.art / "saves_long"
+        what = f"sim --seed {LONG_TIER_SEED} --turns {LONG_TIER_TURNS} --ai-player trade"
+        res, peak_mb = run_sim_measured(ctx, seed=LONG_TIER_SEED, turns=LONG_TIER_TURNS, report=report, save_dir=save_dir, ai_player="trade", timeout=LONG_TIER_BOUND_S)
+        problems = sim_problems(res, what, LONG_TIER_BOUND_S)
+        doc, err = C.load_json(report)
+        if doc is None:
+            return problems + [f"{what}: no report written: {err} (C2)"]
+        problems += G.check_long_tier(doc, turns=LONG_TIER_TURNS, peak_rss_mb=peak_mb, rss_limit_mb=LONG_RSS_LIMIT_MB, what=f"smoke/long {what}")
+        curve = G.population_curve(doc, 200)
+        first, last = G.resolve_means(doc)
+        fin = doc.get("final") or {}
+        print(f"         {LONG_TIER_TURNS} turns in {res.seconds:.0f} s; population {fin.get('captains_start')} → " + ", ".join(f"T{n} {c}" for n, c in curve) +
+              f"; min {fin.get('population_min')} / max {fin.get('population_max')}; resolve_ms first 100 {first if first is None else round(first, 1)} / last 100 "
+              f"{last if last is None else round(last, 1)}; peak RSS {peak_mb if peak_mb is None else round(peak_mb)} MB; mutinies {len(fin.get('mutinies') or [])} "
+              f"(player {sum(1 for m in fin.get('mutinies') or [] if str(m.get('captain')) == 'player')}), mastery_turn {fin.get('mastery_turn')}")
+        return problems
+    except ScenarioError as e:
+        return [str(e)]
+
+
 H = ("smoke/00",)                 # every row needs the harness check (ini values, milestone)
 MAIN = ("smoke/00", "smoke/02")   # rows that read the main run's report / save
 
@@ -2790,14 +3418,29 @@ CHECKS = [
     C.Check("smoke/46", "M3 fix-ups: fire = torpedo + phasers, help fire numbers, ai_class_mix, ai_trace, name pools", "D-137, D-138, D-139, CFG-74, CFG-75, D-146", c46, since="M4", needs=H),
     C.Check("smoke/47", "economy UI: T4 cargo and planet panel, T2 item glyph after scan, T3 OUT-07/08/10, battle numbers", "PNL-04, SYM-09, OUT-07, OUT-08, OUT-10, UX-09, C4", c47, since="M4", needs=H),
     C.Check("smoke/48", "save / load: upgrade, refused and destroyed planet, pickup round-trip", "C6, OV-12", c48, since="M4", needs=("smoke/00", "smoke/37")),
+    # M5 (specs/M5.md § 4, C12) — rows share the world probe, the voids probes and the 200-turn AI run; smoke/51 needs the bus
+    C.Check("smoke/49", "deep space: voids listing deterministic at void_item_pct, a stack picked up once, AI visits", "D-153, D-156, D-67, IT-05, C12", c49, since="M5", needs=H),
+    C.Check("smoke/50", "help: grouped, wrapped at 80 and 120, every command once, group and panel forms", "CMD-01, UX-09, D-154, C4", c50, since="M5", needs=H),
+    C.Check("smoke/51", "log: every player line with its outcome, ai_trace scope, command.echo harmless", "OB-05, D-155, D-160, MSG-10, C12", c51, since="M5", needs=H, exclusive=True),
+    C.Check("smoke/52", "eligibility & placement: event, distance, real system, guardians, T4 lines", "EG-01…04, SP-08, EG-06, PNL-08, D-157, D-158, C12", c52, since="M5", needs=H),
+    C.Check("smoke/53", "guardians: fire regardless, never negotiate or leave, CM-13 rejection, trace", "CM-13, EG-06, D-158, C12", c53, since="M5", needs=H),
+    C.Check("smoke/54", "mastery: event, locked levels, maxed stats, free trade, yields, ceremony, save/load", "EG-07, EG-08, EF-06, SUP-05, OUT-15, D-159, C12", c54, since="M5", needs=H),
 ]
+LONG_CHECKS = [CHECKS[0], C.Check("smoke/long", f"--long: {LONG_TIER_TURNS} turns with --ai-player trade — bound, no mastery, RSS, resolve time", "D-161, OV-06, M5 § 4 (c)",
+                                  c_long, since="M5", needs=H)]
 
 
-def run_gate(ctx: Ctx, select: set[str] | None = None, workers: int | None = None) -> int:
+def run_gate(ctx: Ctx, select: set[str] | None = None, workers: int | None = None, long: bool = False) -> int:
     ctx.art.mkdir(parents=True, exist_ok=True)
+    if long:
+        # M5 § 4 (c): the opt-in tier — smoke/00 then the 2,000-turn run, outside the 150 s budget, its own result file
+        label = f"smoke gate (long) — root {ctx.root}"
+        print(f"long mode: smoke/00 and smoke/long only ({LONG_TIER_TURNS} turns, seed {LONG_TIER_SEED}, --ai-player trade; bound {LONG_TIER_BOUND_S:.0f} s)")
+        return C.run_checks(LONG_CHECKS, ctx, milestone=lambda: ctx.milestone, select=select or LONG_CODES, budget_s=LONG_BUDGET_S, label=label,
+                            result_path=ctx.art / "last_run_long.json", workers=1)
     label = f"smoke gate ({'quick' if ctx.quick else 'full'}) — root {ctx.root}"
     if ctx.quick:
-        print("quick mode: smoke/05–09, 11–48 are not run (full gate: smoke_test.py . without --quick)")
+        print("quick mode: smoke/05–09, 11–54 are not run (full gate: smoke_test.py . without --quick)")
     if select is None:
         select = QUICK_CODES if ctx.quick else None
     return C.run_checks(CHECKS, ctx, milestone=lambda: ctx.milestone, select=select,
@@ -2841,17 +3484,58 @@ def render_probe(in_path: Path, out_path: Path) -> int:
                 break
     except Exception:  # noqa: BLE001
         out["import_errors"]["starbour.config"] = traceback.format_exc()
+    def plain(renderable: Any, width: int) -> str:
+        from rich.console import Console
+        con = Console(file=io.StringIO(), width=width, record=True, force_terminal=False, color_system=None, legacy_windows=False, highlight=False)
+        for part in (renderable if isinstance(renderable, (list, tuple)) else [renderable]):
+            con.print(part)
+        return con.export_text(styles=False)
     if cfg is not None and spec.get("help"):
-        # UX-09 / D-138 (smoke/46): the T1 help text through the existing pure helper render_command.help_text(topic, cfg) (D-148 (9))
+        # UX-09 / D-138 (smoke/46): the T1 help text through the pure helper render_command.help_text(topic, cfg) (D-148 (9)); from M5 the panel
+        # render_help(topic, width, cfg, snapshot) stands in when help_text is gone (D-154, D-162)
         out["help"] = {}
         try:
             rc = importlib.import_module("starbour.terminals.render_command")
             for topic in spec["help"]:
-                parts = rc.help_text(topic, cfg)
-                parts = parts if isinstance(parts, (list, tuple)) else [parts]
-                out["help"][topic] = "\n".join(str(getattr(p, "plain", p)) for p in parts)
+                if callable(getattr(rc, "help_text", None)):
+                    parts = rc.help_text(topic, cfg)
+                    parts = parts if isinstance(parts, (list, tuple)) else [parts]
+                    out["help"][topic] = "\n".join(str(getattr(p, "plain", p)) for p in parts)
+                else:
+                    out["help"][topic] = plain(rc.render_help(topic, spec["width"], cfg, spec.get("snapshot")), spec["width"])
         except Exception:  # noqa: BLE001
             out["errors"]["help"] = traceback.format_exc()
+    if cfg is not None and spec.get("help_render"):
+        # M5 § 1b / D-154 (smoke/50): the grouped help through render_command.render_help(topic, width, cfg, snapshot), printed by a Console of that width
+        out["help_render"] = {}
+        try:
+            rc = importlib.import_module("starbour.terminals.render_command")
+            rh = getattr(rc, "render_help", None)
+            if not callable(rh):
+                raise AttributeError("starbour.terminals.render_command has no render_help(topic, width, cfg, snapshot) (M5 § 1b, D-154)")
+            for topic in spec["help_render"]["topics"]:
+                for w in spec["help_render"]["widths"]:
+                    out["help_render"][f"{topic}@{w}"] = plain(rh(None if topic == "all" else topic, int(w), cfg, spec.get("snapshot")), int(w))
+        except Exception:  # noqa: BLE001
+            out["errors"]["help_render"] = traceback.format_exc()
+        try:
+            cat = importlib.import_module("starbour.commands.catalogue")
+            names = cat.available_names() if callable(getattr(cat, "available_names", None)) else list(getattr(cat, "COMMANDS", {}).keys())
+            out["catalogue"] = sorted({str(n).lower() for n in names})
+        except Exception:  # noqa: BLE001
+            out["errors"]["catalogue"] = traceback.format_exc()
+    if cfg is not None and spec.get("ceremony"):
+        # OUT-15 / D-159 (smoke/54): fireworks_frames(width, height, rng, n) -> list[Text], title_frame(width) -> Text, render() of the game.mastery payload
+        c = spec["ceremony"]
+        try:
+            import random
+            ro = importlib.import_module("starbour.terminals.render_output")
+            frames = ro.fireworks_frames(int(c["width"]), int(c["height"]), random.Random(int(c.get("seed", 1))), int(c["n"]))
+            title = ro.title_frame(int(c["width"]))
+            rendered = plain(ro.render(c["payload"], spec["view"], cfg, int(c["width"])), int(c["width"])) if c.get("payload") else ""
+            out["ceremony"] = {"frames": [plain(f, int(c["width"])) for f in (frames or [])], "title": plain(title, int(c["width"])), "render": rendered}
+        except Exception:  # noqa: BLE001
+            out["errors"]["ceremony"] = traceback.format_exc()
     if cfg is not None:
         from rich.console import Console
         for role, inputs in spec["inputs"].items():
@@ -3013,6 +3697,18 @@ def m3_case_problems(case: dict) -> list[str]:
 def m4_case_problems(case: dict) -> list[str]:
     """Run the checker call a sim_m4_scenarios.json entry records against verify/_economy.py: {check, args: [keys], kwargs}."""
     fn = getattr(E, "check_" + case["check"])
+    return fn(*[case[k] for k in case["args"]], **case["kwargs"])
+
+
+def RENDER_K_ELEMENTS() -> dict:
+    """The fixture catalogue as [elements] rows (rarity special for the four Mythical ones), for the selftest."""
+    from make_fixtures_m4 import FIXTURE_M4  # noqa: E402
+    return {n: {"value": v, "rarity": "special" if v >= 400 else "normal"} for n, v in FIXTURE_M4["elements"].items()}
+
+
+def m5_case_problems(case: dict) -> list[str]:
+    """Run the checker call a sim_m5_scenarios.json entry records against verify/_endgame.py: {check, args: [keys], kwargs}."""
+    fn = getattr(G, "check_" + case["check"])
     return fn(*[case[k] for k in case["args"]], **case["kwargs"])
 
 
@@ -3690,6 +4386,183 @@ def selftest(root: Path) -> int:
     gate_level_proof(t, root, "M4", M4_CODES, "smoke/37–48", "smoke/38")
     gate_level_tree(t, root, "M4", M4_CODES | {"smoke/12"}, "smoke/12, 37–48", "smoke/38")
 
+    # ---------------------------------------------------------------- M5 (specs/M5.md § 4, C12)
+    print("-- M5 --")
+    from make_fixtures_m5 import FIXTURE_M5, GUARDS, LODE_KEY, VOID_KEY  # noqa: E402
+    from stub_windows import StubWindows  # noqa: E402
+    # 29. every good M5 fixture passes the exact checker call the gate makes; every broken one fails its row naming the IDs
+    scen5 = load("sim_m5_scenarios")
+    bad5 = {name: m5_case_problems(c) for name, c in scen5.items()}
+    bad5 = {k: v for k, v in bad5.items() if v}
+    t(f"M5 scenarios: all {len(scen5)} good fixtures pass their checkers ({', '.join(sorted(scen5))})", not bad5, bad5)
+    broken5 = {"sim_void_rejected": ("smoke/19", "D-153", "warps"), "sim_void_item_respawns": ("smoke/49", "IT-05", "respawn"), "sim_help_truncated": ("smoke/50", "D-154", "cropped"),
+               "sim_log_missing_commands": ("smoke/51", "D-155", "you >"), "sim_lodestone_too_near": ("smoke/52", "SP-08", "distance"),
+               "sim_guardian_offers_peace": ("smoke/53", "D-158", "peace"), "sim_mastery_stats_not_maxed": ("smoke/54", "EG-07", "shield"),
+               "sim_mastery_wealth_deducted": ("smoke/54", "EG-07", "coins"), "sim_master_replays_ceremony": ("smoke/54", "D-159", "game.mastery"),
+               "sim_ai_player_trade_starves": ("smoke/12", "D-161", "mutinied")}
+    for name, (code, id_, word) in broken5.items():
+        r = m5_case_problems(load(name))
+        t(f"{name} fails {code} citing {id_} and naming '{word}'", bool(r) and any(id_ in m for m in r) and any(word.lower() in m.lower() for m in r), r[:3])
+        if r:
+            print(f"      message: {r[0][:170]}")
+    # 30. the discriminations the spec's broken fixtures do not cover, as minimal edits of the good cases
+    c = json.loads(json.dumps(scen5["voids_listing"]))
+    c["listings"]["1234"][1][0]["item"] = {"element": "iridium", "units": 1, "rarity": "normal", "cell": [1, 1]}
+    t("smoke/49: two voids listings that differ fail citing D-67", any("D-67" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["voids_listing"]))
+    for e in c["listings"]["1234"][0] + c["listings"]["1234"][1]:
+        e["item"] = e["item"] or {"element": "iridium", "units": 1, "rarity": "normal", "cell": [1, 1]}
+    t("smoke/49: every void holding a stack (100 %) fails citing CFG-84", any("CFG-84" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["ai_void_visits"]))
+    c["report2"]["final"]["ai_void_visits"] = 3
+    t("smoke/49: AI visits with roam_void_pct = 0 fail citing CFG-85", any("CFG-85" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["help_render"]))
+    c["renders"]["fighting@80"] = c["renders"]["all@80"]
+    t("smoke/50: `help fighting` listing every group fails naming the group form", any("help fighting" in m and "exactly" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["help_render"]))
+    c["renders"]["warp@120"] = "warp <gx gy> <sx sy> [factor]\\n  Warp to a sector."
+    t("smoke/50: a flat `help warp` without the panel labels fails naming Syntax / Does / When / Example", any("Syntax" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["trace_scope"]))
+    c["log_off"] = c["log_all"]
+    t("smoke/51: ai_trace = off with decision lines fails citing CFG-74", any("CFG-74" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["echo_harmless"]))
+    c["obs_echo"]["hashes"][1] = "c" * 40
+    t("smoke/51: a snapshot hash that changes with command.echo fails citing D-160", any("D-160" in m and "hash" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["echo_harmless"]))
+    c["obs_echo"]["echo_topics"] = ["order.accepted"]
+    t("smoke/51: an engine that answers command.echo fails citing MSG-10", any("MSG-10" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["eligible"]))
+    c["snapshot"]["galaxies"]["7,1"]["hazards"].append([9, 12])
+    t("smoke/52: a placed sector listed among the galaxy's hazards fails citing SP-08", any("hole" in m and "SP-08" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["eligible"]))
+    c["report"]["per_turn"][0]["captains"] = c["report"]["final"]["captains"] = 5
+    t("smoke/52: guardians counted in captains fail citing D-158", any("excluded" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["guardians"]))
+    c["snapshot"]["ships"]["s-952"]["position"] = [[3, 4], [7, 9], [1, 1]]
+    t("smoke/53: a guardian that left the sector fails citing D-158 'never leave'", any("never leave" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["guardians"]))
+    c["report"]["per_turn"][8]["events"] = ["Picked up the Lodestone of Starbour"]
+    t("smoke/53: `pickup lodestone` accepted with guardians alive fails citing CM-13", any("CM-13" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["ceremony_probe"]))
+    c["probe"]["ceremony"]["title"] = "\\n".join(c["probe"]["ceremony"]["title"].splitlines()[:5])
+    t("smoke/54: a title frame without the words fails citing OUT-15", any("OUT-15" in m and "MASTER OF STARBOUR" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["ceremony_probe"]))
+    c["probe"]["ceremony"]["frames"] = []
+    t("smoke/54: no fireworks frame fails citing EG-08", any("EG-08" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["master_render"]))
+    c["text"] = "Harrow Vey · turn 14\\ngold 100  silver 0"
+    t("smoke/54: a T4 header without the title and ∞ fails citing EG-08 and SUP-05", any("EG-08" in m for m in m5_case_problems(c)) and any("SUP-05" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["mastery"]))
+    for tt in c["report"]["per_turn"][9:]:
+        tt["player"]["respect"] = 95
+    t("smoke/54: respect falling after the started fight fails citing D-159 / FR-06", any("FR-06" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["mastery"]))
+    c["report"]["per_turn"] = c["report"]["per_turn"][:4]
+    c["report"]["turns_completed"] = 4
+    t("smoke/54: a sim that stops at mastery fails naming 'keeps counting'", any("keeps counting" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["long_tier"]))
+    for tt in c["report"]["per_turn"][-100:]:
+        tt["resolve_ms"] = 200.0
+    t("--long: the last 100 turns resolving 4× slower fails naming resolve_ms", any("resolve_ms" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["long_tier"]))
+    c["kwargs"]["peak_rss_mb"] = 1500.0
+    t("--long: a 1.5 GB peak RSS fails naming RSS", any("RSS" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["long_tier"]))
+    c["report"]["final"]["population_max"] = int(c["report"]["final"]["captains_start"] * 1.3) + 1
+    t("--long: population_max above 1.3 × captains_start fails citing D-144", any("D-144" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["mastery_bus"]))
+    c["obs"]["mastery"] = None
+    t("live/11 checker: no game.mastery message fails citing MSG-09", any("MSG-09" in m for m in m5_case_problems(c)))
+    c = json.loads(json.dumps(scen5["ceremony_heartbeat"]))
+    c["seen"]["done_after_s"] = None
+    t("live/11 checker: a ceremony that never ends fails naming 'hangs'", any("hangs" in m for m in m5_case_problems(c)))
+    # 31. housekeeping (M5 § 4 (a)–(d)): the star picker, deep-space coordinates, mastery no longer ends a run, the trade driver and the long tier
+    idx = copy.deepcopy(M2_INDEX)
+    hole_star = {"galaxy": [3, 4], "sector": [8, 9], "cell": [12, 12], "bucket": "medium", "mass": 1.0, "colour": "yellow"}   # the sector of the plain hole
+    idx["stars"].insert(0, hole_star)
+    pick_a = C.pick_star(idx, k_g=1, falloff=1.5, scale=7, sector_size=(24, 24))
+    pick_b = C.pick_star(idx, k_g=1, falloff=1.5, scale=7, sector_size=(24, 24), avoid_hazards=False)
+    t("pick_star (M5 § 4 (a)): a Sun-like star in a hole's sector is skipped — the exit cell would sit in the hole's pull range (HZ-04) — and taken without the rule",
+      pick_a is not None and pick_a[0]["sector"] == [7, 9] and pick_b is not None and pick_b[0]["sector"] == [8, 9], (pick_a, pick_b))
+    t("pick_star: galaxies[*].hazards passed as `hazards` also excludes a sector", C.pick_star(idx, k_g=1, falloff=1.5, scale=7, sector_size=(24, 24), hazards={((3, 4), (7, 9))}) is None
+      or C.pick_star(idx, k_g=1, falloff=1.5, scale=7, sector_size=(24, 24), hazards={((3, 4), (7, 9))})[0]["sector"] not in ([7, 9], [8, 9]))
+    near = C.void_sectors_near(snap, ((3, 4), (7, 9)), (8, 8), (16, 16), 3)
+    t(f"void_sectors_near: {len(near)} deep-space coordinates within 3 of the fixture start, nearest first, none a listed sector",
+      bool(near) and ((3, 4), (7, 9)) not in near and all(C.chebyshev(C.flat_sector(a[0], a[1], (16, 16)), (55, 73)) <= C.chebyshev(C.flat_sector(b[0], b[1], (16, 16)), (55, 73))
+                                                          for a, b in zip(near, near[1:])), near[:5])
+    cont = json.loads(json.dumps(good))
+    cont.update(outcome="mastery")
+    cont["final"]["mastery_turn"] = 4
+    t("smoke/02 (M5): outcome mastery at turn 4 with every requested turn completed passes with allow_end (D-159: play continues)",
+      not C.check_turns_advance(cont, 40, allow_end=True), C.check_turns_advance(cont, 40, allow_end=True))
+    t("smoke/02: outcome mastery with turns_completed neither the mastery turn nor the request fails",
+      any("mastery_turn" in m for m in C.check_turns_advance(dict(cont, turns_completed=20, per_turn=cont["per_turn"][:20]), 40, allow_end=True)))
+    t("sim_args: --ai-player trade and --world-index voids are emitted as C12 says",
+      sim_args(Ctx(root, False, sys.executable, root), seed=7, turns=1, report=root / "r.json", save_dir=root / "s", ai_player="trade", world_index="voids")[-6:]
+      == ["--save-dir", str(root / "s"), "--ai-player", "trade", "--world-index", "voids"])
+    t("placement_threshold: 50 % of 8 × 16 = 64; eligibility_coins: 2000 silver = 100 gold; specials of the fixture catalogue",
+      G.placement_threshold((8, 8), (16, 16), 50) == 64 and G.eligibility_coins(2000, 20) == (100, 0)
+      and G.special_elements(RENDER_K_ELEMENTS()) == ["adamantine", "aetherite", "orichalcum", "star_iron"])
+    # 32. stub engine mastery modes through the live/11 driver, with the stub windows' ceremony heartbeat
+    with tempfile.TemporaryDirectory() as td:
+        for mode, ends, expect in (("mastery", True, None), ("mastery_leaky", True, ("MSG-09", "master")), ("mastery", False, ("hangs",))):
+            hb_dir = Path(td) / f"hb_{mode}_{int(ends)}"
+            hb_dir.mkdir()
+            eng = StubEngine(mode)
+            eng.start()
+            eng.ready.wait(5)
+            win = StubWindows(eng.pub_port, hb_dir, ceremony_ends=ends)
+            win.start()
+            win.ready.wait(5)
+
+            def watch(obs: dict, hb_dir=hb_dir) -> dict:
+                t0 = time.perf_counter()
+                seen: dict = {"turn_no": obs["mastery_turn"]}
+
+                def cer() -> Any:
+                    d, _ = C.load_json(hb_dir / "output.json")
+                    return (d or {}).get("ceremony")
+                C.wait_until(lambda: cer() in ("running", "done"), 2.0, 0.05)
+                seen["running_after_s"] = round(time.perf_counter() - t0, 2) if cer() in ("running", "done") else None
+                C.wait_until(lambda: cer() == "done", 2.5, 0.05)
+                seen["done_after_s"] = round(time.perf_counter() - t0, 2) if cer() == "done" else None
+                d, _ = C.load_json(hb_dir / "status.json")
+                seen["master"] = (d or {}).get("master")
+                seen["problems"] = C.check_heartbeats(C.read_heartbeats(hb_dir), obs["mastery_turn"])
+                return seen
+            try:
+                obs = G.drive_mastery(eng.pub_port, eng.pull_port, warp_factor=10, volley=7, hello_timeout=10.0, reply_timeout=2.0, turn_timeout=2.0, after_mastery=watch)
+            finally:
+                win.stop()
+                eng.stop()
+            problems = G.check_mastery_bus(obs) + G.check_ceremony_heartbeat(obs.get("after_mastery"), ceremony_seconds=0.6, grace_s=1.5)
+            seen = obs.get("after_mastery") or {}
+            if expect is None:
+                t(f"bus: stub engine 'mastery' passes the live/11 driver (lodestone after turn 1, kill at turn {obs.get('kill_turn')}, game.mastery after {obs.get('mastery_wait_s')} s, "
+                  f"ceremony running at {seen.get('running_after_s')} s, done at {seen.get('done_after_s')} s, T4 master true, turn {obs.get('extra_turn')} resolved after)", not problems, problems)
+            else:
+                t(f"bus: stub engine '{mode}'{'' if ends else ' with a ceremony that never ends'} fails naming {expect}", all(any(w in m for m in problems) for w in expect), problems)
+    # 33. milestone gating: the M5 rows SKIP at M4 and run (here: fail) at M5; against `git archive m4-game` (the M4 game) they all FAIL at M5;
+    # against the tree they reach a verdict; smoke/19 (amended) FAILs against m4-game at M5 naming D-153; smoke/long SKIPs below M5
+    rows = sorted(M5_CODES)
+    skips = {code: gate_status(code, "M4") for code in rows}
+    fails = {code: gate_status(code, "M5") for code in rows}
+    t(f"gating: smoke/49–54 SKIP at MILESTONE M4 ({len(rows)} rows)", all(s == C.SKIP for s in skips.values()), skips)
+    t("gating: smoke/49–54 run (and here FAIL) at MILESTONE M5", all(s == C.FAIL for s in fails.values()), fails)
+    long_chk = next(c for c in LONG_CHECKS if c.code == "smoke/long")
+    t("gating: smoke/long SKIPs at M4 and runs at M5", C.milestone_index(long_chk.since) == C.milestone_index("M5"))
+    gate_level_proof(t, root, "M5", M5_CODES, "smoke/49–54", "smoke/52")
+    gate_level_tree(t, root, "M5", M5_CODES | {"smoke/12"}, "smoke/12, 49–54", "smoke/52")
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td) / "repo"
+        _extract_tag(root, PRE_BUILD_TAGS["M5"], tmp)
+        statuses, res, out = _gate_statuses(tmp, {"smoke/19"}, "M5")
+        line = next((ln for ln in out.splitlines() if "smoke/19" in ln and ln.split() and ln.split()[0] in (C.PASS, C.FAIL)), "")
+        t(f"gate: the m4-game game with specs/MILESTONE = M5 makes smoke/19 (amended) FAIL naming D-153 — deep space still walled off (exit {res.returncode}, {res.seconds:.1f} s)",
+          statuses.get("smoke/19") == C.FAIL and "D-153" in out and "unexpected exception inside the gate" not in out, f"statuses {statuses}; tail:\n{res.tail(12)}")
+        if line:
+            print(f"      gate line: {line.strip()[:200]}")
+
     bad = [n for ok, n in results if not ok]
     print(f"== smoke selftest: {len(results) - len(bad)} ok, {len(bad)} failed ==")
     return 1 if bad else 0
@@ -3703,6 +4576,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("root", nargs="?", default=".", help="repo root (default: current directory)")
     ap.add_argument("--quick", action="store_true", help="hook tier: smoke/00, 01 (not slow), 02–04 with --turns 10, 10")
     ap.add_argument("--selftest", action="store_true", help="prove the checkers discriminate good from broken fixtures")
+    ap.add_argument("--long", action="store_true", help=f"opt-in tier (M5 § 4 (c)): smoke/00 + a {LONG_TIER_TURNS}-turn --ai-player trade run; not in the 150 s budget")
     ap.add_argument("--select", default=None, help=argparse.SUPPRESS)        # comma-separated codes (selftest use)
     ap.add_argument("--workers", type=int, default=None, help="concurrent checks (default: cores − 1, at most 6; 1 = serial; D-128)")
     ap.add_argument("--_render-probe", nargs=2, metavar=("IN", "OUT"), help=argparse.SUPPRESS)
@@ -3725,7 +4599,7 @@ def main(argv: list[str] | None = None) -> int:
     except C.HarnessError:
         pass                                    # smoke/00 reports it
     select = {s.strip() for s in a.select.split(",") if s.strip()} if a.select else None
-    return run_gate(ctx, select, workers=a.workers)
+    return run_gate(ctx, select, workers=a.workers, long=a.long)
 
 
 if __name__ == "__main__":

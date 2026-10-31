@@ -1,0 +1,406 @@
+{
+ "check": "gameplay_log",
+ "args": [
+  "log_text",
+  "report"
+ ],
+ "kwargs": {
+  "lines": [
+   [
+    1,
+    "move +3 +0"
+   ],
+   [
+    2,
+    "warp 8 8 0 0"
+   ],
+   [
+    3,
+    "scan"
+   ],
+   [
+    4,
+    "help"
+   ],
+   [
+    5,
+    "status"
+   ]
+  ],
+  "queued": [
+   "move +3 +0"
+  ],
+  "rejected": [
+   "warp 8 8 0 0"
+  ],
+  "what": "fixture gameplay log"
+ },
+ "log_text": "# Master of Starbour gameplay log - seed 1234. 'T<n> <phase> <severity>/<type>: text [ids]' is a T3 event; 'T<n> <captain> <name>: reason (ids)' is an AI decision; 'T<n> you > <line>: <outcome>' is a player line (queued as / rejected: / the reply). Never read by the game.\nT1 you > move +3 +0: queued as move +3 +0 (persisting)\nT1 TP-02 info/movement: Lantern moved to 15,11 [MV-01]\nT2 you > warp 8 8 0 0: rejected: galaxy 8,8 is outside the universe 8x8 (CMD-07, VW-01)\nT2 TP-02 info/movement: Lantern moved to 15,11 [MV-01]\n",
+ "report": {
+  "schema": 1,
+  "seed": 1234,
+  "config_path": "E:\\CODE\\master-of-starbour\\controls_config.ini",
+  "turns_requested": 5,
+  "turns_completed": 5,
+  "outcome": "running",
+  "elapsed_s": 1.0,
+  "per_turn": [
+   {
+    "turn_no": 1,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 29,
+     "water": 29,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       15,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "Lantern moved to 15,11"
+    ],
+    "snapshot_hash": "1c69005dcafbc1b46534e2f9ff7e0b14dc0b6569",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   },
+   {
+    "turn_no": 2,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 28,
+     "water": 28,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       15,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "script order 'warp 8 8 0 0' rejected: galaxy 8,8 is outside the universe 8x8 (CMD-07, VW-01)"
+    ],
+    "snapshot_hash": "c41198485e91ad690439e73d4ada24373d78a5ed",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   },
+   {
+    "turn_no": 3,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 27,
+     "water": 27,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       15,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "script order 'scan' accepted: Scan: nothing to pick up in cell 15,11"
+    ],
+    "snapshot_hash": "722f637e8175e97f583ee32ca822cdeb6cf9e205",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   },
+   {
+    "turn_no": 4,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 26,
+     "water": 26,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       15,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "script order 'help' accepted: Getting about: move, warp, stop, view"
+    ],
+    "snapshot_hash": "de090cace45944c2ea976e4f6b1533527e2ad85a",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   },
+   {
+    "turn_no": 5,
+    "orders_executed": {
+     "player": 1,
+     "ai": 2
+    },
+    "ai_ships_moved": 2,
+    "player": {
+     "food": 25,
+     "water": 25,
+     "fear": 10,
+     "respect": 10,
+     "gold": 5,
+     "silver": 50,
+     "ship_class": "kestrel",
+     "position": [
+      [
+       3,
+       4
+      ],
+      [
+       7,
+       9
+      ],
+      [
+       15,
+       11
+      ]
+     ],
+     "shield_current": 60.0,
+     "shield_max": 60.0,
+     "hazard": null,
+     "move_remaining": null,
+     "in_battle": false,
+     "ships": 1,
+     "items": {},
+     "master": false,
+     "infinite_wealth": false
+    },
+    "captains": 193,
+    "events": [
+     "script order 'status' accepted: Harrow Vey  turn 5  seed 1234"
+    ],
+    "snapshot_hash": "3fbe04f954142ea96390ca458cce98b6635d5625",
+    "snapshot_bytes": 180000,
+    "resolve_ms": 6.0,
+    "warps": [],
+    "destroyed": [],
+    "battles": [],
+    "reputation": [],
+    "captures": [],
+    "trades": [],
+    "pickups": [],
+    "upgrades": [],
+    "planet_events": [],
+    "ai_economy": {
+     "purchases": 0,
+     "sales": 0,
+     "restock_trips": 0,
+     "docked": 0
+    },
+    "void_visits": false,
+    "lodestone": null
+   }
+  ],
+  "final": {
+   "captains": 193,
+   "ships": 193,
+   "mutinies": [],
+   "game_over_turn": null,
+   "mastery_turn": null,
+   "game_over_cause": null,
+   "hazard_deaths": 0,
+   "warps": 0,
+   "battles": 0,
+   "battles_by_outcome": {
+    "destroyed": 0,
+    "peace": 0,
+    "escape": 0,
+    "open": 0
+   },
+   "combat_deaths": 0,
+   "captures": 0,
+   "ai_vs_ai_battles": 0,
+   "player_fear": 10,
+   "player_respect": 10,
+   "roams": 0,
+   "trades": 0,
+   "pickups": 0,
+   "upgrades": 0,
+   "planets_destroyed": 0,
+   "ai_purchases": 0,
+   "ai_mutinies": 0,
+   "captains_start": 193,
+   "population_min": 193,
+   "population_max": 193,
+   "eligible_turn": null,
+   "ai_void_visits": 0,
+   "guardians_destroyed": 0
+  },
+  "spawned": []
+ }
+}

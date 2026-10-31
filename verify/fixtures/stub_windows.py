@@ -19,27 +19,36 @@ REDRAW_TOPICS = ("state.hello", "turn.resolved")
 
 
 class StubWindows(threading.Thread):
-    def __init__(self, pub_port: int, hb_dir: Path, roles: tuple[str, ...] = VIEW_ROLES, host: str = "127.0.0.1") -> None:
+    def __init__(self, pub_port: int, hb_dir: Path, roles: tuple[str, ...] = VIEW_ROLES, host: str = "127.0.0.1", ceremony_s: float = 0.6,
+                 ceremony_ends: bool = True) -> None:
         super().__init__(daemon=True, name="stub-windows")
         self.pub_port, self.host = pub_port, host
         self.hb_dir, self.roles = Path(hb_dir), tuple(roles)
+        self.ceremony_s, self.ceremony_ends = ceremony_s, ceremony_ends     # M5 / live/11: how long T3's stub ceremony runs; False = it never ends
+        self.ceremony: str | None = None                                     # the output window's C12 heartbeat field: null | running | done
         self.ready = threading.Event()
         self._halt = threading.Event()
         self.drawn: list[tuple[float, str, int]] = []      # (perf_counter, topic, turn_no) per redraw
+        self._last: tuple[int, bool | None, dict | None, dict | None] = (0, None, None, None)
 
     def stop(self) -> None:
         self._halt.set()
         self.join(5)
 
-    def _write(self, role: str, turn_no: int, in_battle: bool | None = None, economy: dict | None = None) -> None:
+    def _write(self, role: str, turn_no: int, in_battle: bool | None = None, economy: dict | None = None, endgame: dict | None = None) -> None:
         """C5 record, written atomically; retried when the gate holds the file open (Windows os.replace).
         The status window adds `in_battle` (C10 / live/09, [ASSUMED] C5 addition) and, when the snapshot carries
-        C11 planets, `docked` (planet id or null) and `items` (count of stacks) (C11 C5 addition, live/10)."""
+        C11 planets, `docked` (planet id or null) and `items` (count of stacks) (C11 C5 addition, live/10); from M5 the
+        status window adds `master` and `lodestone_guardians_alive` and the output window `ceremony` (C12 C5, live/11)."""
         doc = {"role": role, "turn_no": turn_no, "rendered_at": time.time(), "pid": os.getpid(), "render_ms": 1}
         if role == "status" and in_battle is not None:
             doc["in_battle"] = in_battle
         if role == "status" and economy is not None:
             doc.update(economy)
+        if role == "status" and endgame is not None:
+            doc.update(endgame)
+        if role == "output":
+            doc["ceremony"] = self.ceremony
         tmp = self.hb_dir / f"{role}.json.tmp"
         tmp.write_text(json.dumps(doc), encoding="utf-8")
         for attempt in range(5):
@@ -53,6 +62,7 @@ class StubWindows(threading.Thread):
         t0 = time.perf_counter()
         in_battle: bool | None = None
         economy: dict | None = None
+        endgame: dict | None = None
         if isinstance(snapshot, dict):
             try:
                 cap = snapshot["captains"][snapshot["player_id"]]
@@ -65,11 +75,30 @@ class StubWindows(threading.Thread):
                     docked = next((pid for pid, p in planets.items() if isinstance(p, dict) and str(p.get("sector")) == key
                                    and list(p.get("cell") or []) == list(pos[2])), None)
                     economy = {"docked": docked, "items": len(cap.get("items") or {})}
+                if "master" in cap or isinstance(snapshot.get("lodestone"), dict):
+                    ld = snapshot.get("lodestone")
+                    endgame = {"master": bool(cap.get("master")), "lodestone_guardians_alive": ld.get("guardians_alive") if isinstance(ld, dict) else None}
             except (KeyError, TypeError):
                 in_battle = None
+        self._last = (turn_no, in_battle, economy, endgame)
         for r in self.roles:
-            self._write(r, turn_no, in_battle, economy)
+            self._write(r, turn_no, in_battle, economy, endgame)
         self.drawn.append((t0, topic, turn_no))
+
+    def _ceremony(self) -> None:
+        """OUT-15 as T3 does it: the heartbeat says 'running' at once, 'done' after ceremony_s; turn.resolved keeps redrawing meanwhile."""
+        self.ceremony = "running"
+        turn_no, in_battle, economy, endgame = self._last
+        self._write("output", turn_no, in_battle, economy, endgame)
+        if not self.ceremony_ends:
+            return
+
+        def finish() -> None:
+            time.sleep(self.ceremony_s)
+            self.ceremony = "done"
+            t, ib, ec, eg = self._last
+            self._write("output", t, ib, ec, eg)
+        threading.Thread(target=finish, daemon=True, name="stub-ceremony").start()
 
     def run(self) -> None:
         import zmq
@@ -95,6 +124,8 @@ class StubWindows(threading.Thread):
                     continue
                 if topic in REDRAW_TOPICS and isinstance(payload, dict) and isinstance(payload.get("turn_no"), int):
                     self._draw(topic, payload["turn_no"], payload.get("snapshot"))
+                elif topic == "game.mastery":
+                    self._ceremony()
         finally:
             sub.close(0)
             ctx.term()
